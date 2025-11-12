@@ -58,7 +58,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } else {
             // Si le fichier est corrompu, renvoyer données vides
             echo json_encode([
-                'roundsStore' => [],
+                'roundsStore' => new stdClass(),
                 'currentRoundKey' => 'ronde1',
                 'arbiterPassword' => null
             ]);
@@ -66,7 +66,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } else {
         // Si pas de sauvegarde, renvoyer données vides
         echo json_encode([
-            'roundsStore' => [],
+            'roundsStore' => new stdClass(),
             'currentRoundKey' => 'ronde1',
             'arbiterPassword' => null
         ]);
