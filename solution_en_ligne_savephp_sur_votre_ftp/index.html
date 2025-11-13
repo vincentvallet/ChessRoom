@@ -4735,32 +4735,49 @@ setInterval(async () => {
 // --- NOUVELLES FONCTIONS DE GESTION DE TOURNOI ---
 
 function deleteCurrentRound() {
-    // Vérifier s'il reste plus d'une ronde
-    const roundKeys = Object.keys(roundsStore);
-    if (roundKeys.length <= 1) {
+    // 1. Vérification de sécurité
+    const keys = Object.keys(roundsStore);
+    if (keys.length <= 1) {
         alert("Impossible de supprimer la seule ronde existante. Pour recommencer à zéro, utilisez le bouton 'Nouveau Tournoi'.");
         return;
     }
 
-    // Demander confirmation
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT la ${currentRoundKey.replace('r', 'R')} ? Cette action est irréversible.`)) {
+    // 2. Demander confirmation
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT la ${currentRoundKey.replace('r', 'R')} ?\n\n⚠️ IMPORTANT : Les rondes suivantes seront renumérotées (ex: la Ronde 3 deviendra la Ronde 2).`)) {
         return;
     }
 
-    // Supprimer la ronde de l'objet de stockage
-    delete roundsStore[currentRoundKey];
+    // 3. Récupérer toutes les clés et les trier numériquement (pour éviter l'ordre ronde1, ronde10, ronde2)
+    const sortedKeys = keys.sort((a, b) => {
+        const numA = parseInt(a.replace('ronde', ''));
+        const numB = parseInt(b.replace('ronde', ''));
+        return numA - numB;
+    });
 
-    // Trouver une nouvelle clé vers laquelle basculer (la dernière disponible)
-    const remainingKeys = Object.keys(roundsStore);
-    const newKey = remainingKeys[remainingKeys.length - 1];
+    // 4. Créer une liste des données des rondes que l'on GARDE (on exclut la ronde actuelle)
+    const remainingRoundsData = sortedKeys
+        .filter(key => key !== currentRoundKey)
+        .map(key => roundsStore[key]);
 
-    // Charger cette nouvelle ronde
-    loadStateFromStore(newKey);
+    // 5. Reconstruire le roundsStore proprement (ronde1, ronde2, ronde3...)
+    // On vide l'ancien store et on le remplit avec les nouvelles clés séquentielles
+    roundsStore = {};
     
-    // Mettre à jour l'interface
+    remainingRoundsData.forEach((data, index) => {
+        const newKey = `ronde${index + 1}`; // index 0 devient ronde1, index 1 devient ronde2, etc.
+        roundsStore[newKey] = data;
+    });
+
+    // 6. Basculer vers la dernière ronde disponible (souvent celle qui vient d'être renommée)
+    const newKeys = Object.keys(roundsStore);
+    const lastKey = newKeys[newKeys.length - 1];
+    
+    // Charger la nouvelle vue
+    loadStateFromStore(lastKey);
     updateRoundSelector();
     autoSaveToLocalStorage();
-    showNotification("Ronde supprimée avec succès.", "success");
+    
+    showNotification("Ronde supprimée et numérotation réorganisée.", "success");
 }
 
 function createNewTournament() {
