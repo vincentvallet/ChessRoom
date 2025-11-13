@@ -948,14 +948,20 @@
                     </div>
                 </div>
 
-                <div class="sidebar-section">
-                    <h3>Rondes du Tournoi</h3>
-                    <div class="control-group">
-                        <label for="roundSelector">Ronde Actuelle :</label>
-                        <select id="roundSelector" onchange="switchRound(this.value)"></select>
-                    </div>
-                    <button class="btn-primary" onclick="addNewRound()">+ Nouvelle Ronde Vierge</button>
-                    <button class="btn-secondary" onclick="cloneRoundLayout()">+ Cloner Disposition Ronde</button>
+            <div class="sidebar-section">
+                <h3>Rondes du Tournoi</h3>
+                <div class="control-group">
+                    <label for="roundSelector">Ronde Actuelle :</label>
+                    <select id="roundSelector" onchange="switchRound(this.value)"></select>
+                </div>
+                <button class="btn-primary" onclick="addNewRound()">+ Nouvelle Ronde Vierge</button>
+                <button class="btn-secondary" onclick="cloneRoundLayout()">+ Cloner Disposition Ronde</button>
+                
+                <button class="btn-danger" style="margin-top: 5px;" onclick="deleteCurrentRound()">- Supprimer la Ronde</button>
+                
+                <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+                
+                <button class="btn-danger" onclick="createNewTournament()">⚠️ Nouveau Tournoi</button>
                 </div>
 
                 <div class="sidebar-section">
@@ -1414,7 +1420,7 @@
         // --- Sauvegarde Auto LocalStorage ---
         const SAVE_KEY = 'chessRoomManagerSave';
         const SAVE_KEY_TIMESTAMP = 'chessRoomManagerSaveTimestamp'; 
-        const SERVER_URL = 'https://www.vincentvallet.com/save.php';
+        const SERVER_URL = 'save.php';
         const USE_SERVER_SYNC = true;
 
         // ========================================
@@ -4725,6 +4731,71 @@ setInterval(async () => {
         }
     }
 }, 10000);
+
+// --- NOUVELLES FONCTIONS DE GESTION DE TOURNOI ---
+
+function deleteCurrentRound() {
+    // Vérifier s'il reste plus d'une ronde
+    const roundKeys = Object.keys(roundsStore);
+    if (roundKeys.length <= 1) {
+        alert("Impossible de supprimer la seule ronde existante. Pour recommencer à zéro, utilisez le bouton 'Nouveau Tournoi'.");
+        return;
+    }
+
+    // Demander confirmation
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT la ${currentRoundKey.replace('r', 'R')} ? Cette action est irréversible.`)) {
+        return;
+    }
+
+    // Supprimer la ronde de l'objet de stockage
+    delete roundsStore[currentRoundKey];
+
+    // Trouver une nouvelle clé vers laquelle basculer (la dernière disponible)
+    const remainingKeys = Object.keys(roundsStore);
+    const newKey = remainingKeys[remainingKeys.length - 1];
+
+    // Charger cette nouvelle ronde
+    loadStateFromStore(newKey);
+    
+    // Mettre à jour l'interface
+    updateRoundSelector();
+    autoSaveToLocalStorage();
+    showNotification("Ronde supprimée avec succès.", "success");
+}
+
+function createNewTournament() {
+    // On réutilise la logique existante de clearAll mais avec un message spécifique
+    // clearAll() contient déjà un confirm(), mais pour être sûr du message "Nouveau Tournoi":
+    
+    if (confirm("⚠️ ATTENTION : Vous allez créer un NOUVEAU TOURNOI.\n\nToutes les données actuelles (toutes les rondes, joueurs, scores, configurations) seront effacées.\n\nVoulez-vous vraiment continuer ?")) {
+        // On appelle la logique de nettoyage sans redemander confirmation (on bypass le confirm du clearAll en exécutant son contenu directement ou en le modifiant légèrement, mais ici on va appeler la logique de reset manuellement pour être propre).
+        
+        localStorage.removeItem(SAVE_KEY);
+        localStorage.removeItem(SAVE_KEY_TIMESTAMP);
+
+        // Réinitialisation des variables globales
+        physicalTables = [];
+        rooms = [];
+        nextPhysicalTableId = 1;
+        nextRoomId = 1;
+        nextBoardNumber = 1;
+        historyStack = [];
+        redoStack = [];
+
+        // Réinitialisation du store
+        roundsStore = {};
+        currentRoundKey = 'ronde1'; // On repart à la ronde 1
+        
+        // Charger l'état vide
+        loadStateFromStore('ronde1');
+        updateRoundSelector();
+
+        document.getElementById('canvas').innerHTML = '';
+        updateStats();
+        
+        showNotification("Nouveau tournoi créé.", "success");
+    }
+}
     </script>
 </body>
 </html>
