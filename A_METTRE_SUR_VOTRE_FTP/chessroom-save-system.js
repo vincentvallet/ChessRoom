@@ -17,66 +17,24 @@ const SAVE_CONFIG = {
 };
 
 // Note: Les variables globales sont déclarées dans index.html :
-// - tournamentName
 // - currentSaveMode
-// - autoSaveLocalEnabled
-// - autoSaveServerEnabled
-// - autoSyncEnabled
 // - localSaveInterval
 // - serverSyncInterval
 // - lastServerTimestamp
+//
+// SUPPRIMÉ:
+// - tournamentName
+// - autoSaveLocalEnabled
+// - autoSaveServerEnabled
+// - autoSyncEnabled
+
 
 // Variable locale pour ce module
 let lastSaveStatus = { type: '', message: '', timestamp: null };
 
 // ===== INTERFACE UTILISATEUR =====
 
-// HTML à ajouter dans la barre d'outils
-const saveControlsHTML = `
-<div class="save-controls" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
-    <div style="margin-bottom: 15px;">
-        <label style="font-weight: bold; display: block; margin-bottom: 8px;">🎮 Mode de Fonctionnement</label>
-        <select id="modeSelector" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; width: 100%;">
-            <option value="arbiter">👨‍⚖️ Arbitre (Saisie + Sauvegarde)</option>
-            <option value="spectator">👁️ Spectateur (Lecture seule)</option>
-        </select>
-    </div>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-        <button id="btnSaveLocal" class="save-btn" style="padding: 10px; border-radius: 4px; border: none; background: #28a745; color: white; cursor: pointer;">
-            💾 Sauvegarde Locale
-        </button>
-        <button id="btnSaveServer" class="save-btn" style="padding: 10px; border-radius: 4px; border: none; background: #007bff; color: white; cursor: pointer;">
-            ☁️ Sauvegarder Serveur
-        </button>
-        <button id="btnLoadServer" class="save-btn" style="padding: 10px; border-radius: 4px; border: none; background: #17a2b8; color: white; cursor: pointer;">
-            🔄 Recharger Serveur
-        </button>
-        <button id="btnShowHistory" class="save-btn" style="padding: 10px; border-radius: 4px; border: none; background: #6c757d; color: white; cursor: pointer;">
-            📂 Historique
-        </button>
-    </div>
-    
-    <div style="border-top: 1px solid #ddd; padding-top: 12px;">
-        <label style="display: flex; align-items: center; margin: 8px 0; cursor: pointer;">
-            <input type="checkbox" id="chkAutoSaveLocal" checked style="margin-right: 8px;">
-            <span>💾 Sauvegarde automatique locale (30s)</span>
-        </label>
-        <label style="display: flex; align-items: center; margin: 8px 0; cursor: pointer;">
-            <input type="checkbox" id="chkAutoSaveServer" style="margin-right: 8px;">
-            <span>☁️ Sauvegarde automatique serveur (après chaque résultat)</span>
-        </label>
-        <label style="display: flex; align-items: center; margin: 8px 0; cursor: pointer;">
-            <input type="checkbox" id="chkAutoSync" checked style="margin-right: 8px;">
-            <span>🔄 Synchronisation automatique (5s)</span>
-        </label>
-    </div>
-    
-    <div id="saveStatus" style="margin-top: 12px; padding: 10px; border-radius: 4px; font-size: 13px; display: none;">
-        <!-- Messages de statut -->
-    </div>
-</div>
-`;
+// HTML (Maintenant directement dans index.html)
 
 // ===== FONCTIONS DE STATUT =====
 
@@ -127,7 +85,7 @@ async function saveToLocalStorage() {
             roundsStore: JSON.parse(JSON.stringify(roundsStore)),
             currentRoundKey: currentRoundKey,
             arbiterPassword: arbiterPassword,
-            tournamentName: tournamentName || 'tournoi',
+            // SUPPRIMÉ: tournamentName
             lastModified: Date.now()
         };
         
@@ -171,7 +129,7 @@ async function saveToServer() {
             roundsStore: JSON.parse(JSON.stringify(roundsStore)),
             currentRoundKey: currentRoundKey,
             arbiterPassword: arbiterPassword,
-            tournamentName: tournamentName || 'tournoi',
+            // SUPPRIMÉ: tournamentName (le script PHP utilisera une valeur par défaut)
             lastModified: Date.now(),
             savedBy: currentSaveMode
         };
@@ -211,15 +169,19 @@ async function saveToServer() {
     }
 }
 
-async function loadFromServer() {
+// MODIFIÉ: Ajout du paramètre isAutoSync
+async function loadFromServer(isAutoSync = false) {
     if (!USE_SERVER_SYNC) return false;
     
     try {
-        showSaveStatus('sync', '🔄 Chargement depuis le serveur...');
+        // NOUVEAU: Ne pas afficher "Chargement..." pour la synchro auto silencieuse
+        if (!isAutoSync) {
+            showSaveStatus('sync', '🔄 Chargement depuis le serveur...');
+        }
         
         const response = await fetch(SERVER_URL);
         if (!response.ok) {
-            showSaveStatus('error', 'Erreur lors du chargement serveur');
+            if (!isAutoSync) showSaveStatus('error', 'Erreur lors du chargement serveur');
             return false;
         }
         
@@ -233,12 +195,13 @@ async function loadFromServer() {
             const serverJson = JSON.stringify(data.roundsStore);
             
             if (currentJson === serverJson) {
-                showSaveStatus('info', 'ℹ️ Les données sont déjà à jour');
+                if (!isAutoSync) showSaveStatus('info', 'ℹ️ Les données sont déjà à jour');
                 return false;
             }
             
-            // Demander confirmation si on a des données locales non sauvegardées
-            if (currentSaveMode === SAVE_CONFIG.modes.ARBITER && 
+            // MODIFIÉ: Supprimer la confirmation pour la synchro auto
+            if (!isAutoSync && // NE PAS DEMANDER SI AUTOSYNC
+                currentSaveMode === SAVE_CONFIG.modes.ARBITER && 
                 Object.keys(roundsStore).length > 0) {
                 if (!confirm('⚠️ Charger les données du serveur écrasera vos modifications locales. Continuer ?')) {
                     showSaveStatus('warning', 'Chargement annulé');
@@ -249,9 +212,9 @@ async function loadFromServer() {
             roundsStore = data.roundsStore;
             currentRoundKey = data.currentRoundKey || 'ronde1';
             arbiterPassword = data.arbiterPassword || null;
-            tournamentName = data.tournamentName || '';
+            // SUPPRIMÉ: tournamentName
             
-            // Migration des données
+            // ... [Migration identique] ...
             Object.values(roundsStore).forEach(roundState => {
                 if (!roundState.physicalTables) roundState.physicalTables = [];
                 if (!roundState.rooms) roundState.rooms = [];
@@ -287,34 +250,60 @@ async function loadFromServer() {
             return true;
         }
         
-        showSaveStatus('info', 'Aucune donnée sur le serveur');
+        if (!isAutoSync) showSaveStatus('info', 'Aucune donnée sur le serveur');
         return false;
     } catch (error) {
         console.error('❌ Erreur chargement serveur:', error);
-        showSaveStatus('error', 'Erreur lors du chargement serveur');
+        if (!isAutoSync) showSaveStatus('error', 'Erreur lors du chargement serveur');
         return false;
     }
 }
 
 // ===== SYNCHRONISATION AUTOMATIQUE =====
 
+// ===== SYNCHRONISATION AUTOMATIQUE =====
+
 function syncFromServerIfNeeded() {
-    // Uniquement en mode spectateur ou si autoSync activé
-    if (currentSaveMode !== SAVE_CONFIG.modes.SPECTATOR && !autoSyncEnabled) {
-        return;
-    }
-    
-    // Ne pas synchroniser si une modale est ouverte
+    // Ne pas synchroniser si une modale est ouverte (s'applique à tout le monde)
     if (document.querySelector('.modal-overlay[style*="display: flex"]')) {
         return;
     }
+
+    // CAS 1: MODE SPECTATEUR
+    // Un spectateur charge TOUJOURS les données, sans délai.
+    if (currentSaveMode === SAVE_CONFIG.modes.SPECTATOR) {
+        loadFromServer(true);
+        return; // C'est tout pour le spectateur.
+    }
+
+    // CAS 2: MODE ARBITRE
+    // Si on arrive ici, on est en mode Arbitre.
     
-    loadFromServer();
+    // 1. Vérifier le Cooldown (pour éviter les conflits de sauvegarde)
+    const SYNC_COOLDOWN = 10000; // 10 secondes
+    if (Date.now() - lastLocalSaveTime < SYNC_COOLDOWN) {
+        // console.log('Synchro auto en pause (cooldown post-sauvegarde)');
+        return; // L'arbitre vient de sauvegarder, on attend.
+    }
+    
+    // 2. Vérifier la stratégie de l'arbitre
+    const strategySelect = document.getElementById('saveStrategySelector');
+    if (!strategySelect) return;
+    
+    const strategy = strategySelect.value;
+    const enableSync = (strategy === 'server_local' || strategy === 'server_only');
+    
+    if (enableSync) {
+        // L'arbitre est en mode synchro et n'est pas en cooldown
+        loadFromServer(true);
+    }
+    // Si enableSync est faux (mode local ou manuel), ne rien faire.
 }
 
 // ===== GESTION DE L'HISTORIQUE =====
 
 async function loadHistoryList() {
+    // ... [Fonction identique] ...
     try {
         const response = await fetch(SERVER_URL + '?list_history=1');
         if (!response.ok) return [];
@@ -328,6 +317,7 @@ async function loadHistoryList() {
 }
 
 async function loadFromHistory(filename) {
+    // ... [Fonction identique, garde la confirmation] ...
     try {
         const response = await fetch(SERVER_URL + '?history=' + encodeURIComponent(filename));
         if (!response.ok) {
@@ -344,7 +334,7 @@ async function loadFromHistory(filename) {
         roundsStore = data.roundsStore;
         currentRoundKey = data.currentRoundKey || 'ronde1';
         arbiterPassword = data.arbiterPassword || null;
-        tournamentName = data.tournamentName || '';
+        // SUPPRIMÉ: tournamentName
         
         updateRoundSelector();
         loadStateFromStore(currentRoundKey);
@@ -358,6 +348,7 @@ async function loadFromHistory(filename) {
 }
 
 function showHistoryModal() {
+    // ... [Fonction identique] ...
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
@@ -433,30 +424,32 @@ function showHistoryModal() {
 
 // ===== GESTION DES MODES =====
 
+// ... (vers la ligne 476)
 function setMode(mode) {
     currentSaveMode = mode;
     
     const modeSelector = document.getElementById('modeSelector');
-    const chkAutoSaveServer = document.getElementById('chkAutoSaveServer');
-    const chkAutoSync = document.getElementById('chkAutoSync');
-    const btnSaveServer = document.getElementById('btnSaveServer');
+    const saveStrategySelector = document.getElementById('saveStrategySelector');
+    const btnForceSaveServer = document.getElementById('btnForceSaveServer');
     
     if (mode === SAVE_CONFIG.modes.ARBITER) {
         // Mode Arbitre : peut sauvegarder
         if (modeSelector) modeSelector.value = 'arbiter';
-        if (btnSaveServer) btnSaveServer.disabled = false;
-        if (chkAutoSaveServer) chkAutoSaveServer.disabled = false;
+        if (btnForceSaveServer) btnForceSaveServer.disabled = false;
+        if (saveStrategySelector) saveStrategySelector.disabled = false;
+        
+        // NOUVEAU: Retire la classe de verrouillage
+        document.body.classList.remove('spectator-mode');
         
         showSaveStatus('info', '👨‍⚖️ Mode Arbitre activé - Vous pouvez sauvegarder');
     } else {
         // Mode Spectateur : lecture seule
         if (modeSelector) modeSelector.value = 'spectator';
-        if (btnSaveServer) btnSaveServer.disabled = true;
-        if (chkAutoSaveServer) {
-            chkAutoSaveServer.checked = false;
-            chkAutoSaveServer.disabled = true;
-        }
-        autoSaveServerEnabled = false;
+        if (btnForceSaveServer) btnForceSaveServer.disabled = true;
+        if (saveStrategySelector) saveStrategySelector.disabled = true;
+        
+        // NOUVEAU: Ajoute la classe de verrouillage
+        document.body.classList.add('spectator-mode');
         
         showSaveStatus('info', '👁️ Mode Spectateur activé - Lecture seule');
     }
@@ -467,20 +460,30 @@ function setMode(mode) {
 
 // ===== CONFIGURATION DES INTERVALLES =====
 
+// MODIFIÉ: Utilise le nouveau dropdown
 function setupAutoSaveIntervals() {
     // Nettoyer les anciens intervalles
     if (localSaveInterval) clearInterval(localSaveInterval);
     if (serverSyncInterval) clearInterval(serverSyncInterval);
     
+    const strategySelect = document.getElementById('saveStrategySelector');
+    if (!strategySelect) return; // Pas encore prêt
+    
+    const strategy = strategySelect.value;
+    
+    // Déterminer les actions basées sur la stratégie
+    const enableLocalSave = (strategy === 'server_local' || strategy === 'local_only');
+    const enableServerSync = (strategy === 'server_local' || strategy === 'server_only');
+    
     // Sauvegarde locale automatique
-    if (autoSaveLocalEnabled) {
+    if (enableLocalSave) {
         localSaveInterval = setInterval(() => {
             saveToLocalStorage();
         }, SAVE_CONFIG.intervals.LOCAL_SAVE);
     }
     
-    // Synchronisation serveur (uniquement en mode spectateur ou si autoSync activé)
-    if (autoSyncEnabled || currentSaveMode === SAVE_CONFIG.modes.SPECTATOR) {
+    // Synchronisation serveur (uniquement en mode spectateur OU si autoSync activé)
+    if (enableServerSync || currentSaveMode === SAVE_CONFIG.modes.SPECTATOR) {
         serverSyncInterval = setInterval(() => {
             syncFromServerIfNeeded();
         }, SAVE_CONFIG.intervals.SERVER_SYNC);
@@ -489,108 +492,84 @@ function setupAutoSaveIntervals() {
 
 // ===== ÉVÉNEMENTS DE L'INTERFACE =====
 
+// MODIFIÉ: Utilise les nouveaux IDs de boutons et le dropdown
 function initSaveControls() {
-    // Le HTML est déjà présent dans index.html, on attache juste les event listeners
     console.log('🔧 Initialisation des contrôles de sauvegarde...');
     
-    // Attendre un peu que le DOM soit complètement chargé
     setTimeout(() => {
-        // Event listeners
-    // Event listeners
-    const modeSelector = document.getElementById('modeSelector');
-    const btnSaveLocal = document.getElementById('btnSaveLocal');
-    const btnSaveServer = document.getElementById('btnSaveServer');
-    const btnLoadServer = document.getElementById('btnLoadServer');
-    const btnShowHistory = document.getElementById('btnShowHistory');
-    const chkAutoSaveLocal = document.getElementById('chkAutoSaveLocal');
-    const chkAutoSaveServer = document.getElementById('chkAutoSaveServer');
-    const chkAutoSync = document.getElementById('chkAutoSync');
-    
-    console.log('🔍 Éléments trouvés:', {
-        modeSelector: !!modeSelector,
-        btnSaveLocal: !!btnSaveLocal,
-        btnSaveServer: !!btnSaveServer,
-        btnLoadServer: !!btnLoadServer,
-        btnShowHistory: !!btnShowHistory,
-        chkAutoSaveLocal: !!chkAutoSaveLocal,
-        chkAutoSaveServer: !!chkAutoSaveServer,
-        chkAutoSync: !!chkAutoSync
-    });
-    
-    if (!btnSaveLocal) {
-        console.error('❌ Boutons non trouvés ! Vérifier que le HTML est bien présent.');
-        return;
-    }
-    
-    modeSelector?.addEventListener('change', (e) => {
-        setMode(e.target.value);
-    });
-    
-    btnSaveLocal?.addEventListener('click', () => {
-        console.log('💾 Clic sur Sauvegarde Locale');
-        saveToLocalStorage();
-    });
-    
-    btnSaveServer?.addEventListener('click', () => {
-        console.log('☁️ Clic sur Sauvegarder Serveur');
-        saveToServer();
-    });
-    
-    btnLoadServer?.addEventListener('click', () => {
-        console.log('🔄 Clic sur Recharger Serveur');
-        loadFromServer();
-    });
-    
-    btnShowHistory?.addEventListener('click', () => {
-        console.log('📂 Clic sur Historique');
-        showHistoryModal();
-    });
-    
-    chkAutoSaveLocal?.addEventListener('change', (e) => {
-        autoSaveLocalEnabled = e.target.checked;
-        setupAutoSaveIntervals();
-        showSaveStatus('info', autoSaveLocalEnabled ? 
-            '✅ Sauvegarde locale auto activée' : 
-            '⏸️ Sauvegarde locale auto désactivée');
-    });
-    
-    chkAutoSaveServer?.addEventListener('change', (e) => {
-        autoSaveServerEnabled = e.target.checked;
-        if (currentSaveMode !== SAVE_CONFIG.modes.ARBITER) {
-            e.target.checked = false;
-            autoSaveServerEnabled = false;
-            showSaveStatus('warning', '⚠️ Disponible uniquement en mode Arbitre');
-        } else {
-            showSaveStatus('info', autoSaveServerEnabled ? 
-                '✅ Sauvegarde serveur auto activée' : 
-                '⏸️ Sauvegarde serveur auto désactivée');
+        const modeSelector = document.getElementById('modeSelector');
+        const saveStrategySelector = document.getElementById('saveStrategySelector');
+        const btnForceSaveServer = document.getElementById('btnForceSaveServer');
+        const btnLoadServer = document.getElementById('btnLoadServer');
+        const btnShowHistory = document.getElementById('btnShowHistory');
+        
+        console.log('🔍 Éléments trouvés:', {
+            modeSelector: !!modeSelector,
+            saveStrategySelector: !!saveStrategySelector,
+            btnForceSaveServer: !!btnForceSaveServer,
+            btnLoadServer: !!btnLoadServer,
+            btnShowHistory: !!btnShowHistory
+        });
+        
+        if (!btnForceSaveServer) {
+            console.error('❌ Boutons non trouvés ! Vérifier que le HTML est bien présent.');
+            return;
         }
-    });
-    
-    chkAutoSync?.addEventListener('change', (e) => {
-        autoSyncEnabled = e.target.checked;
+        
+        modeSelector?.addEventListener('change', (e) => {
+            setMode(e.target.value);
+        });
+        
+        // NOUVEAU: Listener pour la stratégie
+        saveStrategySelector?.addEventListener('change', (e) => {
+            setupAutoSaveIntervals();
+            showSaveStatus('info', '📡 Stratégie de sauvegarde mise à jour.');
+        });
+        
+        btnForceSaveServer?.addEventListener('click', () => {
+            console.log('☁️ Clic sur Forcer Sauvegarde Serveur');
+            saveToServer();
+        });
+        
+        btnLoadServer?.addEventListener('click', () => {
+            console.log('🔄 Clic sur Recharger Serveur');
+            loadFromServer(false); // false = action manuelle, afficher confirmation
+        });
+        
+        btnShowHistory?.addEventListener('click', () => {
+            console.log('📂 Clic sur Historique');
+            showHistoryModal();
+        });
+        
+        // SUPPRIMÉ: Listeners pour les anciennes cases à cocher
+        
+        console.log('✅ Event listeners attachés');
+        
+        // Initialiser les intervalles
         setupAutoSaveIntervals();
-        showSaveStatus('info', autoSyncEnabled ? 
-            '✅ Synchronisation auto activée' : 
-            '⏸️ Synchronisation auto désactivée');
-    });
-    
-    console.log('✅ Event listeners attachés');
-    
-    // Initialiser les intervalles
-    setupAutoSaveIntervals();
-    }, 500); // Attendre 500ms pour être sûr que le DOM est prêt
+    }, 500);
 }
 
 // ===== HOOK DE SAUVEGARDE APRÈS RÉSULTAT =====
 
-// À appeler après chaque saisie de résultat
+// MODIFIÉ: Utilise le nouveau dropdown
 function onResultSaved() {
-    // Toujours sauvegarder localement
-    saveToLocalStorage();
+    const strategySelect = document.getElementById('saveStrategySelector');
+    if (!strategySelect) return;
+    
+    const strategy = strategySelect.value;
+    
+    // Déterminer les actions basées sur la stratégie
+    const saveLocal = (strategy === 'server_local' || strategy === 'local_only');
+    const saveServer = (strategy === 'server_local' || strategy === 'server_only');
+    
+    // Toujours sauvegarder localement si l'option est active
+    if (saveLocal) {
+        saveToLocalStorage();
+    }
     
     // Sauvegarder sur serveur si option activée et mode arbitre
-    if (autoSaveServerEnabled && currentSaveMode === SAVE_CONFIG.modes.ARBITER) {
+    if (saveServer && currentSaveMode === SAVE_CONFIG.modes.ARBITER) {
         saveToServer();
     }
 }
@@ -602,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSaveControls();
     
     // Charger depuis le serveur au démarrage
-    loadFromServer();
+    loadFromServer(true); // true = synchro auto, silencieuse
     
     showSaveStatus('success', '🚀 Système de sauvegarde initialisé');
 });

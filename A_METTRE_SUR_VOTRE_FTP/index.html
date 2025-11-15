@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
     <style>
-        /* ... [CSS identique à la version précédente] ... */
+        /* ... [La plupart du CSS est identique] ... */
         * {
             margin: 0;
             padding: 0;
@@ -26,7 +26,7 @@
             font-size: 14px;
         }
         
-        /* NOUVEAU: Classe pour masquer l'interface en mode plan joueur */
+        /* ... [CSS Mode Player identique] ... */
         body.player-plan-view-mode .sidebar,
         body.player-plan-view-mode .toolbar,
         body.player-plan-view-mode .shortcut-bar,
@@ -38,8 +38,48 @@
         body.player-plan-view-mode #playerPlanReturnButton {
             display: block;
         }
-        /* Fin NOUVEAU */
 
+        /* =====================================================
+            NOUVEAU: Verrouillage complet du Mode Spectateur
+        =====================================================
+        */
+        
+        /* 1. Cache tous les boutons d'action de la barre latérale */
+        .spectator-mode .sidebar-content button,
+        .spectator-mode .sidebar-content input[type="file"],
+        .spectator-mode .sidebar-content label.file-upload-label {
+            display: none !important;
+        }
+        
+        /* 2. Cache les boutons de la barre d'outils (sauf Outils de navigation) */
+        .spectator-mode .tool-btn[onclick*="delete"],
+        .spectator-mode .tool-btn[onclick*="duplicate"],
+        .spectator-mode .tool-btn[onclick*="rotate"],
+        .spectator-mode .tool-btn[onclick*="flip"],
+        .spectator-mode .tool-btn[onclick*="undo"],
+        .spectator-mode .tool-btn[onclick*="redo"],
+        .spectator-mode .btn-success[onclick*="startQRScanner"] {
+            display: none !important;
+        }
+        
+        /* 3. Désactive les interactions sur le plan (tables, salles) */
+        .spectator-mode .table-element,
+        .spectator-mode .room-element,
+        .spectator-mode .board-container {
+            cursor: default !important;
+            pointer-events: none !important; /* Bloque tous les clics */
+        }
+        
+        /* 4. Cache les poignées de modification (au cas où) */
+        .spectator-mode .delete-btn,
+        .spectator-mode .rotate-btn,
+        .spectator-mode .resize-handle,
+        .spectator-mode .flip-btn-single,
+        .spectator-mode .arbiter-flag,
+        .spectator-mode .room-delete-btn,
+        .spectator-mode .room-resize-handle {
+            display: none !important;
+        }
 
         .container {
             max-width: 100%;
@@ -62,20 +102,22 @@
         }
 
         .sidebar {
-            width: 300px;
+            width: 200px;
             background: #f8f9fa;
             border-right: 2px solid #e9ecef;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
+            /* MODIFIÉ: overflow-y: hidden pour l'accordéon */
+            overflow-y: hidden; 
             transition: width 0.3s ease, padding 0.3s ease;
             position: relative;
-            padding: 15px;
+            /* MODIFIÉ: padding géré par les sections */
+            padding: 0;
         }
         
         .main-content.sidebar-collapsed .sidebar {
             width: 0;
-            padding: 15px 0;
+            padding: 0;
             border-right: none;
             overflow: hidden;
         }
@@ -83,7 +125,7 @@
         #sidebarToggle {
             position: absolute;
             top: 10px;
-            left: 300px; 
+            left: 200px; 
             width: 28px;
             height: 28px;
             padding: 0;
@@ -104,31 +146,77 @@
             transform: translateX(0);
         }
 
+        /*
+        =====================================================
+            NOUVEAU SYSTÈME ACCORDÉON
+        =====================================================
+        */
         .sidebar-section {
-            padding: 0;
-            margin-bottom: 15px;
+            /* MODIFIÉ: Plus de padding/margin, géré par le contenu */
+            margin-bottom: 0;
             border-bottom: 2px solid #e9ecef;
-            padding-bottom: 15px;
-            min-width: 270px;
+            /* min-width: 270px; */ /* MODIFIÉ: Supprimé ou commenté */
         }
         .sidebar-section:last-child {
             border-bottom: none;
-            padding-bottom: 0;
+            /* NOUVEAU: Permet à la dernière section de remplir l'espace */
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+            /* CORRECTION: Ajouté pour forcer la contrainte de hauteur */
+            min-height: 0;
         }
 
         .sidebar-section h3 {
             color: #2c3e50;
-            margin-bottom: 12px;
             font-size: 1.05em;
             display: flex;
             align-items: center;
             gap: 8px;
+            /* NOUVEAU: Cliquable */
+            padding: 15px;
+            margin-bottom: 0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
         }
+        .sidebar-section h3:hover {
+            background-color: #e9ecef;
+        }
+        .sidebar-section h3.active {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        /* NOUVEAU: Conteneur du contenu de l'accordéon */
+        .sidebar-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            padding: 0 15px; /* Padding latéral */
+            background: #ffffff;
+        }
+        
+        .sidebar-content.expanded {
+            /* NOUVEAU: Hauteur pour le contenu */
+            max-height: 70vh; /* Hauteur max pour le contenu */
+            overflow-y: auto; /* Scroll si besoin DANS la section */
+            padding: 15px; /* Padding complet */
+        }
+        
+        .sidebar-section:last-child .sidebar-content.expanded {
+             /* NOUVEAU: Permet au dernier de s'étendre */
+            max-height: none;
+            flex: 1;
+        }
+        /* Fin NOUVEAU SYSTÈME ACCORDÉON */
+
 
         .control-group {
             margin-bottom: 12px;
         }
 
+        /* ... [Reste du CSS identique] ... */
+        
         .control-group label {
             display: block;
             font-weight: 600;
@@ -215,7 +303,7 @@
 
         .toolbar {
             background: white;
-            padding: 10px 15px;
+            padding: 4px 10px; /* MODIFIÉ: 10px est devenu 6px */
             border-bottom: 2px solid #e9ecef;
             display: flex;
             gap: 8px;
@@ -225,8 +313,8 @@
 
         .toolbar button {
             width: auto;
-            padding: 6px 10px;
-            font-size: 0.9em;
+            padding: 3px 6px;
+            font-size: 0.8em;
             margin: 0;
         }
         
@@ -239,11 +327,11 @@
             border-left: 2px solid #e9ecef;
         }
         #roundTimer {
-            font-size: 1.3em;
+            font-size: 1.1em;   /* MODIFIÉ: 1.3em est devenu 1.1em */
             font-weight: 700;
             color: #2c3e50;
             background: #f8f9fa;
-            padding: 4px 10px;
+            padding: 3px 6px;   /* MODIFIÉ: 4px 10px est devenu 3px 8px */
             border-radius: 6px;
             min-width: 70px;
             text-align: center;
@@ -724,7 +812,8 @@
             border-top: 1px solid #666;
         }
         .shortcut-bar span {
-            margin: 0 8px;
+            margin-left: 50px;
+            margin-right: 5px;
             color: #fafafa;
             background: #616161;
             padding: 2px 5px;
@@ -921,6 +1010,42 @@
             display: block;
         }
 
+        /* NOUVEAU: Réduire la taille des boutons dans la sidebar */
+        .sidebar-content button {
+            font-size: 0.8em; /* Plus petit pour s'adapter à 200px */
+            padding: 6px 8px; /* Ajuster le padding */
+        }
+
+        /* NOUVEAU: Styles pour le décompte plein écran */
+        #bigTimerOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            /* Caché par défaut */
+            display: none; 
+            
+            /* Centrage */
+            align-items: center;
+            justify-content: center;
+            
+            /* Au-dessus du plan, mais sous les modales */
+            z-index: 10000; 
+            
+            /* TRÈS IMPORTANT: Laisse passer les clics ! */
+            pointer-events: none; 
+        }
+
+        #bigTimerDisplay {
+            font-size: 15vw; /* Taille énorme qui s'adapte à l'écran */
+            font-weight: bold;
+            color: white;
+            
+            /* Ombre pour la lisibilité sur tous les fonds */
+            text-shadow: 0 0 25px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -931,211 +1056,213 @@
             <div class="sidebar">
                 
                 <div class="sidebar-section">
-                    <h3>📊 Statistiques (Ronde)</h3>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <div class="stat-label">Total Échiquiers</div>
-                            <div class="stat-value" id="totalBoards">0</div>
+                    <h3 onclick="toggleAccordion(this)">📊 Statistiques</h3>
+                    <div class="sidebar-content">
+                        <div class="stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Total</div>
+                                <div class="stat-value" id="totalBoards">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Échiquiers</div>
+                                <div class="stat-value" id="pairedBoards">0</div>
+                            </div>
+                            
+                            <div class="stat-item" style="background-color: #fff3cd; border-color: #ffeeba;">
+                                <div class="stat-label" style="color: #856404;">Restants</div>
+                                <div class="stat-value" id="remainingBoards" style="color: #856404;">0</div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-label">Joueurs</div>
+                                <div class="stat-value" id="totalPlayers">0</div>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Échiquiers appariés</div>
-                            <div class="stat-value" id="pairedBoards">0</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section" id="saveControlsSection">
+                    <h3 onclick="toggleAccordion(this)">💾 Sauvegardes</h3>
+                    <div class="sidebar-content">
+                        
+                        <div class="control-group" style="margin-top: 12px;">
+                            <label for="modeSelector" style="font-weight: bold;">🎮 Mode de Fonctionnement :</label>
+                            <select id="modeSelector" style="font-weight: 600;">
+                                <option value="arbiter">👨‍⚖️ Arbitre</option>
+                                <option value="spectator">👁️ Spectateur</option>
+                            </select>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Joueurs assignés</div>
-                            <div class="stat-value" id="totalPlayers">0</div>
+                        
+                        <div class="control-group">
+                            <label for="saveStrategySelector" style="font-weight: bold;">📡 Mode de Sauvegarde :</label>
+                            <select id="saveStrategySelector">
+                                <option value="server_local">Serveur + Local</option>
+                                <option value="server_only">Serveur Seul</option>
+                                <option value="local_only">Local Seul</option>
+                                <option value="manual">Manuel</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+                            <button id="btnForceSaveServer" class="btn-primary" style="font-size: 0.85em; padding: 8px 6px;">
+                                ☁️ Sauvegarde Serveur
+                            </button>
+                            <button id="btnLoadServer" class="btn-info" style="font-size: 0.85em; padding: 8px 6px;">
+                                🔄 Recharger Serveur
+                            </button>
+                        </div>
+                        <button id="btnShowHistory" class="btn-secondary" style="margin-top: 8px;">
+                            📂 Historique
+                        </button>
+                        
+                        <div id="saveStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 0.8em; display: none; word-wrap: break-word;">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 onclick="toggleAccordion(this)">⛳️ Rondes</h3>
+                    <div class="sidebar-content">
+                        <div class="control-group">
+                            <label for="roundSelector">Ronde Actuelle :</label>
+                            <select id="roundSelector" onchange="switchRound(this.value)"></select>
+                        </div>
+                        <button class="btn-primary" onclick="addNewRound()">+ Nouvelle Ronde</button>
+                        <button class="btn-secondary" onclick="cloneRoundLayout()">+ Cloner la dispo</button>
+                        
+                        <button class="btn-danger" style="margin-top: 5px;" onclick="deleteCurrentRound()">- Supprimer la Ronde</button>
+                        
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+                        
+                        <button class="btn-danger" onclick="createNewTournament()">⚠️ Nouveau Tournoi</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 onclick="toggleAccordion(this)">➕ Disposition</h3>
+                    <div class="sidebar-content">
+                        
+                        <div class="control-group">
+                            <label for="boardsPerTable">Échiquiers par table physique :</label>
+                            <input type="number" id="boardsPerTable" min="1" max="10" value="1">
+                        </div>
+                        <div class="control-group">
+                            <label for="physicalTablesPerRow">Tables par rangée :</label>
+                            <input type="number" id="physicalTablesPerRow" min="1" max="20" value="10">
+                        </div>
+                        <div class="control-group">
+                            <label for="tableLength">Longueur des tables :</label>
+                            <input type="number" id="tableLength" min="100" max="300" value="180" step="10">
+                        </div>
+                        <div class="control-group">
+                            <label for="startCorner">Position de départ :</label>
+                            <select id="startCorner">
+                                <option value="tl">En haut à gauche</option>
+                                <option value="tr">En haut à droite</option>
+                                <option value="bl">En bas à gauche</option>
+                                <option value="br">En bas à droite</option>
+                            </select>
+                        </div>
+                        <button class="btn-secondary" onclick="autoArrangeTables()">📐 Réorganiser le plan</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 onclick="toggleAccordion(this)">🏛️ Salles</h3>
+                    <div class="sidebar-content">
+                        <div class="control-group">
+                            <label for="roomNameInput">Nom de la salle/zone :</label>
+                            <input type="text" id="roomNameInput" placeholder="Ex: Salle A, Zone Calme...">
+                        </div>
+                        <button class="btn-info" onclick="addRoom()">+ Ajouter une Salle/Mur</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 onclick="toggleAccordion(this)">🎮 Appariements</h3>
+                    <div class="sidebar-content">
+                        <label for="pairingFileInput" class="file-upload-label">📁 Charger</label>
+                        <input type="file" id="pairingFileInput" accept=".html,.htm" onchange="loadPapiFile(event)">
+                        
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+                        
+                        <div class="control-group">
+                            <label for="boardCount">Échiquiers à créer :</label>
+                            <input type="number" id="boardCount" min="1" max="2000" value="10">
+                        </div>
+                        <button class="btn-primary" onclick="addBoards()">Ajouter</button>
+                        
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+                        
+                        <button class="btn-danger" onclick="clearPairings()">Effacer</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 onclick="toggleAccordion(this)">🔍 Joueurs</h3>
+                    <div class="sidebar-content">
+                        <div class="control-group">
+                            <label for="searchInput">Chercher échiquier/joueur :</label>
+                            <input type="text" id="searchInput" placeholder="Nom ou numéro d'échiquier..." oninput="searchTables()" list="search-suggestions">
+                            <datalist id="search-suggestions"></datalist>
                         </div>
                     </div>
                 </div>
 
-            <!-- NOUVELLE SECTION: Système de Sauvegarde -->
-            <div class="sidebar-section" id="saveControlsSection">
-                <h3>💾 Système de Sauvegarde</h3>
-                
-                <div class="control-group">
-                    <label for="tournamentNameInput">🏆 Nom du tournoi :</label>
-                    <input type="text" id="tournamentNameInput" placeholder="Ex: Championnat 2025" oninput="tournamentName = this.value.trim() || 'tournoi'">
-                </div>
-                
-                <div class="control-group" style="margin-top: 12px;">
-                    <label for="modeSelector" style="font-weight: bold;">🎮 Mode de Fonctionnement :</label>
-                    <select id="modeSelector" style="font-weight: 600;">
-                        <option value="arbiter">👨‍⚖️ Arbitre (Saisie + Sauvegarde)</option>
-                        <option value="spectator">👁️ Spectateur (Lecture seule)</option>
-                    </select>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-                    <button id="btnSaveLocal" class="btn-success" style="font-size: 0.85em; padding: 8px 6px;">
-                        💾 Sauvegarde Locale
-                    </button>
-                    <button id="btnSaveServer" class="btn-primary" style="font-size: 0.85em; padding: 8px 6px;">
-                        ☁️ Sauvegarder Serveur
-                    </button>
-                    <button id="btnLoadServer" class="btn-info" style="font-size: 0.85em; padding: 8px 6px;">
-                        🔄 Recharger Serveur
-                    </button>
-                    <button id="btnShowHistory" class="btn-secondary" style="font-size: 0.85em; padding: 8px 6px;">
-                        📂 Historique
-                    </button>
-                </div>
-                
-                <div style="border-top: 1px solid #ddd; padding-top: 10px; margin-top: 10px; font-size: 0.85em;">
-                    <label style="display: flex; align-items: center; margin: 6px 0; cursor: pointer;">
-                        <input type="checkbox" id="chkAutoSaveLocal" checked style="margin-right: 6px;">
-                        <span>💾 Sauvegarde auto locale (30s)</span>
-                    </label>
-                    <label style="display: flex; align-items: center; margin: 6px 0; cursor: pointer;">
-                        <input type="checkbox" id="chkAutoSaveServer" style="margin-right: 6px;">
-                        <span>☁️ Sauvegarde auto serveur</span>
-                    </label>
-                    <label style="display: flex; align-items: center; margin: 6px 0; cursor: pointer;">
-                        <input type="checkbox" id="chkAutoSync" checked style="margin-right: 6px;">
-                        <span>🔄 Synchronisation auto (5s)</span>
-                    </label>
-                </div>
-                
-                <div id="saveStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 0.8em; display: none; word-wrap: break-word;">
-                    <!-- Messages de statut -->
-                </div>
-            </div>
-
-            <div class="sidebar-section">
-                <h3>Rondes du Tournoi</h3>
-                <div class="control-group">
-                    <label for="roundSelector">Ronde Actuelle :</label>
-                    <select id="roundSelector" onchange="switchRound(this.value)"></select>
-                </div>
-                <button class="btn-primary" onclick="addNewRound()">+ Nouvelle Ronde Vierge</button>
-                <button class="btn-secondary" onclick="cloneRoundLayout()">+ Cloner Disposition Ronde</button>
-                
-                <button class="btn-danger" style="margin-top: 5px;" onclick="deleteCurrentRound()">- Supprimer la Ronde</button>
-                
-                <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-                
-                <button class="btn-danger" onclick="createNewTournament()">⚠️ Nouveau Tournoi</button>
-                </div>
-
                 <div class="sidebar-section">
-                    <h3>➕ Outils de Disposition</h3>
-                    <div class="control-group">
-                        <label for="templateSelector">Appliquer un template :</label>
-                        <select id="templateSelector" onchange="applyTemplate(this.value)">
-                            <option value="">-- Choisir un modèle --</option>
-                            <option value="small">Petite Salle (20 éch.)</option>
-                            <option value="medium">Moyenne Salle (50 éch.)</option>
-                            <option value="large">Grande Salle (100 éch.)</option>
-                        </select>
-                    </div>
-                    <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-                    <div class="control-group">
-                        <label for="boardsPerTable">Échiquiers par table physique :</label>
-                        <input type="number" id="boardsPerTable" min="1" max="10" value="1">
-                    </div>
-                    <div class="control-group">
-                        <label for="physicalTablesPerRow">Tables par rangée :</label>
-                        <input type="number" id="physicalTablesPerRow" min="1" max="20" value="10">
-                    </div>
-                    <div class="control-group">
-                        <label for="tableLength">Longueur des tables :</label>
-                        <input type="number" id="tableLength" min="100" max="300" value="180" step="10">
-                    </div>
-                    <div class="control-group">
-                        <label for="startCorner">Position de départ :</label>
-                        <select id="startCorner">
-                            <option value="tl">En haut à gauche</option>
-                            <option value="tr">En haut à droite</option>
-                            <option value="bl">En bas à gauche</option>
-                            <option value="br">En bas à droite</option>
-                        </select>
-                    </div>
-                    <button class="btn-secondary" onclick="autoArrangeTables()">📐 Réorganiser le plan</button>
-                </div>
-
-                <div class="sidebar-section">
-                    <h3>🏛️ Gestion des Salles / Murs</h3>
-                    <div class="control-group">
-                        <label for="roomNameInput">Nom de la salle/zone :</label>
-                        <input type="text" id="roomNameInput" placeholder="Ex: Salle A, Zone Calme...">
-                    </div>
-                    <button class="btn-info" onclick="addRoom()">+ Ajouter une Salle/Mur</button>
-                </div>
-
-                <div class="sidebar-section">
-                    <h3>🎮 Appariements (Ronde Actuelle)</h3>
-                    <label for="pairingFileInput" class="file-upload-label">📁 Charger Appariements (HTML)</label>
-                    <input type="file" id="pairingFileInput" accept=".html,.htm" onchange="loadPapiFile(event)">
-                    
-                    <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-                    
-                    <div class="control-group">
-                        <label for="boardCount">Échiquiers à créer (si vierges) :</label>
-                        <input type="number" id="boardCount" min="1" max="2000" value="10">
-                    </div>
-                    <button class="btn-primary" onclick="addBoards()">Ajouter des tables vierges</button>
-                    
-                    <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-                    
-                    <button class="btn-danger" onclick="clearPairings()">Effacer les appariements</button>
-                </div>
-
-                <div class="sidebar-section">
-                    <h3>🔍 Recherche (Ronde Actuelle)</h3>
-                    <div class="control-group">
-                        <label for="searchInput">Chercher échiquier/joueur :</label>
-                        <input type="text" id="searchInput" placeholder="Nom ou numéro d'échiquier..." oninput="searchTables()" list="search-suggestions">
-                        <datalist id="search-suggestions"></datalist>
+                    <h3 onclick="toggleAccordion(this)">📠 QR-codes</h3>
+                    <div class="sidebar-content">
+                        <div class="control-group">
+                            <label for="qrNumTables">Nombre d'échiquiers à générer :</label>
+                            <input type="number" id="qrNumTables" min="1" max="2000" value="50">
+                        </div>
+                        <button class="btn-info" onclick="generateQRFiches()">🖨️ Générer Fiches QR</button>
                     </div>
                 </div>
 
                 <div class="sidebar-section">
-                    <h3>📠 Fiches de Résultats QR</h3>
-                    <div class="control-group">
-                        <label for="qrNumTables">Nombre d'échiquiers à générer :</label>
-                        <input type="number" id="qrNumTables" min="1" max="2000" value="50">
+                    <h3 onclick="toggleAccordion(this)">🎛️ Actions</h3>
+                    <div class="sidebar-content">
+                        <button class="btn-info" onclick="exportToPDF()">📄 Résultats</button>
+                        
+                        <button class="btn-secondary" onclick="exportToTRF()" style="margin-top: 5px;">
+                            🌍 Export TRF (FIDE)
+                        </button>
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+                        <div class="control-group" style="margin-top: 10px; margin-bottom: 5px;">
+                            <label for="pdfOrientation" style="font-size: 0.9em;">Orientation :</label>
+                            <select id="pdfOrientation" style="padding: 4px 8px; font-size: 0.9em;">
+                                <option value="l">Paysage</option>
+                                <option value="p">Portrait</option>
+                            </select>
+                        </div>
+                        <button class="btn-info" id="exportVisualPdfBtn" onclick="exportVisualPDF()">🖨️ Plan</button>
+                        
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+                        
+                        <button class="btn-info" onclick="showArbiterPasswordModal()">🔐 Définir Mot de Passe</button>
+                        <button class="btn-success" onclick="showPlayerLoginModal()">🧑‍🤝‍🧑 Mode Saisie Joueurs</button>
+                        
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+
+                        <button class="btn-secondary" onclick="saveLayout()">💾 Sauvegarder le Tournoi</button>
+                        <button class="btn-secondary" onclick="loadLayout()">📂 Charger le Tournoi</button>
+                        <button class="btn-danger" onclick="clearAll()">🗑️ Tout effacer</button>
                     </div>
-                    <button class="btn-info" onclick="generateQRFiches()">🖨️ Générer Fiches QR</button>
                 </div>
-
-                <div class="sidebar-section">
-                    <h3>💾 Actions (Tout le Tournoi)</h3>
-                    <button class="btn-info" onclick="exportToPDF()">📄 Exporter Liste (PDF)</button>
-                    
-                    <div class="control-group" style="margin-top: 10px; margin-bottom: 5px;">
-                        <label for="pdfOrientation" style="font-size: 0.9em;">Orientation PDF Visuel :</label>
-                        <select id="pdfOrientation" style="padding: 4px 8px; font-size: 0.9em;">
-                            <option value="l">Paysage</option>
-                            <option value="p">Portrait</option>
-                        </select>
-                    </div>
-                    <button class="btn-info" id="exportVisualPdfBtn" onclick="exportVisualPDF()">🖨️ Exporter Plan Visuel (PDF)</button>
-                    
-                    <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-                    
-                    <button class="btn-info" onclick="showArbiterPasswordModal()">🔐 Définir Mdp Joueur</button>
-                    <button class="btn-success" onclick="showPlayerLoginModal()">🧑‍🤝‍🧑 Mode Saisie Joueur</button>
-                    
-                    <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-
-                    <button class="btn-secondary" onclick="saveLayout()">💾 Sauvegarder le Tournoi</button>
-                    <button class="btn-secondary" onclick="loadLayout()">📂 Charger un Tournoi</button>
-                    <button class="btn-danger" onclick="clearAll()">🗑️ Tout effacer</button>
-                </div>
-            </div>
-
-            <div class="workspace">
+            </div> <div class="workspace">
                 <div class="toolbar">
                     <button class="tool-btn active" onclick="setTool('select')" id="selectTool">
-                        👆 Sélectionner
+                        &nbsp;&nbsp;&nbsp;🖱️ Sélection
                     </button>
                     <button class="tool-btn" onclick="setTool('multiselect')" id="multiselectTool">
-                        ☑️ Sélection multiple
+                        ☑️ Plusieurs
                     </button>
                     <button class="tool-btn" onclick="setTool('pan')" id="panTool">
-                        ✋ Déplacer le plan
+                        ✋ Bouger
                     </button>
                     <button class="tool-btn" onclick="setTool('moveboard')" id="moveboardTool">
-                        ⇭ Déplacer Échiquier
+                        ⇭ Déplacer
                     </button>
                     
                     <button class="tool-btn" onclick="undo()" id="undoButton" title="Annuler (Ctrl+Z)" disabled>
@@ -1146,32 +1273,32 @@
                     </button>
                     
                     <button class="tool-btn" onclick="deleteSelected()" title="Supprimer (Touche Suppr ou Retour)">
-                        🗑️ Supprimer
+                        🗑️ Effacer
                     </button>
                     <button class="tool-btn" onclick="duplicateSelected()" title="Dupliquer (Ctrl+D)">
                         📋 Dupliquer
                     </button>
                     <button class="tool-btn" onclick="rotateSelected()" title="Rotation (R)">
-                        ↻ Rotation
+                        ↻ Tourner
                     </button>
                     <button class="tool-btn" onclick="flipPlayersSelected()">
                         🔄 Inverser
                     </button>
 
                     <button class="btn-success" onclick="startQRScanner()" title="Scanner un résultat par QR Code" style="margin: 0;">
-                        📷 Scanner QR
+                        📷 QR-codes
                     </button>
                     
                     <div class="timer-controls">
-                        <label for="timerMinutes" style="font-size: 0.9em; color: #333;">Timer (min):</label>
-                        <input type="number" id="timerMinutes" value="15" min="1">
+                        <label for="timerMinutes" style="font-size: 0.9em; color: #333;">Minuteur :</label>
+                        <input type="number" id="timerMinutes" value="15" min="-240">
                         <button class="btn-success btn-small" onclick="startRoundTimer()">▶</button>
                         <button class="btn-danger btn-small" onclick="stopRoundTimer()">⏹</button>
                         <span id="roundTimer">00:00</span>
                     </div>
 
                     <div style="margin-left: auto; color: #6c757d; font-size: 0.9em;">
-                        Sélectionnées: <span id="selectedCount">0</span> | Zoom: <span id="zoomLevel">100%</span>
+                        Nb: <span id="selectedCount">0</span> | Z: <span id="zoomLevel">100%</span>
                     </div>
                 </div>
 
@@ -1198,11 +1325,9 @@
     <button id="playerPlanReturnButton" class="btn-secondary" onclick="returnToPlayerHome()">
         ⬅️ Retour à l'accueil
     </button>
-
     <div id="loadingOverlay">
         <span>Génération du PDF en cours...</span>
     </div>
-
     <div id="scoreModal">
         <div id="scoreModalContent">
             <h4>Saisir le résultat</h4>
@@ -1225,7 +1350,6 @@
             </div>
         </div>
     </div>
-
     <div id="qrScannerModal" class="modal-overlay" style="display:none;">
         <div id="qrScannerContent" class="modal-content">
             <h2>Scanner le QR Code</h2>
@@ -1240,7 +1364,6 @@
             </button>
         </div>
     </div>
-
     <div id="qrValidationModal" class="modal-overlay" style="display:none;">
         <div id="qrValidationContent" class="modal-content" style="width: 90%; max-width: 450px;">
             <h3>Valider le résultat ?</h3>
@@ -1268,9 +1391,7 @@
             </div>
         </div>
     </div>
-
     <div id="notification" class="notification"></div>
-
     <div id="arbiterPassModal" class="modal-overlay">
         <div class="modal-content" style="width: 350px;">
             <h2>Mot de passe Arbitre</h2>
@@ -1305,7 +1426,6 @@
             </div>
         </div>
     </div>
-
     <div id="playerHomeModal" class="modal-overlay" style="z-index: 10001; flex-direction: column; background: rgba(240, 240, 240, 0.98);">
         <div class="modal-content" style="width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
             <h2 style="font-size: 1.8em;">Saisie des Résultats (Ronde: <span id="playerModeRound"></span>)</h2>
@@ -1331,7 +1451,6 @@
             </button>
         </div>
     </div>
-
     <div id="playerTextSearchModal" class="modal-overlay" style="z-index: 10002;">
         <div class="modal-content" style="width: 90%; max-width: 500px;">
             <h3>Chercher ma partie</h3>
@@ -1346,7 +1465,6 @@
             </div>
         </div>
     </div>
-    
     <div id="playerListSearchModal" class="modal-overlay" style="z-index: 10002;">
         <div class="modal-content" style="width: 90%; max-width: 500px;">
             <h3>Choisir ma partie</h3>
@@ -1362,7 +1480,6 @@
             </div>
         </div>
     </div>
-
     <div id="simplifiedScoreModal" class="modal-overlay" style="z-index: 10002;">
         <div class="modal-content" style="width: 90%; max-width: 500px;">
             <h3>Saisir Résultat (Échiquier <span id="simplifiedBoardNum"></span>)</h3>
@@ -1383,7 +1500,6 @@
             </button>
         </div>
     </div>
-
     <div id="playerLogoutConfirmModal" class="modal-overlay" style="z-index: 10002;">
         <div class="modal-content" style="width: 350px;">
             <h2>Quitter le Mode Saisie</h2>
@@ -1401,19 +1517,45 @@
             </div>
         </div>
     </div>
+    <div id="playerLogoutConfirmModal" class="modal-overlay" style="z-index: 10002;">
+        </div>
+
+    <div id="bigTimerOverlay">
+        <span id="bigTimerDisplay">00:00</span>
+    </div>
 
 
     <script>
+        // --- NOUVEAU: Gestion Accordéon ---
+        function toggleAccordion(headerElement) {
+            const content = headerElement.nextElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            // Fermer tous les autres
+            document.querySelectorAll('.sidebar-content.expanded').forEach(el => {
+                if (el !== content) {
+                    el.classList.remove('expanded');
+                    el.previousElementSibling.classList.remove('active');
+                }
+            });
+            
+            // Ouvrir/Fermer celui-ci
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                headerElement.classList.remove('active');
+            } else {
+                content.classList.add('expanded');
+                headerElement.classList.add('active');
+            }
+        }
+        // --- Fin Gestion Accordéon ---
+
         // --- Gestion Multi-Rondes ---
         let roundsStore = {};
         let currentRoundKey = 'ronde1';
 
-        // --- Templates de salle ---
-        const roomTemplates = {
-            "small": { boards: 20, tablesPerRow: 5, boardsPerTable: 2, length: 180 },
-            "medium": { boards: 50, tablesPerRow: 10, boardsPerTable: 2, length: 180 },
-            "large": { boards: 100, tablesPerRow: 10, boardsPerTable: 2, length: 200 }
-        };
+        // --- Templates de salle (Supprimé) ---
+        // const roomTemplates = { ... }; // SUPPRIMÉ
         
         function getCurrentState() {
             if (!roundsStore[currentRoundKey]) {
@@ -1476,14 +1618,16 @@
         const USE_SERVER_SYNC = true;
         
         // === NOUVEAU SYSTÈME DE SAUVEGARDE ===
-        let tournamentName = ''; // Nom du tournoi actuel
+        // MODIFIÉ: tournamentName supprimé, les cases à cocher sont gérées par chessroom-save-system.js
+        // let tournamentName = ''; // SUPPRIMÉ
         let currentSaveMode = 'arbiter'; // 'arbiter' ou 'spectator'
-        let autoSaveLocalEnabled = true;
-        let autoSaveServerEnabled = false;
-        let autoSyncEnabled = true;
+        // let autoSaveLocalEnabled = true; // Géré par le système de sauvegarde
+        // let autoSaveServerEnabled = false; // Géré par le système de sauvegarde
+        // let autoSyncEnabled = true; // Géré par le système de sauvegarde
         let localSaveInterval = null;
         let serverSyncInterval = null;
         let lastServerTimestamp = 0;
+        let lastLocalSaveTime = 0; // <-- NOUVELLE LIGNE
 
         // ========================================
 // SYNCHRONISATION SERVEUR
@@ -1503,8 +1647,8 @@
         const dataToSave = {
             roundsStore: JSON.parse(JSON.stringify(roundsStore)),
             currentRoundKey: currentRoundKey,
-            arbiterPassword: arbiterPassword,
-            tournamentName: tournamentName || 'tournoi'
+            arbiterPassword: arbiterPassword
+            // SUPPRIMÉ: tournamentName
         };
         
         Object.values(dataToSave.roundsStore).forEach(roundState => {
@@ -1519,10 +1663,8 @@
         localStorage.setItem(SAVE_KEY, json);
         localStorage.setItem(SAVE_KEY_TIMESTAMP, Date.now().toString());
         
-        // Déclencher la sauvegarde serveur si l'option est activée
-        if (autoSaveServerEnabled && currentSaveMode === 'arbiter' && window.ChessRoomSave) {
-            window.ChessRoomSave.saveServer();
-        }
+        // MODIFIÉ: La logique de sauvegarde serveur est gérée par onResultSaved()
+        // et les timers dans chessroom-save-system.js
         
     } catch (error) {
         console.error("Erreur lors de la sauvegarde auto:", error);
@@ -1722,14 +1864,26 @@
         function startRoundTimer() {
             clearInterval(timerInterval);
             const minutes = parseInt(document.getElementById('timerMinutes').value) || 0;
-            if (minutes <= 0) return;
             
-            timerTargetTime = Date.now() + (minutes * 60 * 1000);
-            timerMode = 'down';
-            updateTimer(); 
+            if (minutes > 0) {
+                // CAS 1: DÉCOMPTE (Ex: 15)
+                // AFFICHE le grand minuteur
+                document.getElementById('bigTimerOverlay').style.display = 'flex'; 
+                timerTargetTime = Date.now() + (minutes * 60 * 1000);
+                timerMode = 'down';
+            } else {
+                // CAS 2: COMPTEUR (Ex: 0 ou -5)
+                // N'affiche PAS le grand minuteur
+                document.getElementById('bigTimerOverlay').style.display = 'none'; 
+                timerTargetTime = Date.now() + (minutes * 60 * 1000); 
+                timerMode = 'up';
+            }
+            
+            updateTimer(); // Met à jour l'affichage immédiatement
             timerInterval = setInterval(updateTimer, 500);
         }
 
+        // CORRECTION: CETTE FONCTION ÉTAIT MANQUANTE
         function stopRoundTimer() {
             clearInterval(timerInterval);
             timerInterval = null;
@@ -1737,61 +1891,67 @@
             const timerDisplay = document.getElementById('roundTimer');
             timerDisplay.textContent = '00:00';
             timerDisplay.className = '';
+            
+            // CACHE et réinitialise le grand minuteur (comme demandé)
+            document.getElementById('bigTimerOverlay').style.display = 'none'; 
+            document.getElementById('bigTimerDisplay').textContent = '00:00'; 
         }
 
         function updateTimer() {
             const timerDisplay = document.getElementById('roundTimer');
+            const bigTimerDisplay = document.getElementById('bigTimerDisplay'); 
             const now = Date.now();
             
             if (timerMode === 'down') {
+                // Logique du DÉCOMPTE (valeur positive)
                 let remainingMs = timerTargetTime - now;
+                
                 if (remainingMs <= 0) {
-                    timerMode = 'up';
-                    timerTargetTime = now; 
-                    timerDisplay.textContent = '00:00';
-                    timerDisplay.className = 'timer-elapsed timer-flash';
+                    clearInterval(timerInterval); 
+                    timerInterval = null;
+                    timerMode = 'stop'; 
+                    timerDisplay.textContent = '00:00'; 
+                    timerDisplay.className = 'timer-elapsed timer-flash'; // Flash vert
+                    
+                    document.getElementById('bigTimerOverlay').style.display = 'none'; 
+                    bigTimerDisplay.textContent = '00:00';
+                    
                 } else {
                     const seconds = Math.floor((remainingMs / 1000) % 60);
                     const minutes = Math.floor((remainingMs / 1000 / 60) % 60);
-                    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    timerDisplay.className = 'timer-countdown';
+                    const newTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    timerDisplay.textContent = newTime;
+                    bigTimerDisplay.textContent = newTime; 
+                    timerDisplay.className = 'timer-countdown'; // Style bleu
                 }
-            } else if (timerMode === 'up') {
-                let elapsedMs = now - timerTargetTime;
                 
-                if (elapsedMs > 2000 && timerDisplay.classList.contains('timer-flash')) {
-                    timerDisplay.classList.remove('timer-flash');
-                }
+            } else if (timerMode === 'up') {
+                // Logique du COMPTEUR (valeur 0 ou négative)
+                let elapsedMs = now - timerTargetTime; 
 
+                // CORRECTION: Les calculs étaient manquants
                 const totalSeconds = Math.floor(elapsedMs / 1000);
                 const seconds = totalSeconds % 60;
                 const totalMinutes = Math.floor(totalSeconds / 60);
                 const minutes = totalMinutes % 60;
                 const hours = Math.floor(totalMinutes / 60);
                 
+                let newTime = '';
                 if (hours > 0) {
-                    timerDisplay.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    newTime = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 } else {
-                    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    newTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 }
-                timerDisplay.className = 'timer-elapsed';
+                timerDisplay.textContent = newTime;
+                timerDisplay.className = 'timer-elapsed'; // Style rouge
             }
         }
 
 
-        // --- Template ---
+        // --- Template (Supprimé) ---
         function applyTemplate(templateName) {
-            if (!templateName) return;
-            const config = roomTemplates[templateName];
-            if (!config) return;
-            
-            document.getElementById('boardCount').value = config.boards;
-            document.getElementById('physicalTablesPerRow').value = config.tablesPerRow;
-            document.getElementById('boardsPerTable').value = config.boardsPerTable;
-            document.getElementById('tableLength').value = config.length;
-            
-            document.getElementById('templateSelector').value = ""; 
-            alert("Paramètres du template appliqués. Cliquez sur 'Ajouter des tables vierges' pour les créer.");
+            // SUPPRIMÉ
+            alert("Cette fonctionnalité a été retirée.");
         }
 
         // --- Fonctions d'historique (Modifiées pour le store) ---
@@ -1811,6 +1971,9 @@
             }
             updateHistoryButtons();
             autoSaveToLocalStorage();
+
+            // NOUVEAU: Déclencher la sauvegarde serveur (si activée)
+            if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved(); 
         }
         function restoreState(state) {
             isUndoRedoing = true; 
@@ -2177,7 +2340,7 @@ updateStats();
         function moveGhost(e) {
             if (!movingBoard) return;
             movingBoard.element.style.left = (e.clientX - movingBoard.offsetX) + 'px';
-            movingBoard.element.style.top = (e.clientY - movingBoard.offsetY) + 'px';
+            movingBoard.element.style.top = (e.clientY - movingVhost.offsetY) + 'px';
         }
 
         function handleTableDropEnter(e) {
@@ -2557,7 +2720,6 @@ updateStats();
                 clearSelection();
             } catch (error) { console.error('Error in deleteSelected:', error); }
         }
-
         function rotateSelected() {
             if (selectedTables.length === 0) return;
             saveHistoryState(); 
@@ -3704,19 +3866,236 @@ updateStats();
             });
         }
 
+        // ... (après la fonction syncWithPAPI)
+
+        /**
+         * Exporte TOUT le tournoi (toutes les rondes) au format TRF 1.1 de la FIDE.
+         * Ce format est un fichier texte à largeur fixe.
+         */
+        function exportToTRF() {
+            if (Object.keys(roundsStore).length === 0) {
+                alert("Aucune donnée de tournoi à exporter.");
+                return;
+            }
+
+            // --- 1. Collecter tous les joueurs et toutes les rondes ---
+            const masterPlayerList = {}; // { "NOM Prénom": { id: 0, name: "", elo: 0, points: 0, games: [] } }
+            const playerMap = new Map(); // Map<"NOM Prénom", id>
+            const allRoundKeys = Object.keys(roundsStore).sort((a, b) => {
+                return parseInt(a.replace('ronde', '')) - parseInt(b.replace('ronde', ''));
+            });
+            const numRounds = allRoundKeys.length;
+
+            // Fonction pour normaliser le nom (pour servir de clé unique)
+            const normalizeName = (name) => (name || "").trim().toUpperCase();
+
+            // Première passe : découvrir tous les joueurs
+            let playerIdCounter = 1;
+            for (const roundKey of allRoundKeys) {
+                const roundData = roundsStore[roundKey];
+                if (!roundData.physicalTables) continue;
+                
+                for (const table of roundData.physicalTables) {
+                    for (const board of table.boards) {
+                        if (board.players) {
+                            const pWhiteName = normalizeName(board.players.white.name);
+                            const pBlackName = normalizeName(board.players.black.name);
+
+                            if (pWhiteName && !playerMap.has(pWhiteName)) {
+                                playerMap.set(pWhiteName, playerIdCounter);
+                                masterPlayerList[pWhiteName] = {
+                                    id: playerIdCounter++,
+                                    name: board.players.white.name, // Garde le nom original
+                                    elo: board.players.white.elo || 0,
+                                    points: 0,
+                                    games: [] // [ { round: 1, oppId: 2, color: 'w', result: '+' }, ... ]
+                                };
+                            }
+                            if (pBlackName && !playerMap.has(pBlackName)) {
+                                playerMap.set(pBlackName, playerIdCounter);
+                                masterPlayerList[pBlackName] = {
+                                    id: playerIdCounter++,
+                                    name: board.players.black.name, // Garde le nom original
+                                    elo: board.players.black.elo || 0,
+                                    points: 0,
+                                    games: []
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+
+            const numPlayers = playerMap.size;
+            if (numPlayers === 0) {
+                alert("Aucun joueur apparié trouvé dans le tournoi.");
+                return;
+            }
+
+            // --- 2. Seconde passe : collecter tous les résultats et calculer les points ---
+            let roundCounter = 1;
+            for (const roundKey of allRoundKeys) {
+                const roundData = roundsStore[roundKey];
+                if (!roundData.physicalTables) continue;
+
+                for (const table of roundData.physicalTables) {
+                    for (const board of table.boards) {
+                        if (board.players) {
+                            const pWhiteName = normalizeName(board.players.white.name);
+                            const pBlackName = normalizeName(board.players.black.name);
+                            const pWhiteId = playerMap.get(pWhiteName);
+                            const pBlackId = playerMap.get(pBlackName);
+
+                            let whiteResultChar = ' ';
+                            let blackResultChar = ' ';
+                            let whitePoints = 0;
+                            let blackPoints = 0;
+
+                            const sWhite = board.score.white;
+                            const sBlack = board.score.black;
+
+                            if (sWhite === '1') { whiteResultChar = '+'; whitePoints = 1; }
+                            if (sBlack === '1') { blackResultChar = '+'; blackPoints = 1; }
+                            if (sWhite === '0') { whiteResultChar = '-'; }
+                            if (sBlack === '0') { blackResultChar = '-'; }
+                            if (sWhite === '1/2' || sBlack === '1/2') {
+                                whiteResultChar = '='; whitePoints = 0.5;
+                                blackResultChar = '='; blackPoints = 0.5;
+                            }
+                            // Gérer les forfaits (PAPI F-1 vs TRF -)
+                            if (sWhite === 'F') { whiteResultChar = '-'; }
+                            if (sBlack === 'F') { blackResultChar = '-'; }
+                            if (sWhite === '1' && sBlack === 'F') { blackResultChar = '-'; } // F-1
+                            if (sBlack === '1' && sWhite === 'F') { whiteResultChar = '-'; } // 1-F
+                            
+                            // TRF n'a pas de 0-0, c'est F-F (double -)
+                            if (sWhite === '0' && sBlack === '0') {
+                                whiteResultChar = '-'; blackResultChar = '-';
+                            }
+
+                            if (masterPlayerList[pWhiteName]) {
+                                masterPlayerList[pWhiteName].points += whitePoints;
+                                masterPlayerList[pWhiteName].games[roundCounter - 1] = {
+                                    oppId: pBlackId,
+                                    color: 'w',
+                                    result: whiteResultChar
+                                };
+                            }
+                            if (masterPlayerList[pBlackName]) {
+                                masterPlayerList[pBlackName].points += blackPoints;
+                                masterPlayerList[pBlackName].games[roundCounter - 1] = {
+                                    oppId: pWhiteId,
+                                    color: 'b',
+                                    result: blackResultChar
+                                };
+                            }
+                        }
+                    }
+                }
+                roundCounter++;
+            }
+
+            // --- 3. Trier les joueurs (par points DESC, puis nom ASC) ---
+            const sortedPlayers = Object.values(masterPlayerList).sort((a, b) => {
+                if (b.points !== a.points) {
+                    return b.points - a.points;
+                }
+                return a.name.localeCompare(b.name);
+            });
+
+            // --- 4. Construire le fichier TRF ---
+            let trfContent = "";
+            const today = new Date().toISOString().split('T')[0].replace(/-/g, '.');
+
+            // En-têtes (0xx)
+            // MODIF: Utiliser une valeur par défaut si tournamentName n'existe plus
+            trfContent += "001 " + ("Tournoi ChessRoom").padEnd(60) + "\n";
+            trfContent += "010 Lieu Inconnu\n";
+            trfContent += "011 FRA\n"; // Placeholder
+            trfContent += "012 " + today + "\n"; // Placeholder date début
+            trfContent += "013 " + today + "\n"; // Placeholder date fin
+            trfContent += "014 " + numPlayers + "\n";
+            trfContent += "015 " + numPlayers + "\n"; // Nb joueurs comptant ELO
+            trfContent += "016 " + numRounds + "\n";
+            trfContent += "021 Arbitre Principal\n"; // Placeholder
+            trfContent += "031 10m+0s\n"; // Placeholder
+            trfContent += "112 FIDE-Official Rating list used\n";
+
+            // Lignes des joueurs (format principal)
+            sortedPlayers.forEach((player, index) => {
+                let line = "";
+                const rank = index + 1;
+                const pointsStr = (player.points % 1 === 0) ? `${player.points}.0` : `${player.points}`;
+
+                line += String(rank).padStart(4) + " ";             // Rang
+                line += " ";                                       // Sexe (placeholder)
+                line += player.name.padEnd(33) + " ";              // Nom
+                line += String(player.elo || 0).padStart(4) + " "; // ELO
+                line += "FRA ";                                    // Féd (placeholder)
+                line += pointsStr.padStart(4) + " ";               // Points
+                line += String(rank).padStart(4) + "  ";           // Rang (bis)
+
+                // Boucle des rondes
+                for (let r = 0; r < numRounds; r++) {
+                    const game = player.games[r];
+                    if (game) {
+                        // Ex: " 123 w +"
+                        line += String(game.oppId || 0).padStart(5) + " ";
+                        line += (game.color || " ") + " ";
+                        line += (game.result || " ") + "  ";
+                    } else {
+                        // Pas de partie (bye, ou joueur absent)
+                        // Placeholder pour un BYE 1pt
+                        if (player.games.length < numRounds) {
+                            line += "    0 w +  "; 
+                            // TODO: Améliorer la gestion du bye (il faudrait le stocker)
+                        } else {
+                             line += "             "; // Espace vide
+                        }
+                    }
+                }
+                trfContent += line.trimEnd() + "\n";
+            });
+
+            // --- 5. Télécharger le fichier ---
+            const blob = new Blob([trfContent], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", "tournoi.trf");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            
+            link.click();
+            
+            document.body.removeChild(link);
+            
+            showNotification('Export TRF (FIDE) terminé !', 'success');
+        }
 
         // --- Stats, Zoom, etc. ---
         function updateStats() {
-            let totalBoards = 0, pairedBoards = 0;
+            let totalBoards = 0, pairedBoards = 0, remainingBoards = 0; // NOUVEAU: Ajout de remainingBoards
+            
             physicalTables.forEach(t => {
                 totalBoards += t.boards.length;
                 t.boards.forEach(b => { 
-                    if (b.players) pairedBoards++; 
+                    if (b.players) {
+                        pairedBoards++; 
+                        
+                        // NOUVEAU: Calcul des échiquiers restants
+                        if (b.score.white === '' && b.score.black === '') {
+                            remainingBoards++;
+                        }
+                    }
                 });
             });
+            
             document.getElementById('totalBoards').textContent = totalBoards;
             document.getElementById('pairedBoards').textContent = pairedBoards;
             document.getElementById('totalPlayers').textContent = pairedBoards * 2;
+            document.getElementById('remainingBoards').textContent = remainingBoards; // NOUVEAU: Mise à jour du HTML
         }
         
         function resetZoom() { applyZoom(1); }
@@ -4593,6 +4972,14 @@ updateStats();
         // --- Initialisation ---
             document.addEventListener('DOMContentLoaded', async () => {
                 
+                // NOUVEAU: Ouvrir le premier accordéon par défaut (SUPPRIMÉ)
+                /*
+                const firstAccordionHeader = document.querySelector('.sidebar-section h3');
+                if (firstAccordionHeader) {
+                    toggleAccordion(firstAccordionHeader);
+                }
+                */
+                
                 // Note: Le chargement des données est maintenant géré par chessroom-save-system.js
                 // qui s'occupe de charger depuis le serveur ou le localStorage selon la configuration
                 
@@ -4641,7 +5028,7 @@ updateStats();
             setTimeout(() => {
                 // MODIFIÉ: Vue par défaut
                 fitAllTables();
-            }, 100);
+            }, 500);
             
             // NOUVEAU: Écouteur de synchronisation entre onglets
             window.addEventListener('storage', (e) => {
@@ -4767,7 +5154,6 @@ function createNewTournament() {
 }
     </script>
     
-    <!-- Nouveau système de sauvegarde sécurisé -->
     <script src="chessroom-save-system.js"></script>
 </body>
 </html>

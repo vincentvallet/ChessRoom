@@ -95,24 +95,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             debugLog("Historique OK");
         }
         
-        // Sauvegarder le fichier principal
+        // Sauvegarder le fichier principal (AVEC VERROUILLAGE)
         debugLog("Sauvegarde fichier principal: $dataFile");
-        if (file_put_contents($dataFile, $data)) {
-            debugLog("SUCCESS: Sauvegarde réussie");
-            echo json_encode([
-                'success' => true,
-                'message' => 'Données sauvegardées',
-                'timestamp' => time(),
-                'historyFile' => basename($historyFile),
-                'debug' => 'OK'
-            ]);
-        } else {
-            debugLog("ERREUR: Échec sauvegarde fichier principal");
+
+        // 1. Ouvrir le fichier (mode 'c+' = crée s'il n'existe pas, place le pointeur au début)
+        $fp = fopen($dataFile, 'c+');
+
+        if ($fp === false) {
+            // Erreur si on ne peut même pas ouvrir le fichier
+            debugLog("ERREUR: Impossible d'ouvrir le fichier $dataFile");
             http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'error' => 'Impossible d\'écrire le fichier'
-            ]);
+            echo json_encode(['success' => false, 'error' => 'Impossible d\'ouvrir le fichier de données']);
+        
+        } else {
+            // 2. Demander un VERROU EXCLUSIF (LOCK_EX)
+            // Le script va s'arrêter ici et ATTENDRE si un autre script a déjà le verrou.
+            if (flock($fp, LOCK_EX)) {
+                debugLog("Verrou acquis sur $dataFile");
+
+                // 3. Vider le fichier (car 'c+' n'efface pas le contenu précédent)
+                ftruncate($fp, 0);
+
+                // 4. Écrire les nouvelles données
+                $bytesWritten = fwrite($fp, $data);
+
+                // 5. RELÂCHER LE VERROU (très important !)
+                flock($fp, LOCK_UN);
+                debugLog("Verrou relâché");
+
+                // 6. Fermer le fichier
+                fclose($fp);
+
+                // Gérer le succès ou l'échec de l'écriture
+                if ($bytesWritten !== false) {
+                    debugLog("SUCCESS: Sauvegarde réussie (" . $bytesWritten . " bytes)");
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Données sauvegardées',
+                        'timestamp' => time(),
+                        'historyFile' => basename($historyFile),
+                        'debug' => 'OK (Locked)' // Indique que le verrou a fonctionné
+                    ]);
+                } else {
+                    debugLog("ERREUR: Échec d'écriture (fwrite)");
+                    http_response_code(500);
+                    echo json_encode(['success' => false, 'error' => 'Impossible d\'écrire dans le fichier (fwrite)']);
+                }
+
+            } else {
+                // Si on n'a pas pu obtenir le verrou
+                debugLog("ERREUR: Impossible d'obtenir le verrou sur $dataFile");
+                http_response_code(500); // 500 = Erreur serveur
+                echo json_encode(['success' => false, 'error' => 'Impossible de verrouiller le fichier de données']);
+                fclose($fp); // Fermer quand même
+            }
         }
         
     } catch (Exception $e) {
