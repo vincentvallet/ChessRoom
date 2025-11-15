@@ -3549,6 +3549,7 @@ updateStats();
 
                 document.getElementById('canvas').innerHTML = '';
                 updateStats();
+                if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
             }
         }
         
@@ -3641,6 +3642,7 @@ updateStats();
                         updateRoundSelector();
                         loadStateFromStore(currentRoundKey);
                         autoSaveToLocalStorage();
+                        if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
                         
                         alert('Tournoi chargé avec succès !');
                     } catch (error) {
@@ -5147,6 +5149,7 @@ function createNewTournament() {
         updateRoundSelector();
 
         document.getElementById('canvas').innerHTML = '';
+        if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
         updateStats();
         
         showNotification("Nouveau tournoi créé.", "success");

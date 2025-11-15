@@ -164,7 +164,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // CHARGER (GET)
 elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     debugLog("GET - Chargement des données");
+
+    // ==========================================================
+    // NOUVEAU: GESTION DE LA SUPPRESSION
+    // ==========================================================
     
+    // --- Gérer la suppression d'un seul fichier ---
+    if (isset($_GET['delete'])) {
+        debugLog("Demande de suppression: " . $_GET['delete']);
+        
+        // SÉCURITÉ: Valider le nom du fichier pour éviter le "Path Traversal"
+        // basename() retire tous les '..', '/', etc.
+        $fileToDelete = basename($_GET['delete']); 
+        
+        // SÉCURITÉ: S'assurer qu'on ne supprime que des .json
+        if (substr($fileToDelete, -5) !== '.json') {
+            debugLog("ERREUR: Nom de fichier invalide (pas .json)");
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Nom de fichier invalide']);
+            exit;
+        }
+
+        $filePath = $historyDir . '/' . $fileToDelete;
+
+        // SÉCURITÉ: Vérifier que le fichier est bien dans le dossier d'historique
+        if (file_exists($filePath) && realpath($filePath) === $filePath && strpos($filePath, $historyDir) === 0) {
+            if (unlink($filePath)) {
+                debugLog("Fichier supprimé: " . $filePath);
+                echo json_encode(['success' => true, 'message' => 'Fichier ' . $fileToDelete . ' supprimé.']);
+            } else {
+                debugLog("ERREUR: Impossible de supprimer " . $filePath);
+                http_response_code(500);
+                echo json_encode(['success' => false, 'error' => 'Impossible de supprimer le fichier']);
+            }
+        } else {
+            debugLog("ERREUR: Fichier introuvable ou chemin invalide: " . $filePath);
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Fichier non trouvé ou non autorisé']);
+        }
+        exit;
+    }
+    
+    // --- Gérer la suppression de TOUT l'historique ---
+    if (isset($_GET['delete_all']) && $_GET['delete_all'] === 'true') {
+        debugLog("Demande de suppression de TOUT l'historique");
+        $files = glob($historyDir . '/*.json');
+        $count = 0;
+        $errors = 0;
+        foreach ($files as $file) {
+            if (unlink($file)) {
+                $count++;
+            } else {
+                $errors++;
+            }
+        }
+        debugLog($count . " fichiers supprimés, " . $errors . " erreurs.");
+        echo json_encode(['success' => true, 'message' => $count . ' fichiers supprimés.']);
+        exit;
+    }
+
+    // ==========================================================
+    // FIN DE LA NOUVELLE GESTION
+    // ==========================================================
+
     // Liste historique
     if (isset($_GET['list_history'])) {
         debugLog("Demande de liste historique");

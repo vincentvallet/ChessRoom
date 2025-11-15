@@ -261,8 +261,6 @@ async function loadFromServer(isAutoSync = false) {
 
 // ===== SYNCHRONISATION AUTOMATIQUE =====
 
-// ===== SYNCHRONISATION AUTOMATIQUE =====
-
 function syncFromServerIfNeeded() {
     // Ne pas synchroniser si une modale est ouverte (s'applique à tout le monde)
     if (document.querySelector('.modal-overlay[style*="display: flex"]')) {
@@ -280,10 +278,12 @@ function syncFromServerIfNeeded() {
     // Si on arrive ici, on est en mode Arbitre.
     
     // 1. Vérifier le Cooldown (pour éviter les conflits de sauvegarde)
-    const SYNC_COOLDOWN = 10000; // 10 secondes
-    if (Date.now() - lastLocalSaveTime < SYNC_COOLDOWN) {
-        // console.log('Synchro auto en pause (cooldown post-sauvegarde)');
-        return; // L'arbitre vient de sauvegarder, on attend.
+    if (currentSaveMode === SAVE_CONFIG.modes.ARBITER) {
+        const SYNC_COOLDOWN = 10000; // 10 secondes
+        if (Date.now() - lastLocalSaveTime < SYNC_COOLDOWN) {
+            // console.log('Synchro auto en pause (cooldown post-sauvegarde)');
+            return; // L'arbitre vient de sauvegarder, on attend.
+        }
     }
     
     // 2. Vérifier la stratégie de l'arbitre
@@ -347,8 +347,60 @@ async function loadFromHistory(filename) {
     }
 }
 
+// =============================================
+// NOUVELLES FONCTIONS DE SUPPRESSION
+// =============================================
+
+async function deleteHistoryFile(filename, btnElement) {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer définitivement le fichier "${filename}" ?\n\nCette action est irréversible.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(SERVER_URL + '?delete=' + encodeURIComponent(filename));
+        const result = await response.json();
+        
+        if (result.success) {
+            showSaveStatus('success', result.message || 'Fichier supprimé');
+            // Supprimer l'élément de la liste
+            btnElement.closest('div[style*="border: 1px solid #ddd"]').remove();
+        } else {
+            showSaveStatus('error', result.error || 'Erreur de suppression');
+        }
+    } catch (e) {
+        showSaveStatus('error', 'Erreur de connexion lors de la suppression');
+    }
+}
+
+async function deleteAllHistory() {
+    if (!confirm(`ATTENTION !\n\nVous allez supprimer TOUS les fichiers d'historique sur le serveur.\n\nCette action est irréversible. Continuer ?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(SERVER_URL + '?delete_all=true');
+        const result = await response.json();
+        
+        if (result.success) {
+            showSaveStatus('success', result.message || 'Historique effacé');
+            // Vider la liste
+            const listDiv = document.getElementById('historyList');
+            if (listDiv) {
+                listDiv.innerHTML = '<p>Aucune sauvegarde disponible.</p>';
+            }
+        } else {
+            showSaveStatus('error', result.error || 'Erreur de suppression');
+        }
+    } catch (e) {
+        showSaveStatus('error', 'Erreur de connexion lors de la suppression');
+    }
+}
+
+// =============================================
+// MODIFICATION DE LA MODALE D'HISTORIQUE
+// =============================================
+
 function showHistoryModal() {
-    // ... [Fonction identique] ...
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
@@ -356,14 +408,20 @@ function showHistoryModal() {
     const modalContent = document.createElement('div');
     modalContent.style.cssText = 'background: white; padding: 25px; border-radius: 10px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;';
     
+    // MODIFIÉ: Ajout des boutons de suppression
     modalContent.innerHTML = `
         <h2 style="margin-bottom: 20px;">📂 Historique des Sauvegardes</h2>
         <div id="historyList" style="margin-bottom: 20px;">
             <p>Chargement...</p>
         </div>
-        <button id="closeHistoryModal" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            Fermer
-        </button>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button id="deleteAllHistoryBtn" style="padding: 10px 20px; background: #eb3349; color: white; border: none; border-radius: 4px; cursor: pointer; width: auto; margin-bottom: 0;">
+                🗑️ Tout Supprimer
+            </button>
+            <button id="closeHistoryModal" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; width: auto; margin-bottom: 0;">
+                Fermer
+            </button>
+        </div>
     `;
     
     modal.appendChild(modalContent);
@@ -378,20 +436,24 @@ function showHistoryModal() {
             return;
         }
         
+        // MODIFIÉ: Ajout du bouton "Supprimer"
         const listHTML = history.slice(0, SAVE_CONFIG.maxHistoryDisplay).map(item => `
-            <div style="border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
+            <div style="border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="min-width: 150px;">
                     <div style="font-weight: bold;">${item.filename}</div>
                     <div style="font-size: 13px; color: #666;">📅 ${item.date}</div>
                     <div style="font-size: 12px; color: #999;">📦 ${(item.size / 1024).toFixed(1)} Ko</div>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="restore-btn" data-file="${item.filename}" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="restore-btn" data-file="${item.filename}" style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; width: auto; margin-bottom: 0;">
                         ↩️ Restaurer
                     </button>
-                    <a href="${SERVER_URL}?history=${encodeURIComponent(item.filename)}" download="${item.filename}" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block;">
+                    <a href="${SERVER_URL}?history=${encodeURIComponent(item.filename)}" download="${item.filename}" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; width: auto; margin-bottom: 0; font-size: 14px; font-weight: 600;">
                         ⬇️ Télécharger
                     </a>
+                    <button class="delete-btn" data-file="${item.filename}" style="padding: 8px 12px; background: #eb3349; color: white; border: none; border-radius: 4px; cursor: pointer; width: auto; margin-bottom: 0;">
+                        🗑️ Supprimer
+                    </button>
                 </div>
             </div>
         `).join('');
@@ -408,11 +470,23 @@ function showHistoryModal() {
                 }
             });
         });
+
+        // NOUVEAU: Event listeners pour les boutons de suppression
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                deleteHistoryFile(btn.dataset.file, btn);
+            });
+        });
     });
     
     // Fermer la modale
     document.getElementById('closeHistoryModal').addEventListener('click', () => {
         modal.remove();
+    });
+
+    // NOUVEAU: Event listener pour "Tout Supprimer"
+    document.getElementById('deleteAllHistoryBtn').addEventListener('click', () => {
+        deleteAllHistory();
     });
     
     modal.addEventListener('click', (e) => {
@@ -424,7 +498,6 @@ function showHistoryModal() {
 
 // ===== GESTION DES MODES =====
 
-// ... (vers la ligne 476)
 function setMode(mode) {
     currentSaveMode = mode;
     
@@ -554,6 +627,10 @@ function initSaveControls() {
 
 // MODIFIÉ: Utilise le nouveau dropdown
 function onResultSaved() {
+    // NOUVEAU: Mettre à jour le timestamp de la dernière action locale
+    // Cela met en pause la synchro auto pour éviter les conflits
+    lastLocalSaveTime = Date.now(); 
+
     const strategySelect = document.getElementById('saveStrategySelector');
     if (!strategySelect) return;
     
