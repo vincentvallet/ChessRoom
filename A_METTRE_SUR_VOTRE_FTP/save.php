@@ -1,6 +1,6 @@
 <?php
 // VERSION "NUCLÉAIRE" - ANTI-CRASH
-// Mettez ceci en place, et si ça ne marche pas, le problème est 100% les permissions de fichiers.
+// MODIFIÉ: Ajout de la limite d'historique à 10
 
 // ÉTAPE 1: DÉSACTIVER LES ERREURS IMMÉDIATEMENT
 error_reporting(0);
@@ -40,6 +40,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 $dataFile = 'chessroom-data.json';
 $historyDir = 'chessroom-history';
 $debugLog = 'chessroom-debug.log';
+$maxHistoryFiles = 10; // <-- MODIFICATION 1: Limite à 10
 
 // Log (on utilise @ pour ne pas crasher si le log n'est pas inscriptible)
 $logMessage = date('Y-m-d H:i:s') . " --- " . $_SERVER['REQUEST_METHOD'] . " ---";
@@ -72,6 +73,22 @@ try {
         }
         $historyFile = $historyDir . '/history_' . date('Y-m-d_H-i-s') . '.json';
         @file_put_contents($historyFile, $data);
+
+        // --- MODIFICATION 2: Logique de nettoyage ---
+        $files = @glob($historyDir . '/*.json');
+        if ($files && count($files) > $maxHistoryFiles) {
+            // Trier par date de modification (le plus ancien en premier)
+            usort($files, function($a, $b) {
+                return @filemtime($a) - @filemtime($b);
+            });
+            
+            $filesToDelete = count($files) - $maxHistoryFiles;
+            for ($i = 0; $i < $filesToDelete; $i++) {
+                @unlink($files[$i]); // Supprimer le plus ancien
+            }
+            @file_put_contents($debugLog, date('Y-m-d H:i:s') . " HISTORIQUE: Nettoyage de " . $filesToDelete . " anciens fichiers.\n", FILE_APPEND);
+        }
+        // --- FIN: Logique de nettoyage ---
 
         // Écrire dans le fichier principal (OBLIGATOIRE)
         $fp = @fopen($dataFile, 'c+');
