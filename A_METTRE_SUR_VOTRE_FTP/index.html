@@ -52,6 +52,7 @@
         }
         
         /* 2. Cache les boutons de la barre d'outils (sauf Outils de navigation) */
+        .spectator-mode .timer-controls, /* <-- NOUVELLE LIGNE AJOUTÉE */
         .spectator-mode .tool-btn[onclick*="delete"],
         .spectator-mode .tool-btn[onclick*="duplicate"],
         .spectator-mode .tool-btn[onclick*="rotate"],
@@ -1284,6 +1285,8 @@
                         <button class="btn-success btn-small" onclick="startRoundTimer()">▶</button>
                         <button class="btn-danger btn-small" onclick="stopRoundTimer()">⏹</button>
                         <span id="roundTimer">00:00</span>
+                        
+                        <button class="btn-secondary btn-small" id="toggleBigTimerBtn" onclick="toggleBigTimer()" title="Masquer/Afficher le chrono plein écran" style="margin-left: 5px;">👁️</button>
                     </div>
 
                     <div style="margin-left: auto; color: #6c757d; font-size: 0.9em;">
@@ -1571,8 +1574,17 @@
                     nextRoomId: 1,
                     nextBoardNumber: 1,
                     historyStack: [],
-                    redoStack: []
+                    redoStack: [],
+                    timerState: { mode: 'stop', targetTime: 0, hidden: false } // <-- MODIFIÉ
                 };
+            }
+            // Compatibilité anciens fichiers
+            if (!roundsStore[currentRoundKey].timerState) {
+                roundsStore[currentRoundKey].timerState = { mode: 'stop', targetTime: 0, hidden: false }; // <-- MODIFIÉ
+            }
+            // NOUVEAU: Compatibilité pour la propriété 'hidden'
+            if (roundsStore[currentRoundKey].timerState.hidden === undefined) {
+                roundsStore[currentRoundKey].timerState.hidden = false;
             }
             // Assurer la compatibilité avec les anciens sauvegardes
             if (!roundsStore[currentRoundKey].rooms) {
@@ -1611,7 +1623,8 @@
         
         let isUndoRedoing = false; 
         let movingBoard = null;
-        
+        let bigTimerUserHidden = false;
+
         const CANVAS_WIDTH = 3000;
         const CANVAS_HEIGHT = 2000;
         const START_MARGIN = 100;
@@ -1754,6 +1767,13 @@
             state.nextBoardNumber = nextBoardNumber;
             state.historyStack = JSON.parse(JSON.stringify(historyStack));
             state.redoStack = JSON.parse(JSON.stringify(redoStack));
+            
+            // NOUVEAU: Sauvegarder l'état du minuteur
+            state.timerState = {
+                mode: timerMode,
+                targetTime: timerTargetTime,
+                hidden: bigTimerUserHidden // <-- NOUVELLE LIGNE
+            };
         }
 
         function loadStateFromStore(key) {
@@ -1767,7 +1787,27 @@
             nextBoardNumber = state.nextBoardNumber;
             historyStack = JSON.parse(JSON.stringify(state.historyStack));
             redoStack = JSON.parse(JSON.stringify(state.redoStack));
+            // NOUVEAU: Charger et relancer le minuteur
+            clearInterval(timerInterval); // Arrêter tout minuteur précédent
+            timerInterval = null;
+            
+            const savedTimerState = state.timerState || { mode: 'stop', targetTime: 0, hidden: false }; // <-- MODIFIÉ
+            timerMode = savedTimerState.mode;
+            timerTargetTime = savedTimerState.targetTime;
+            bigTimerUserHidden = savedTimerState.hidden; // <-- NOUVELLE LIGNE
+            
+            // NOUVEAU: Mettre à jour l'icône du bouton
+            const btn = document.getElementById('toggleBigTimerBtn');
+            if (btn) {
+                btn.innerHTML = bigTimerUserHidden ? '👁️‍🗨️' : '👁️';
+            }
+            
+            if (timerMode !== 'stop') {
+                timerInterval = setInterval(updateTimer, 500); // Relancer le cycle
+            }
+            updateTimer(); // Mettre à jour l'affichage immédiatement
 
+            renderAllTables();
             renderAllTables();
             renderAllRooms();
             updateStats();
@@ -1870,6 +1910,12 @@
         // --- Fonctions du Timer ---
         function startRoundTimer() {
             clearInterval(timerInterval);
+            
+            // NOUVEAU: Réinitialiser l'état masqué
+            bigTimerUserHidden = false;
+            const btn = document.getElementById('toggleBigTimerBtn');
+            if (btn) btn.innerHTML = '👁️';
+            
             const minutes = parseInt(document.getElementById('timerMinutes').value) || 0;
             
             if (minutes > 0) {
@@ -1888,15 +1934,38 @@
             
             updateTimer(); // Met à jour l'affichage immédiatement
             timerInterval = setInterval(updateTimer, 500);
+            saveHistoryState(); // <-- NOUVEAU: Déclencher la synchronisation
+        }
+        // NOUVELLE FONCTION POUR MASQUER LE CHRONO PLEIN ÉCRAN
+        function toggleBigTimer() {
+            bigTimerUserHidden = !bigTimerUserHidden; // Inverse l'état
+            
+            // Met à jour l'icône du bouton
+            const btn = document.getElementById('toggleBigTimerBtn');
+            if (btn) {
+                // 👁️‍🗨️ est l'icône "œil barré"
+                btn.innerHTML = bigTimerUserHidden ? '👁️‍🗨️' : '👁️';
+            }
+            
+            // Applique le changement d'affichage immédiatement
+            updateTimer();
+            saveHistoryState();
         }
         // CORRECTION: CETTE FONCTION ÉTAIT MANQUANTE
         function stopRoundTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
+            clearInterval(timerInterval); // <-- LIGNE AJOUTÉE
+            timerInterval = null;         // <-- LIGNE AJOUTÉE
             timerMode = 'stop';
+            timerTargetTime = 0; // NOUVEAU: Réinitialiser
+            bigTimerUserHidden = false; // NOUVEAU: Réinitialiser
+
             const timerDisplay = document.getElementById('roundTimer');
             timerDisplay.textContent = '00:00';
             timerDisplay.className = '';
+            // NOUVEAU: Mettre à jour l'icône
+            const btn = document.getElementById('toggleBigTimerBtn');
+            if (btn) btn.innerHTML = '👁️';
+            saveHistoryState(); // <-- NOUVEAU: Déclencher la synchronisation
             
             // CACHE et réinitialise le grand minuteur (comme demandé)
             document.getElementById('bigTimerOverlay').style.display = 'none'; 
@@ -1906,21 +1975,36 @@
         function updateTimer() {
             const timerDisplay = document.getElementById('roundTimer');
             const bigTimerDisplay = document.getElementById('bigTimerDisplay'); 
+            const bigTimerOverlay = document.getElementById('bigTimerOverlay'); // <-- NOUVEAU: Récupérer l'overlay
             const now = Date.now();
+
+            // --- NOUVEAU BLOC AJOUTÉ ---
+            // Gérer le cas 'stop' explicitement pour forcer l'arrêt
+            if (timerMode === 'stop') {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                timerDisplay.textContent = '00:00';
+                timerDisplay.className = '';
+                bigTimerOverlay.style.display = 'none';
+                bigTimerDisplay.textContent = '00:00';
+                return; // Fin
+            }
+            // --- FIN DU NOUVEAU BLOC ---
             
             if (timerMode === 'down') {
-                // Logique du DÉCOMPTE (valeur positive)
                 let remainingMs = timerTargetTime - now;
                 
                 if (remainingMs <= 0) {
                     clearInterval(timerInterval); 
                     timerInterval = null;
                     timerMode = 'stop'; 
-                    timerDisplay.textContent = '00:00'; 
-                    timerDisplay.className = 'timer-elapsed timer-flash'; // Flash vert
+                    timerTargetTime = 0; // Réinitialiser l'état
+                    timerDisplay.textContent = '00:00';
+                    timerDisplay.className = 'timer-elapsed timer-flash';
                     
-                    document.getElementById('bigTimerOverlay').style.display = 'none'; 
+                    bigTimerOverlay.style.display = 'none'; // <-- Modifié
                     bigTimerDisplay.textContent = '00:00';
+                    saveHistoryState(); // <-- NOUVEAU: Sauvegarder l'arrêt automatique
                     
                 } else {
                     const seconds = Math.floor((remainingMs / 1000) % 60);
@@ -1928,12 +2012,23 @@
                     const newTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                     timerDisplay.textContent = newTime;
                     bigTimerDisplay.textContent = newTime; 
-                    timerDisplay.className = 'timer-countdown'; // Style bleu
+                    timerDisplay.className = 'timer-countdown';
+                    
+                    // --- NOUVELLE LOGIQUE DE MASQUAGE ---
+                    if (bigTimerUserHidden) {
+                        bigTimerOverlay.style.display = 'none';
+                    } else {
+                        bigTimerOverlay.style.display = 'flex';
+                    }
+                    // --- FIN ---
                 }
                 
             } else if (timerMode === 'up') {
-                // Logique du COMPTEUR (valeur 0 ou négative)
+                // NOUVEAU: S'assurer qu'il est aussi caché si on compte vers le haut
+                bigTimerOverlay.style.display = 'none'; 
+                
                 let elapsedMs = now - timerTargetTime; 
+                // ... (le reste de la logique 'up')
 
                 // CORRECTION: Les calculs étaient manquants
                 const totalSeconds = Math.floor(elapsedMs / 1000);
