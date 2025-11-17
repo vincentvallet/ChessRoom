@@ -1,6 +1,5 @@
 // ============================================
-// NOUVEAU SYSTÈME DE SAUVEGARDE SÉCURISÉ
-// À intégrer dans index.html
+// SYSTÈME DE SAUVEGARDE SÉCURISÉ - VERSION CORRIGÉE
 // ============================================
 
 // ===== CONFIGURATION =====
@@ -16,25 +15,8 @@ const SAVE_CONFIG = {
     maxHistoryDisplay: 20            // Nombre d'historiques affichés
 };
 
-// Note: Les variables globales sont déclarées dans index.html :
-// - currentSaveMode
-// - localSaveInterval
-// - serverSyncInterval
-// - lastServerTimestamp
-//
-// SUPPRIMÉ:
-// - tournamentName
-// - autoSaveLocalEnabled
-// - autoSaveServerEnabled
-// - autoSyncEnabled
-
-
 // Variable locale pour ce module
 let lastSaveStatus = { type: '', message: '', timestamp: null };
-
-// ===== INTERFACE UTILISATEUR =====
-
-// HTML (Maintenant directement dans index.html)
 
 // ===== FONCTIONS DE STATUT =====
 
@@ -85,7 +67,6 @@ async function saveToLocalStorage() {
             roundsStore: JSON.parse(JSON.stringify(roundsStore)),
             currentRoundKey: currentRoundKey,
             arbiterPassword: arbiterPassword,
-            // SUPPRIMÉ: tournamentName
             lastModified: Date.now()
         };
         
@@ -129,7 +110,6 @@ async function saveToServer() {
             roundsStore: JSON.parse(JSON.stringify(roundsStore)),
             currentRoundKey: currentRoundKey,
             arbiterPassword: arbiterPassword,
-            // SUPPRIMÉ: tournamentName (le script PHP utilisera une valeur par défaut)
             lastModified: Date.now(),
             savedBy: currentSaveMode
         };
@@ -169,12 +149,10 @@ async function saveToServer() {
     }
 }
 
-// MODIFIÉ: Ajout du paramètre isAutoSync
 async function loadFromServer(isAutoSync = false) {
     if (!USE_SERVER_SYNC) return false;
     
     try {
-        // NOUVEAU: Ne pas afficher "Chargement..." pour la synchro auto silencieuse
         if (!isAutoSync) {
             showSaveStatus('sync', '🔄 Chargement depuis le serveur...');
         }
@@ -199,8 +177,9 @@ async function loadFromServer(isAutoSync = false) {
                 return false;
             }
             
-            // MODIFIÉ: Supprimer la confirmation pour la synchro auto
-            if (!isAutoSync && // NE PAS DEMANDER SI AUTOSYNC
+            // CORRECTION: En mode spectateur, ne JAMAIS demander confirmation
+            // En mode arbitre, demander uniquement si action manuelle ET données locales existent
+            if (!isAutoSync && 
                 currentSaveMode === SAVE_CONFIG.modes.ARBITER && 
                 Object.keys(roundsStore).length > 0) {
                 if (!confirm('⚠️ Charger les données du serveur écrasera vos modifications locales. Continuer ?')) {
@@ -212,9 +191,8 @@ async function loadFromServer(isAutoSync = false) {
             roundsStore = data.roundsStore;
             currentRoundKey = data.currentRoundKey || 'ronde1';
             arbiterPassword = data.arbiterPassword || null;
-            // SUPPRIMÉ: tournamentName
             
-            // ... [Migration identique] ...
+            // Migration des données
             Object.values(roundsStore).forEach(roundState => {
                 if (!roundState.physicalTables) roundState.physicalTables = [];
                 if (!roundState.rooms) roundState.rooms = [];
@@ -224,231 +202,322 @@ async function loadFromServer(isAutoSync = false) {
                     pt.boards.forEach(b => {
                         if (b.score === undefined) b.score = { white: "", black: "" };
                         if (b.players && b.players.white && typeof b.players.white === 'string') {
-                            b.players = {
-                                white: { name: b.players.white, elo: "", comment: "" },
-                                black: { name: b.players.black, elo: "", comment: "" }
-                            };
-                        } else if (b.players) {
-                            if (b.players.white) {
-                                if (!b.players.white.elo) b.players.white.elo = "";
-                                if (!b.players.white.comment) b.players.white.comment = "";
-                            }
-                            if (b.players.black) {
-                                if (!b.players.black.elo) b.players.black.elo = "";
-                                if (!b.players.black.comment) b.players.black.comment = "";
-                            }
+                            b.players.white = { name: b.players.white, elo: null };
+                            b.players.black = { name: b.players.black, elo: null };
+                        }
+                        if (!b.players) {
+                            b.players = { white: { name: "", elo: null }, black: { name: "", elo: null } };
                         }
                     });
                 });
-                if (!roundState.historyStack) roundState.historyStack = [];
-                if (!roundState.redoStack) roundState.redoStack = [];
             });
             
-            updateRoundSelector();
             loadStateFromStore(currentRoundKey);
-            showSaveStatus('success', '✅ Données chargées depuis le serveur');
+            updateRoundSelector();
+            
+            if (!isAutoSync) {
+                showSaveStatus('success', '✅ Données chargées depuis le serveur');
+            }
             return true;
+        } else {
+            if (!isAutoSync) showSaveStatus('warning', 'Aucune donnée sur le serveur');
+            return false;
+        }
+    } catch (error) {
+        console.error('Erreur chargement serveur:', error);
+        if (!isAutoSync) showSaveStatus('error', 'Erreur lors du chargement');
+        return false;
+    }
+}
+
+// NOUVEAU: Fonction pour charger depuis localStorage
+async function loadFromLocalStorage() {
+    try {
+        const saved = localStorage.getItem(SAVE_KEY);
+        if (!saved) {
+            showSaveStatus('info', 'Aucune sauvegarde locale trouvée');
+            return false;
         }
         
-        if (!isAutoSync) showSaveStatus('info', 'Aucune donnée sur le serveur');
+        const data = JSON.parse(saved);
+        
+        if (data && data.roundsStore && typeof data.roundsStore === 'object') {
+            roundsStore = data.roundsStore;
+            currentRoundKey = data.currentRoundKey || 'ronde1';
+            arbiterPassword = data.arbiterPassword || null;
+            
+            // Migration des données
+            Object.values(roundsStore).forEach(roundState => {
+                if (!roundState.physicalTables) roundState.physicalTables = [];
+                if (!roundState.rooms) roundState.rooms = [];
+                if (!roundState.nextRoomId) roundState.nextRoomId = 1;
+                roundState.physicalTables.forEach(pt => {
+                    if (!pt.arbiterComment) pt.arbiterComment = { text: "", flag: "none" };
+                    pt.boards.forEach(b => {
+                        if (b.score === undefined) b.score = { white: "", black: "" };
+                        if (b.players && b.players.white && typeof b.players.white === 'string') {
+                            b.players.white = { name: b.players.white, elo: null };
+                            b.players.black = { name: b.players.black, elo: null };
+                        }
+                        if (!b.players) {
+                            b.players = { white: { name: "", elo: null }, black: { name: "", elo: null } };
+                        }
+                    });
+                });
+            });
+            
+            loadStateFromStore(currentRoundKey);
+            updateRoundSelector();
+            
+            showSaveStatus('success', '✅ Données chargées depuis le localStorage');
+            return true;
+        }
         return false;
     } catch (error) {
-        console.error('❌ Erreur chargement serveur:', error);
-        if (!isAutoSync) showSaveStatus('error', 'Erreur lors du chargement serveur');
+        console.error('Erreur chargement localStorage:', error);
+        showSaveStatus('error', 'Erreur lors du chargement local');
         return false;
+    }
+}
+
+// NOUVEAU: Fonction pour purger le localStorage
+function purgeLocalStorage() {
+    if (!confirm('⚠️ ATTENTION : Supprimer TOUTES les sauvegardes locales ?\n\nCette action est irréversible.\n\nAssurez-vous d\'avoir sauvegardé sur le serveur si nécessaire.')) {
+        return;
+    }
+    
+    try {
+        localStorage.removeItem(SAVE_KEY);
+        localStorage.removeItem(SAVE_KEY_TIMESTAMP);
+        showSaveStatus('success', '🗑️ Sauvegardes locales supprimées');
+    } catch (error) {
+        console.error('Erreur purge localStorage:', error);
+        showSaveStatus('error', 'Erreur lors de la suppression');
     }
 }
 
 // ===== SYNCHRONISATION AUTOMATIQUE =====
 
-function syncFromServerIfNeeded() {
-    // Ne pas synchroniser si une modale est ouverte (s'applique à tout le monde)
-    if (document.querySelector('.modal-overlay[style*="display: flex"]')) {
-        return;
-    }
-
-    // CAS 1: MODE SPECTATEUR
-    // Un spectateur charge TOUJOURS les données, sans délai.
+async function syncFromServerIfNeeded() {
+    // CORRECTION: Supprimer le délai anti-conflit
+    // La synchronisation se fait maintenant immédiatement après chaque action
+    
+    // En mode spectateur, toujours synchroniser depuis le serveur
     if (currentSaveMode === SAVE_CONFIG.modes.SPECTATOR) {
-        loadFromServer(true);
-        return; // C'est tout pour le spectateur.
-    }
-
-    // CAS 2: MODE ARBITRE
-    // Si on arrive ici, on est en mode Arbitre.
-    
-    // 1. Vérifier le Cooldown (pour éviter les conflits de sauvegarde)
-    if (currentSaveMode === SAVE_CONFIG.modes.ARBITER) {
-        const SYNC_COOLDOWN = 10000; // 10 secondes
-        if (Date.now() - lastLocalSaveTime < SYNC_COOLDOWN) {
-            // console.log('Synchro auto en pause (cooldown post-sauvegarde)');
-            return; // L'arbitre vient de sauvegarder, on attend.
-        }
-    }
-    
-    // 2. Vérifier la stratégie de l'arbitre
-    const strategySelect = document.getElementById('saveStrategySelector');
-    if (!strategySelect) return;
-    
-    const strategy = strategySelect.value;
-    const enableSync = (strategy === 'server_local' || strategy === 'server_only');
-    
-    if (enableSync) {
-        // L'arbitre est en mode synchro et n'est pas en cooldown
-        loadFromServer(true);
-    }
-    // Si enableSync est faux (mode local ou manuel), ne rien faire.
-}
-
-// ===== GESTION DE L'HISTORIQUE =====
-
-async function loadHistoryList() {
-    // ... [Fonction identique] ...
-    try {
-        const response = await fetch(SERVER_URL + '?list_history=1');
-        if (!response.ok) return [];
-        
-        const result = await response.json();
-        return result.success ? result.history : [];
-    } catch (error) {
-        console.error('Erreur chargement historique:', error);
-        return [];
+        await loadFromServer(true); // true = auto sync silencieux
     }
 }
+
+// ===== HISTORIQUE SERVEUR =====
 
 async function loadFromHistory(filename) {
-    // ... [Fonction identique, garde la confirmation] ...
+    if (!filename) return false;
+    
     try {
-        const response = await fetch(SERVER_URL + '?history=' + encodeURIComponent(filename));
+        showSaveStatus('sync', '🔄 Chargement de l\'historique...');
+        
+        const response = await fetch(`${SERVER_URL}?history=${encodeURIComponent(filename)}`);
         if (!response.ok) {
-            showSaveStatus('error', 'Impossible de charger cette sauvegarde');
+            showSaveStatus('error', 'Erreur lors du chargement de l\'historique');
             return false;
         }
         
         const data = await response.json();
         
-        if (!confirm(`Restaurer la sauvegarde "${filename}" ?\n\n⚠️ Cela écrasera les données actuelles.`)) {
-            return false;
+        if (data && data.roundsStore) {
+            if (confirm(`⚠️ Restaurer cette sauvegarde écrasera toutes les données actuelles. Continuer ?`)) {
+                roundsStore = data.roundsStore;
+                currentRoundKey = data.currentRoundKey || 'ronde1';
+                arbiterPassword = data.arbiterPassword || null;
+                
+                // Migration
+                Object.values(roundsStore).forEach(roundState => {
+                    if (!roundState.physicalTables) roundState.physicalTables = [];
+                    if (!roundState.rooms) roundState.rooms = [];
+                    if (!roundState.nextRoomId) roundState.nextRoomId = 1;
+                    roundState.physicalTables.forEach(pt => {
+                        if (!pt.arbiterComment) pt.arbiterComment = { text: "", flag: "none" };
+                        pt.boards.forEach(b => {
+                            if (b.score === undefined) b.score = { white: "", black: "" };
+                            if (b.players && b.players.white && typeof b.players.white === 'string') {
+                                b.players.white = { name: b.players.white, elo: null };
+                                b.players.black = { name: b.players.black, elo: null };
+                            }
+                            if (!b.players) {
+                                b.players = { white: { name: "", elo: null }, black: { name: "", elo: null } };
+                            }
+                        });
+                    });
+                });
+                
+                loadStateFromStore(currentRoundKey);
+                updateRoundSelector();
+                
+                // Sauvegarder immédiatement
+                saveToLocalStorage();
+                if (currentSaveMode === SAVE_CONFIG.modes.ARBITER) {
+                    await saveToServer();
+                }
+                
+                showSaveStatus('success', '✅ Historique restauré');
+                return true;
+            }
         }
-        
-        roundsStore = data.roundsStore;
-        currentRoundKey = data.currentRoundKey || 'ronde1';
-        arbiterPassword = data.arbiterPassword || null;
-        // SUPPRIMÉ: tournamentName
-        
-        updateRoundSelector();
-        loadStateFromStore(currentRoundKey);
-        showSaveStatus('success', `✅ Sauvegarde "${filename}" restaurée`);
-        return true;
+        return false;
     } catch (error) {
-        console.error('Erreur restauration:', error);
+        console.error('Erreur restauration historique:', error);
         showSaveStatus('error', 'Erreur lors de la restauration');
         return false;
     }
 }
 
-// =============================================
-// NOUVELLES FONCTIONS DE SUPPRESSION
-// =============================================
-
-async function deleteHistoryFile(filename, btnElement) {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer définitivement le fichier "${filename}" ?\n\nCette action est irréversible.`)) {
+// NOUVEAU: Fonction pour supprimer un fichier d'historique
+async function deleteHistoryFile(filename, buttonElement) {
+    if (!confirm(`Supprimer définitivement le fichier "${filename}" ?\n\nCette action est irréversible.`)) {
         return;
     }
     
     try {
-        const response = await fetch(SERVER_URL + '?delete=' + encodeURIComponent(filename));
-        const result = await response.json();
-        
-        if (result.success) {
-            showSaveStatus('success', result.message || 'Fichier supprimé');
-            // Supprimer l'élément de la liste
-            btnElement.closest('div[style*="border: 1px solid #ddd"]').remove();
-        } else {
-            showSaveStatus('error', result.error || 'Erreur de suppression');
-        }
-    } catch (e) {
-        showSaveStatus('error', 'Erreur de connexion lors de la suppression');
-    }
-}
-
-async function deleteAllHistory() {
-    if (!confirm(`ATTENTION !\n\nVous allez supprimer TOUS les fichiers d'historique sur le serveur.\n\nCette action est irréversible. Continuer ?`)) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(SERVER_URL + '?delete_all=true');
-        const result = await response.json();
-        
-        if (result.success) {
-            showSaveStatus('success', result.message || 'Historique effacé');
-            // Vider la liste
-            const listDiv = document.getElementById('historyList');
-            if (listDiv) {
-                listDiv.innerHTML = '<p>Aucune sauvegarde disponible.</p>';
-            }
-        } else {
-            showSaveStatus('error', result.error || 'Erreur de suppression');
-        }
-    } catch (e) {
-        showSaveStatus('error', 'Erreur de connexion lors de la suppression');
-    }
-}
-
-// =============================================
-// MODIFICATION DE LA MODALE D'HISTORIQUE
-// =============================================
-
-function showHistoryModal() {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
-    
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = 'background: white; padding: 25px; border-radius: 10px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;';
-    
-    // MODIFIÉ: Ajout des boutons de suppression
-    modalContent.innerHTML = `
-        <h2 style="margin-bottom: 20px;">📂 Historique des Sauvegardes</h2>
-        <div id="historyList" style="margin-bottom: 20px;">
-            <p>Chargement...</p>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <button id="deleteAllHistoryBtn" style="padding: 10px 20px; background: #eb3349; color: white; border: none; border-radius: 4px; cursor: pointer; width: auto; margin-bottom: 0;">
-                🗑️ Tout Supprimer
-            </button>
-            <button id="closeHistoryModal" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; width: auto; margin-bottom: 0;">
-                Fermer
-            </button>
-        </div>
-    `;
-    
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-    
-    // Charger la liste
-    loadHistoryList().then(history => {
-        const listDiv = document.getElementById('historyList');
-        
-        if (history.length === 0) {
-            listDiv.innerHTML = '<p>Aucune sauvegarde disponible.</p>';
+        const response = await fetch(`${SERVER_URL}?delete=${encodeURIComponent(filename)}`);
+        if (!response.ok) {
+            showSaveStatus('error', 'Erreur lors de la suppression');
             return;
         }
         
-        // MODIFIÉ: Ajout du bouton "Supprimer"
-        const listHTML = history.slice(0, SAVE_CONFIG.maxHistoryDisplay).map(item => `
-            <div style="border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div style="min-width: 150px;">
-                    <div style="font-weight: bold;">${item.filename}</div>
-                    <div style="font-size: 13px; color: #666;">📅 ${item.date}</div>
-                    <div style="font-size: 12px; color: #999;">📦 ${(item.size / 1024).toFixed(1)} Ko</div>
+        const result = await response.json();
+        if (result.success) {
+            // Retirer visuellement l'élément
+            const historyItem = buttonElement.closest('.history-item');
+            if (historyItem) {
+                historyItem.style.opacity = '0';
+                setTimeout(() => historyItem.remove(), 300);
+            }
+            showSaveStatus('success', `Fichier ${filename} supprimé`);
+        } else {
+            showSaveStatus('error', 'Impossible de supprimer le fichier');
+        }
+    } catch (error) {
+        console.error('Erreur suppression:', error);
+        showSaveStatus('error', 'Erreur lors de la suppression');
+    }
+}
+
+// NOUVEAU: Fonction pour supprimer TOUT l'historique
+async function deleteAllHistory() {
+    if (!confirm('⚠️ ATTENTION : Supprimer TOUT l\'historique du serveur ?\n\nCette action est IRRÉVERSIBLE et supprimera toutes les sauvegardes automatiques.\n\nLes données actuelles ne seront pas affectées.')) {
+        return;
+    }
+    
+    // Double confirmation pour sécurité
+    if (!confirm('Confirmez-vous vraiment la suppression de TOUT l\'historique ?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${SERVER_URL}?delete_all=true`);
+        if (!response.ok) {
+            showSaveStatus('error', 'Erreur lors de la suppression');
+            return;
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+            // Fermer la modale et recharger
+            const modal = document.getElementById('historyModal');
+            if (modal) modal.remove();
+            
+            showSaveStatus('success', result.message);
+        } else {
+            showSaveStatus('error', 'Impossible de supprimer l\'historique');
+        }
+    } catch (error) {
+        console.error('Erreur suppression totale:', error);
+        showSaveStatus('error', 'Erreur lors de la suppression');
+    }
+}
+
+async function showHistoryModal() {
+    if (!USE_SERVER_SYNC) {
+        alert('La synchronisation serveur doit être activée pour voir l\'historique.');
+        return;
+    }
+    
+    try {
+        showSaveStatus('sync', '🔄 Chargement de l\'historique...');
+        
+        const response = await fetch(`${SERVER_URL}?list_history=true`);
+        if (!response.ok) {
+            showSaveStatus('error', 'Erreur lors du chargement de l\'historique');
+            return;
+        }
+        
+        const result = await response.json();
+        if (!result.success || !result.history) {
+            showSaveStatus('warning', 'Aucun historique trouvé');
+            return;
+        }
+        
+        showHistoryList(result.history);
+        showSaveStatus('success', 'Historique chargé');
+    } catch (error) {
+        console.error('Erreur chargement historique:', error);
+        showSaveStatus('error', 'Impossible de charger l\'historique');
+    }
+}
+
+function showHistoryList(historyItems) {
+    // Créer la modale
+    const modal = document.createElement('div');
+    modal.id = 'historyModal';
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;';
+    
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: #2c3e50;">📂 Historique des sauvegardes</h2>
+                <button id="closeHistoryModal" style="background: #eb3349; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2em; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+            </div>
+            
+            <div style="margin-bottom: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                <strong>ℹ️ Info :</strong> Les sauvegardes sont créées automatiquement à chaque modification.
+            </div>
+            
+            <button id="deleteAllHistoryBtn" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 20px; width: 100%;">
+                🗑️ Supprimer TOUT l'historique
+            </button>
+            
+            <div id="historyList"></div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Remplir la liste
+    const listDiv = document.getElementById('historyList');
+    
+    if (historyItems.length === 0) {
+        listDiv.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 40px;">Aucune sauvegarde trouvée</p>';
+        return;
+    }
+    
+    // Limiter l'affichage
+    const displayItems = historyItems.slice(0, SAVE_CONFIG.maxHistoryDisplay);
+    
+    const listHTML = displayItems.map(item => `
+        <div class="history-item" style="border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 10px; transition: all 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">${item.filename}</div>
+                    <div style="color: #6c757d; font-size: 0.9em;">
+                        📅 ${item.date} | 💾 ${(item.size / 1024).toFixed(2)} Ko
+                    </div>
                 </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button class="restore-btn" data-file="${item.filename}" style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; width: auto; margin-bottom: 0;">
-                        ↩️ Restaurer
+                <div style="display: flex; gap: 8px;">
+                    <button class="restore-btn" data-file="${item.filename}" style="padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap; width: auto; margin-bottom: 0;">
+                        🔄 Restaurer
                     </button>
-                    <a href="${SERVER_URL}?history=${encodeURIComponent(item.filename)}" download="${item.filename}" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; width: auto; margin-bottom: 0; font-size: 14px; font-weight: 600;">
+                    <a href="${SERVER_URL}?history=${encodeURIComponent(item.filename)}" download="${item.filename}" style="padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; white-space: nowrap; width: auto; margin-bottom: 0;">
                         ⬇️ Télécharger
                     </a>
                     <button class="delete-btn" data-file="${item.filename}" style="padding: 8px 12px; background: #eb3349; color: white; border: none; border-radius: 4px; cursor: pointer; width: auto; margin-bottom: 0;">
@@ -456,35 +525,32 @@ function showHistoryModal() {
                     </button>
                 </div>
             </div>
-        `).join('');
-        
-        listDiv.innerHTML = listHTML;
-        
-        // Event listeners pour les boutons de restauration
-        document.querySelectorAll('.restore-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const filename = btn.dataset.file;
-                const success = await loadFromHistory(filename);
-                if (success) {
-                    modal.remove();
-                }
-            });
-        });
-
-        // NOUVEAU: Event listeners pour les boutons de suppression
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                deleteHistoryFile(btn.dataset.file, btn);
-            });
+        </div>
+    `).join('');
+    
+    listDiv.innerHTML = listHTML;
+    
+    // Event listeners
+    document.querySelectorAll('.restore-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const filename = btn.dataset.file;
+            const success = await loadFromHistory(filename);
+            if (success) {
+                modal.remove();
+            }
         });
     });
     
-    // Fermer la modale
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            deleteHistoryFile(btn.dataset.file, btn);
+        });
+    });
+    
     document.getElementById('closeHistoryModal').addEventListener('click', () => {
         modal.remove();
     });
-
-    // NOUVEAU: Event listener pour "Tout Supprimer"
+    
     document.getElementById('deleteAllHistoryBtn').addEventListener('click', () => {
         deleteAllHistory();
     });
@@ -503,25 +569,23 @@ function setMode(mode) {
     
     const modeSelector = document.getElementById('modeSelector');
     const saveStrategySelector = document.getElementById('saveStrategySelector');
-    const btnForceSaveServer = document.getElementById('btnForceSaveServer');
+    const btnShowHistory = document.getElementById('btnShowHistory');
     
     if (mode === SAVE_CONFIG.modes.ARBITER) {
         // Mode Arbitre : peut sauvegarder
         if (modeSelector) modeSelector.value = 'arbiter';
-        if (btnForceSaveServer) btnForceSaveServer.disabled = false;
+        if (btnShowHistory) btnShowHistory.disabled = false;
         if (saveStrategySelector) saveStrategySelector.disabled = false;
         
-        // NOUVEAU: Retire la classe de verrouillage
         document.body.classList.remove('spectator-mode');
         
-        showSaveStatus('info', '👨‍⚖️ Mode Arbitre activé - Vous pouvez sauvegarder');
+        showSaveStatus('info', '👨‍⚖️ Mode Arbitre activé - Vous pouvez modifier et sauvegarder');
     } else {
         // Mode Spectateur : lecture seule
         if (modeSelector) modeSelector.value = 'spectator';
-        if (btnForceSaveServer) btnForceSaveServer.disabled = true;
+        if (btnShowHistory) btnShowHistory.disabled = false; // Peut voir l'historique
         if (saveStrategySelector) saveStrategySelector.disabled = true;
         
-        // NOUVEAU: Ajoute la classe de verrouillage
         document.body.classList.add('spectator-mode');
         
         showSaveStatus('info', '👁️ Mode Spectateur activé - Lecture seule');
@@ -533,88 +597,110 @@ function setMode(mode) {
 
 // ===== CONFIGURATION DES INTERVALLES =====
 
-// MODIFIÉ: Utilise le nouveau dropdown
 function setupAutoSaveIntervals() {
     // Nettoyer les anciens intervalles
     if (localSaveInterval) clearInterval(localSaveInterval);
     if (serverSyncInterval) clearInterval(serverSyncInterval);
     
     const strategySelect = document.getElementById('saveStrategySelector');
-    if (!strategySelect) return; // Pas encore prêt
+    if (!strategySelect) return;
     
     const strategy = strategySelect.value;
     
-    // Déterminer les actions basées sur la stratégie
-    const enableLocalSave = (strategy === 'server_local' || strategy === 'local_only');
-    const enableServerSync = (strategy === 'server_local' || strategy === 'server_only');
-    
-    // Sauvegarde locale automatique
-    if (enableLocalSave) {
-        localSaveInterval = setInterval(() => {
-            saveToLocalStorage();
-        }, SAVE_CONFIG.intervals.LOCAL_SAVE);
-    }
-    
-    // Synchronisation serveur (uniquement en mode spectateur OU si autoSync activé)
-    if (enableServerSync || currentSaveMode === SAVE_CONFIG.modes.SPECTATOR) {
+    // CORRECTION: Stratégies strictement séparées - pas de mélange
+    if (strategy === 'local_only') {
+        // MODE LOCAL : Sauvegarde locale uniquement, AUCUNE synchronisation serveur
+        if (currentSaveMode === SAVE_CONFIG.modes.ARBITER) {
+            localSaveInterval = setInterval(() => {
+                saveToLocalStorage();
+            }, SAVE_CONFIG.intervals.LOCAL_SAVE);
+        }
+        // Pas de serverSyncInterval en mode local
+        console.log('Mode local: Sauvegarde locale activée, serveur désactivé');
+        
+    } else if (strategy === 'server_only') {
+        // MODE SERVEUR : Synchronisation serveur uniquement, pas de sauvegarde locale auto
         serverSyncInterval = setInterval(() => {
             syncFromServerIfNeeded();
         }, SAVE_CONFIG.intervals.SERVER_SYNC);
+        console.log('Mode serveur: Synchronisation serveur activée');
     }
 }
 
 // ===== ÉVÉNEMENTS DE L'INTERFACE =====
 
-// MODIFIÉ: Utilise les nouveaux IDs de boutons et le dropdown
 function initSaveControls() {
     console.log('🔧 Initialisation des contrôles de sauvegarde...');
     
     setTimeout(() => {
         const modeSelector = document.getElementById('modeSelector');
         const saveStrategySelector = document.getElementById('saveStrategySelector');
-        const btnForceSaveServer = document.getElementById('btnForceSaveServer');
-        const btnLoadServer = document.getElementById('btnLoadServer');
         const btnShowHistory = document.getElementById('btnShowHistory');
         
         console.log('🔍 Éléments trouvés:', {
             modeSelector: !!modeSelector,
             saveStrategySelector: !!saveStrategySelector,
-            btnForceSaveServer: !!btnForceSaveServer,
-            btnLoadServer: !!btnLoadServer,
             btnShowHistory: !!btnShowHistory
         });
         
-        if (!btnForceSaveServer) {
-            console.error('❌ Boutons non trouvés ! Vérifier que le HTML est bien présent.');
+        if (!modeSelector) {
+            console.error('❌ Sélecteur de mode non trouvé !');
             return;
         }
         
+        // Listener pour changement de mode avec validation
         modeSelector?.addEventListener('change', (e) => {
-            setMode(e.target.value);
+            const newMode = e.target.value;
+            
+            // Si on passe de spectateur à arbitre, demander le mot de passe
+            if (newMode === 'arbiter' && currentSaveMode === SAVE_CONFIG.modes.SPECTATOR) {
+                if (!arbiterPassword) {
+                    // Pas de mot de passe défini, créer un maintenant
+                    alert("⚠️ Aucun mot de passe arbitre n'est défini.\n\nVeuillez en créer un pour sécuriser l'accès au mode Arbitre.");
+                    document.getElementById('arbiterPassModal').style.display = 'flex';
+                    modeSelector.value = 'spectator'; // Rester en spectateur
+                    return;
+                }
+                
+                // Afficher la modale de validation
+                document.getElementById('switchToArbiterModal').style.display = 'flex';
+                document.getElementById('switchArbiterPassInput').value = '';
+                document.getElementById('switchArbiterPassInput').focus();
+                
+                // Remettre temporairement en spectateur (sera changé après validation)
+                modeSelector.value = 'spectator';
+            } else {
+                // Passage de arbitre à spectateur : toujours autorisé
+                setMode(newMode);
+            }
         });
         
-        // NOUVEAU: Listener pour la stratégie
+        // Listener pour la stratégie
         saveStrategySelector?.addEventListener('change', (e) => {
+            const newStrategy = e.target.value;
+            
+            // CORRECTION: Recharger les données selon la nouvelle stratégie
+            if (newStrategy === 'server_only') {
+                console.log('Changement vers mode serveur - Chargement serveur...');
+                loadFromServer(false); // false = action manuelle, afficher confirmation si conflit
+            } else if (newStrategy === 'local_only') {
+                console.log('Changement vers mode local - Chargement localStorage...');
+                const hasLocalData = localStorage.getItem(SAVE_KEY);
+                if (hasLocalData) {
+                    loadFromLocalStorage();
+                } else {
+                    showSaveStatus('info', 'Mode local activé - Aucune sauvegarde locale');
+                }
+            }
+            
             setupAutoSaveIntervals();
             showSaveStatus('info', '📡 Stratégie de sauvegarde mise à jour.');
-        });
-        
-        btnForceSaveServer?.addEventListener('click', () => {
-            console.log('☁️ Clic sur Forcer Sauvegarde Serveur');
-            saveToServer();
-        });
-        
-        btnLoadServer?.addEventListener('click', () => {
-            console.log('🔄 Clic sur Recharger Serveur');
-            loadFromServer(false); // false = action manuelle, afficher confirmation
         });
         
         btnShowHistory?.addEventListener('click', () => {
             console.log('📂 Clic sur Historique');
             showHistoryModal();
         });
-        
-        // SUPPRIMÉ: Listeners pour les anciennes cases à cocher
         
         console.log('✅ Event listeners attachés');
         
@@ -623,48 +709,105 @@ function initSaveControls() {
     }, 500);
 }
 
+// Fonction pour valider le passage en mode Arbitre
+window.validateSwitchToArbiter = function() {
+    const passwordInput = document.getElementById('switchArbiterPassInput');
+    const enteredPassword = passwordInput.value;
+    
+    if (enteredPassword === arbiterPassword) {
+        // Mot de passe correct
+        document.getElementById('switchToArbiterModal').style.display = 'none';
+        document.getElementById('modeSelector').value = 'arbiter';
+        setMode(SAVE_CONFIG.modes.ARBITER);
+        showSaveStatus('success', '✅ Mode Arbitre activé');
+    } else {
+        // Mot de passe incorrect
+        alert('❌ Mot de passe incorrect');
+        passwordInput.value = '';
+        passwordInput.focus();
+    }
+};
+
+// Fonction pour annuler le passage en mode Arbitre
+window.cancelSwitchToArbiter = function() {
+    document.getElementById('switchToArbiterModal').style.display = 'none';
+    document.getElementById('modeSelector').value = 'spectator';
+};
+
 // ===== HOOK DE SAUVEGARDE APRÈS RÉSULTAT =====
 
-// MODIFIÉ: Utilise le nouveau dropdown
 function onResultSaved() {
-    // NOUVEAU: Mettre à jour le timestamp de la dernière action locale
-    // Cela met en pause la synchro auto pour éviter les conflits
-    lastLocalSaveTime = Date.now(); 
-
+    // CORRECTION: Sauvegarder IMMÉDIATEMENT selon la stratégie stricte
+    
     const strategySelect = document.getElementById('saveStrategySelector');
     if (!strategySelect) return;
     
     const strategy = strategySelect.value;
     
-    // Déterminer les actions basées sur la stratégie
-    const saveLocal = (strategy === 'server_local' || strategy === 'local_only');
-    const saveServer = (strategy === 'server_local' || strategy === 'server_only');
-    
-    // Toujours sauvegarder localement si l'option est active
-    if (saveLocal) {
-        saveToLocalStorage();
+    // Vérifier qu'on est bien en mode arbitre
+    if (currentSaveMode !== SAVE_CONFIG.modes.ARBITER) {
+        console.log('Mode spectateur - Pas de sauvegarde');
+        return;
     }
     
-    // Sauvegarder sur serveur si option activée et mode arbitre
-    if (saveServer && currentSaveMode === SAVE_CONFIG.modes.ARBITER) {
+    // CORRECTION: Mode strictement séparé
+    if (strategy === 'local_only') {
+        // MODE LOCAL : Sauvegarder UNIQUEMENT en local
+        console.log('Sauvegarde locale immédiate');
+        saveToLocalStorage();
+    } else if (strategy === 'server_only') {
+        // MODE SERVEUR : Sauvegarder UNIQUEMENT sur serveur
+        console.log('Sauvegarde serveur immédiate');
         saveToServer();
     }
 }
 
 // ===== INITIALISATION =====
 
-// À appeler au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     initSaveControls();
     
-    // Charger depuis le serveur au démarrage
-    loadFromServer(true); // true = synchro auto, silencieuse
+    // CORRECTION: Charger VRAIMENT selon la stratégie
+    const strategySelect = document.getElementById('saveStrategySelector');
+    const strategy = strategySelect ? strategySelect.value : 'server_only';
     
-    showSaveStatus('success', '🚀 Système de sauvegarde initialisé');
+    // IMPORTANT: Vérifier d'abord si on a des données locales
+    const hasLocalData = localStorage.getItem(SAVE_KEY);
+    
+    if (strategy === 'local_only') {
+        // MODE LOCAL : Charger UNIQUEMENT depuis localStorage, jamais depuis serveur
+        if (hasLocalData) {
+            console.log('Mode local: Chargement depuis localStorage');
+            loadFromLocalStorage();
+        } else {
+            console.log('Mode local: Aucune donnée locale - Nouveau tournoi');
+            showSaveStatus('info', 'Mode local - Nouveau tournoi');
+        }
+    } else {
+        // MODE SERVEUR : Charger depuis serveur
+        console.log('Mode serveur: Chargement depuis serveur');
+        loadFromServer(true);
+    }
+    
+    // NOUVEAU: Démarrer en mode SPECTATEUR par défaut
+    setMode(SAVE_CONFIG.modes.SPECTATOR);
+    
+    // NOUVEAU: Listener pour Enter dans la modale de switch
+    const switchModal = document.getElementById('switchToArbiterModal');
+    if (switchModal) {
+        switchModal.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                validateSwitchToArbiter();
+            } else if (e.key === 'Escape') {
+                cancelSwitchToArbiter();
+            }
+        });
+    }
+    
+    showSaveStatus('success', '🚀 Système de sauvegarde initialisé - Mode Spectateur');
 });
 
 // ===== EXPORT DES FONCTIONS =====
-// Ces fonctions peuvent être appelées depuis d'autres parties du code
 
 window.ChessRoomSave = {
     saveLocal: saveToLocalStorage,

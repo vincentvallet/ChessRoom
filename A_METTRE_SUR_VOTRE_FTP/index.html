@@ -1086,33 +1086,23 @@
                     <div class="sidebar-content">
                         
                         <div class="control-group" style="margin-top: 12px;">
-                            <label for="modeSelector" style="font-weight: bold;">🎮 Mode de Fonctionnement :</label>
+                            <label for="modeSelector" style="font-weight: bold;">🎮 Mode :</label>
                             <select id="modeSelector" style="font-weight: 600;">
-                                <option value="arbiter">👨‍⚖️ Arbitre</option>
                                 <option value="spectator">👁️ Spectateur</option>
+                                <option value="arbiter">👨‍⚖️ Arbitre</option>
                             </select>
                         </div>
                         
                         <div class="control-group">
-                            <label for="saveStrategySelector" style="font-weight: bold;">📡 Mode de Sauvegarde :</label>
+                            <label for="saveStrategySelector" style="font-weight: bold;">📡 Sauvegarde :</label>
                             <select id="saveStrategySelector">
-                                <option value="server_local">Serveur + Local</option>
-                                <option value="server_only">Serveur Seul</option>
-                                <option value="local_only">Local Seul</option>
-                                <option value="manual">Manuel</option>
+                                <option value="server_only" selected>☁️ Serveur</option>
+                                <option value="local_only">💾 Local</option>
                             </select>
                         </div>
                         
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-                            <button id="btnForceSaveServer" class="btn-primary" style="font-size: 0.85em; padding: 8px 6px;">
-                                ☁️ Sauvegarde Serveur
-                            </button>
-                            <button id="btnLoadServer" class="btn-info" style="font-size: 0.85em; padding: 8px 6px;">
-                                🔄 Recharger Serveur
-                            </button>
-                        </div>
                         <button id="btnShowHistory" class="btn-secondary" style="margin-top: 8px;">
-                            📂 Historique
+                            📂 Historique Serveur
                         </button>
                         
                         <div id="saveStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 0.8em; display: none; word-wrap: break-word;">
@@ -1177,7 +1167,6 @@
                         <button class="btn-info" onclick="addRoom()">+ Ajouter une Salle/Mur</button>
                     </div>
                 </div>
-
                 <div class="sidebar-section">
                     <h3 onclick="toggleAccordion(this)">🎮 Appariements</h3>
                     <div class="sidebar-content">
@@ -1409,6 +1398,22 @@
             </div>
         </div>
     </div>
+    
+    <div id="switchToArbiterModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="width: 350px;">
+            <h2>🔐 Passage en Mode Arbitre</h2>
+            <p style="margin-bottom: 15px;">Veuillez entrer le mot de passe arbitre pour passer en mode modification.</p>
+            <div class="control-group">
+                <label for="switchArbiterPassInput">Mot de passe :</label>
+                <input type="password" id="switchArbiterPassInput" placeholder="Mot de passe arbitre">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-success" onclick="validateSwitchToArbiter()">Valider</button>
+                <button class="btn-secondary" onclick="cancelSwitchToArbiter()">Annuler</button>
+            </div>
+        </div>
+    </div>
+    
     <div id="playerLoginModal" class="modal-overlay">
         <div class="modal-content" style="width: 350px;">
             <h2>Accès Saisie Résultat</h2>
@@ -1822,8 +1827,9 @@
             
             loadStateFromStore(newKey); 
             updateRoundSelector();
+            
+            // CORRECTION: Sauvegarder l'état vide
             saveHistoryState();
-            autoSaveToLocalStorage();
         }
 
         function cloneRoundLayout() {
@@ -1855,8 +1861,9 @@
             
             loadStateFromStore(newKey);
             updateRoundSelector();
+            
+            // CORRECTION: Sauvegarder l'état cloné
             saveHistoryState(); 
-            autoSaveToLocalStorage();
         }
 
 
@@ -1882,7 +1889,6 @@
             updateTimer(); // Met à jour l'affichage immédiatement
             timerInterval = setInterval(updateTimer, 500);
         }
-
         // CORRECTION: CETTE FONCTION ÉTAIT MANQUANTE
         function stopRoundTimer() {
             clearInterval(timerInterval);
@@ -1973,6 +1979,7 @@
             autoSaveToLocalStorage();
 
             // NOUVEAU: Déclencher la sauvegarde serveur (si activée)
+            // CORRECTION: C'est le SEUL endroit où onResultSaved() doit être appelé.
             if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved(); 
         }
         function restoreState(state) {
@@ -2127,7 +2134,7 @@
 
         // --- Création/Disposition des Tables ---
         function addBoards() {
-            saveHistoryState(); 
+            // CORRECTION: Sauvegarde APRÈS modification
             try {
                 const boardCount = parseInt(document.getElementById('boardCount').value);
                 const boardsPerTable = parseInt(document.getElementById('boardsPerTable').value) || 1;
@@ -2138,8 +2145,6 @@
                 
                 if (!boardCount || boardCount < 1 || boardCount > 2000) {
                     alert('Veuillez saisir un nombre d\'échiquiers entre 1 et 2000');
-                    historyStack.pop(); 
-                    updateHistoryButtons();
                     return;
                 }
 
@@ -2223,16 +2228,16 @@
                         currentX += (tableWidth + 30) * xDir; 
                     }
                 }
-updateStats();
-                
+                updateStats();
+
                 if (newTables.length > 0) {
+                    saveHistoryState(); // Sauvegarder APRÈS que les tables ont été ajoutées
                     setTimeout(() => centerViewOnTables(newTables), 100);
                 }
+
             } catch (error) {
                 console.error('Error in addBoards:', error);
                 alert('Une erreur est survenue: ' + error.message);
-                historyStack.pop(); 
-                updateHistoryButtons();
             }
         }
 
@@ -2375,7 +2380,7 @@ updateStats();
                 const currentFlag = table.arbiterComment.flag || 'none';
                 const newFlag = prompt("Couleur du drapeau (none, red, yellow, green):", currentFlag);
                 
-                saveHistoryState(); 
+                // CORRECTION: Modifier AVANT de sauvegarder
                 table.arbiterComment.text = newText.trim();
                 table.arbiterComment.flag = newFlag ? newFlag.trim().toLowerCase() : 'none';
                 
@@ -2386,11 +2391,12 @@ updateStats();
                         flagEl.className = `arbiter-flag flag-${table.arbiterComment.flag}`;
                     }
                 }
+                
+                saveHistoryState(); 
             }
         }
 
         function editPlayerComment(boardNum, color) {
-            // NOUVEAU: Désactivé en mode joueur
             if (isPlayerMode) return;
             
             const { board, physicalTable } = findBoard(boardNum);
@@ -2401,9 +2407,11 @@ updateStats();
             const newValue = prompt(`Ajouter/modifier le commentaire pour ${player.name}:`, currentValue);
 
             if (newValue !== null) { 
-                saveHistoryState(); 
+                // CORRECTION: Modifier AVANT de sauvegarder
                 player.comment = newValue.trim();
                 updateTableDisplay(physicalTable.id);
+                
+                saveHistoryState(); 
             }
         }
         
@@ -2475,8 +2483,7 @@ updateStats();
                 return;
             }
 
-            saveHistoryState();
-            
+            // CORRECTION: Modifier AVANT de sauvegarder
             if (value === "") {
                 board.score.white = "";
                 board.score.black = "";
@@ -2488,7 +2495,9 @@ updateStats();
             
             updateTableDisplay(physicalTable.id);
             updateStats();
-            if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
+            
+            saveHistoryState(); // Sauvegarder APRÈS
+            
             hideScoreModal();
         }
 
@@ -2547,10 +2556,10 @@ updateStats();
                         return;
                     }
                     
-                    saveHistoryState(); 
                     const { board: targetBoard } = findBoard(originalNumber);
                     
                     if (targetBoard) {
+                        // CORRECTION: Modifier AVANT de sauvegarder
                         targetBoard.boardNumber = newNumber;
                         
                         numberDisplay.innerHTML = newNumber;
@@ -2571,6 +2580,8 @@ updateStats();
                         boardEl.querySelectorAll('.player-score').forEach(scoreEl => {
                             scoreEl.setAttribute('onclick', `event.stopPropagation(); editScore(${boardNumForEvent})`);
                         });
+                        
+                        saveHistoryState(); // Sauvegarder APRÈS
                         
                     } else {
                         numberDisplay.innerHTML = originalText;
@@ -2695,7 +2706,7 @@ updateStats();
         }
 
         function deleteTable(tableId, addToHistory = true) {
-            if (addToHistory) saveHistoryState(); 
+            // CORRECTION: Sauvegarde gérée par deleteSelected ou appelée après modification
             try {
                 const index = physicalTables.findIndex(t => t.id === tableId);
                 if (index !== -1) {
@@ -2708,43 +2719,45 @@ updateStats();
                         updateSelectedCount();
                     }
                     updateStats();
+
+                    if (addToHistory) {
+                        saveHistoryState(); // Sauvegarder APRÈS
+                    }
                 }
             } catch (error) { console.error('Error in deleteTable:', error); }
         }
 
         function deleteSelected() {
             if (selectedTables.length === 0) return;
-            saveHistoryState(); 
             try {
                 [...selectedTables].forEach(id => deleteTable(id, false)); 
                 clearSelection();
+                saveHistoryState(); // Sauvegarder APRÈS
             } catch (error) { console.error('Error in deleteSelected:', error); }
         }
         function rotateSelected() {
             if (selectedTables.length === 0) return;
-            saveHistoryState(); 
             try {
                 selectedTables.forEach(id => rotateTable(id, false)); 
+                saveHistoryState(); // Sauvegarder APRÈS
             } catch (error) { console.error('Error in rotateSelected:', error); }
         }
 
         function flipSingleBoard(boardNumber) {
-            // NOUVEAU: Désactivé en mode joueur
             if (isPlayerMode) return;
             
-            saveHistoryState();
             try {
                 const { board, physicalTable } = findBoard(boardNumber);
                 if (board && board.players) {
                     board.flipped = !board.flipped;
                     updateTableDisplay(physicalTable.id);
+                    saveHistoryState(); // Sauvegarder APRÈS
                 }
             } catch (error) { console.error('Error in flipSingleBoard:', error); }
         }
 
         function flipPlayersSelected() {
             if (selectedTables.length === 0) return;
-            saveHistoryState();
             try {
                 selectedTables.forEach(id => {
                     const table = physicalTables.find(t => t.id === id);
@@ -2755,6 +2768,7 @@ updateStats();
                         updateTableDisplay(id); 
                     }
                 });
+                saveHistoryState(); // Sauvegarder APRÈS
             } catch (error) { console.error('Error in flipPlayersSelected:', error); }
         }
 
@@ -2909,7 +2923,7 @@ updateStats();
 
         // --- Rotation ---
         function rotateTable(tableId, addToHistory = true) {
-            if (addToHistory) saveHistoryState();
+            // CORRECTION: Sauvegarde gérée par rotateSelected ou appelée après modification
             try {
                 const table = physicalTables.find(t => t.id === tableId);
                 if (table) {
@@ -2926,6 +2940,10 @@ updateStats();
                         if (contentInner) {
                             contentInner.style.transform = 'rotate(0deg)'; 
                         }
+                    }
+
+                    if (addToHistory) {
+                        saveHistoryState(); // Sauvegarder APRÈS
                     }
                 }
             } catch (error) { console.error('Error in rotateTable:', error); }
@@ -2984,7 +3002,7 @@ updateStats();
             function onMouseUp() {
                 if (isResizing) {
                     if (table.width !== startWidth || table.x !== startXPos || table.y !== startYPos) {
-                        saveHistoryState();
+                        saveHistoryState(); // Sauvegarder APRÈS
                     }
                 }
                 isResizing = false;
@@ -2999,7 +3017,6 @@ updateStats();
 
         function duplicateSelected() {
             if (selectedTables.length === 0) return;
-            saveHistoryState();
             try {
                 const newTables = [];
                 selectedTables.forEach(id => {
@@ -3020,6 +3037,7 @@ updateStats();
                 clearSelection();
                 newTables.forEach(id => selectTable(id));
                 updateStats();
+                saveHistoryState(); // Sauvegarder APRÈS
             } catch (error) { console.error('Error in duplicateSelected:', error); }
         }
 
@@ -3031,8 +3049,6 @@ updateStats();
             if (!confirm("Voulez-vous vraiment réorganiser toutes les tables en fonction des paramètres actuels ? Les positions et rotations manuelles seront perdues.")) {
                 return;
             }
-            
-            saveHistoryState(); 
             
             try {
                 const boardsPerTable = parseInt(document.getElementById('boardsPerTable').value) || 1;
@@ -3101,6 +3117,7 @@ updateStats();
 
                 renderAllTables();
                 updateStats();
+                saveHistoryState(); // Sauvegarder APRÈS
                 setTimeout(fitAllTables, 100);
 
             } catch (e) {
@@ -3113,7 +3130,6 @@ updateStats();
 
         function addRoom() {
             const name = document.getElementById('roomNameInput').value.trim() || "Nouvelle Salle";
-            saveHistoryState();
             
             const newRoom = {
                 id: nextRoomId++,
@@ -3127,6 +3143,8 @@ updateStats();
             rooms.push(newRoom);
             createRoomElement(newRoom);
             document.getElementById('roomNameInput').value = '';
+            
+            saveHistoryState(); // Sauvegarder APRÈS
         }
 
         function createRoomElement(room) {
@@ -3163,24 +3181,26 @@ updateStats();
             
             const newName = prompt("Nouveau nom pour la salle :", room.name);
             if (newName !== null && newName.trim() !== "") {
-                saveHistoryState();
                 room.name = newName.trim();
                 const element = document.getElementById(`room-${roomId}`);
                 if (element) {
                     element.querySelector('.room-title').textContent = room.name;
                 }
+                saveHistoryState(); // Sauvegarder APRÈS
             }
         }
         
         function deleteRoom(roomId, addToHistory = true) {
-            if (addToHistory) saveHistoryState();
-            
             const index = rooms.findIndex(r => r.id === roomId);
             if (index > -1) {
                 rooms.splice(index, 1);
                 const element = document.getElementById(`room-${roomId}`);
                 if (element) {
                     element.remove();
+                }
+                
+                if (addToHistory) {
+                    saveHistoryState(); // Sauvegarder APRÈS
                 }
             }
         }
@@ -3262,7 +3282,7 @@ updateStats();
             
             function onMouseUp() {
                 if (isResizing) {
-                    saveHistoryState();
+                    saveHistoryState(); // Sauvegarder APRÈS
                 }
                 isResizing = false;
                 document.removeEventListener('mousemove', onMouseMove);
@@ -3302,7 +3322,7 @@ updateStats();
         }
 
         function parsePapiFile(htmlContent) {
-            saveHistoryState();
+            // CORRECTION: Sauvegarde déplacée à la fin
             
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlContent, 'text/html');
@@ -3360,8 +3380,6 @@ updateStats();
             
             if (boardNumbers.length === 0) {
                 alert('Aucun appariement valide trouvé dans le fichier.');
-                historyStack.pop();
-                updateHistoryButtons();
                 return;
             }
 
@@ -3447,18 +3465,22 @@ updateStats();
 
             renderAllTables();
             updateStats();
+            
+            saveHistoryState(); // Sauvegarder APRÈS
+            
             alert(`${boardNumbers.length} appariements chargés dans la ronde actuelle !`);
         }
 
 
         function clearPairings() {
-            saveHistoryState(); 
             physicalTables.forEach(t => t.boards.forEach(b => {
                 b.players = null;
                 b.score = { white: "", black: "" }; 
             }));
             renderAllTables();
             updateStats();
+            
+            saveHistoryState(); // Sauvegarder APRÈS
         }
         
         function searchTables() {
@@ -3549,7 +3571,7 @@ updateStats();
 
                 document.getElementById('canvas').innerHTML = '';
                 updateStats();
-                if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
+                saveHistoryState(); // Sauvegarder l'état vide
             }
         }
         
@@ -3642,7 +3664,7 @@ updateStats();
                         updateRoundSelector();
                         loadStateFromStore(currentRoundKey);
                         autoSaveToLocalStorage();
-                        if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
+                        saveHistoryState(); // Sauvegarder l'état chargé
                         
                         alert('Tournoi chargé avec succès !');
                     } catch (error) {
@@ -4219,7 +4241,6 @@ updateStats();
                         const originalIndex = originalTable.boards.findIndex(b => b.boardNumber.toString() === movingBoard.boardNumber.toString());
                         
                         if (originalIndex > -1) {
-                            saveHistoryState();
                             const [boardToMove] = originalTable.boards.splice(originalIndex, 1);
                             
                             const targetBoardEl = e.target.closest('.board-container');
@@ -4238,6 +4259,8 @@ updateStats();
                             }
                             updateTableDisplay(targetTable.id);
                             updateStats();
+                            
+                            saveHistoryState(); // Sauvegarder APRÈS
                         }
                     }
                 }
@@ -4259,7 +4282,7 @@ updateStats();
             if (isDragging) {
                 if(dragContext.isRoom) {
                      if (dragContext.room.x !== dragContext.initialX || dragContext.room.y !== dragContext.initialY) {
-                        saveHistoryState();
+                        saveHistoryState(); // Sauvegarder APRÈS
                     }
                     dragContext.element.style.zIndex = '5';
                 }
@@ -4267,7 +4290,9 @@ updateStats();
                     const moved = dragContext.tables && dragContext.tables.some(item => 
                         item.table.x !== item.initialX || item.table.y !== item.initialY
                     );
-                    if (moved) saveHistoryState();
+                    if (moved) {
+                        saveHistoryState(); // Sauvegarder APRÈS
+                    }
                     if (dragContext.tables) {
                         dragContext.tables.forEach(item => {
                             if (item.element) item.element.style.zIndex = '10';
@@ -4625,8 +4650,7 @@ updateStats();
                 return;
             }
             
-            saveHistoryState();
-
+            // CORRECTION: Modifier AVANT de sauvegarder
             if (result === "1-0") {
                 board.score.white = "1";
                 board.score.black = "0";
@@ -4640,8 +4664,9 @@ updateStats();
             
             updateTableDisplay(physicalTable.id);
             updateStats();
-            if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
-
+            
+            saveHistoryState(); // Sauvegarder APRÈS
+            
             showNotification(`Table ${tableNum} : ${formatResult(result)} enregistré !`, 'success');
             cancelQRValidation(); // Retourne à l'accueil joueur
         }
@@ -4940,9 +4965,8 @@ updateStats();
         function saveSimplifiedScore(boardNum, result) {
             const { board, physicalTable } = findBoard(boardNum);
             if (!board) return;
-
-            saveHistoryState();
             
+            // CORRECTION: Modifier AVANT de sauvegarder
             if (result === "1-0") {
                 board.score.white = "1";
                 board.score.black = "0";
@@ -4956,8 +4980,8 @@ updateStats();
             
             updateTableDisplay(physicalTable.id);
             updateStats();
-
-            if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
+            
+            saveHistoryState(); // Sauvegarder APRÈS
             
             // MODIFIÉ: Logique de fermeture/retour
             document.getElementById('simplifiedScoreModal').style.display = 'none';
@@ -5118,6 +5142,7 @@ function deleteCurrentRound() {
     updateRoundSelector();
     autoSaveToLocalStorage();
     
+    saveHistoryState(); // Sauvegarder APRÈS
     showNotification("Ronde supprimée et numérotation réorganisée.", "success");
 }
 
@@ -5149,8 +5174,9 @@ function createNewTournament() {
         updateRoundSelector();
 
         document.getElementById('canvas').innerHTML = '';
-        if (window.ChessRoomSave) window.ChessRoomSave.onResultSaved();
         updateStats();
+        
+        saveHistoryState(); // Sauvegarder l'état vide
         
         showNotification("Nouveau tournoi créé.", "success");
     }
