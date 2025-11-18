@@ -91,8 +91,8 @@
         
         /* 6. (AJOUTÉ) Ré-affiche UNIQUEMENT les sections autorisées */
         .spectator-mode .sidebar-section:first-child, /* Section "Statistiques" */
-        .spectator-mode #saveControlsSection,         /* Section "Sauvegardes" (pour le switch de mode) */
-        .spectator-mode .sidebar-section:nth-child(7)  /* Section "Joueurs" (pour la recherche) */ {
+        .spectator-mode #saveControlsSection,         /* Section "Sauvegardes" */
+        .spectator-mode #playersSection               /* Section "Joueurs" (Ciblée par ID) */ {
             display: block !important;
         }
         /* AJOUT: Cacher la barre de raccourcis en bas en mode spectateur */
@@ -1212,6 +1212,17 @@
                     </div>
                 </div>
 
+                <div class="sidebar-section" id="playersSection">
+                    <h3 onclick="toggleAccordion(this)">🔍 Joueurs</h3>
+                    <div class="sidebar-content">
+                        <div class="control-group">
+                            <label for="searchInput">Chercher échiquier/joueur :</label>
+                            <input type="text" id="searchInput" placeholder="Nom ou numéro d'échiquier..." oninput="searchTables()" list="search-suggestions">
+                            <datalist id="search-suggestions"></datalist>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="sidebar-section">
                     <h3 onclick="toggleAccordion(this)">⛳️ Rondes</h3>
                     <div class="sidebar-content">
@@ -1286,17 +1297,6 @@
                         <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
                         
                         <button class="btn-danger" onclick="clearPairings()">Effacer</button>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <h3 onclick="toggleAccordion(this)">🔍 Joueurs</h3>
-                    <div class="sidebar-content">
-                        <div class="control-group">
-                            <label for="searchInput">Chercher échiquier/joueur :</label>
-                            <input type="text" id="searchInput" placeholder="Nom ou numéro d'échiquier..." oninput="searchTables()" list="search-suggestions">
-                            <datalist id="search-suggestions"></datalist>
-                        </div>
                     </div>
                 </div>
 
