@@ -44,15 +44,17 @@
         =====================================================
         */
         
-        /* 1. Cache tous les boutons d'action de la barre latérale */
+        /* 1. Cache tous les boutons d'action DANS les sections (redondant mais sécurisé) */
         .spectator-mode .sidebar-content button,
         .spectator-mode .sidebar-content input[type="file"],
-        .spectator-mode .sidebar-content label.file-upload-label {
+        .spectator-mode .sidebar-content label.file-upload-label
+        .spectator-mode button[onclick="showArbiterPasswordModal()"],
+        .spectator-mode button[onclick="showPlayerLoginModal()"] {
             display: none !important;
         }
         
         /* 2. Cache les boutons de la barre d'outils (sauf Outils de navigation) */
-        .spectator-mode .timer-controls, /* <-- NOUVELLE LIGNE AJOUTÉE */
+        .spectator-mode .timer-controls,
         .spectator-mode .tool-btn[onclick*="delete"],
         .spectator-mode .tool-btn[onclick*="duplicate"],
         .spectator-mode .tool-btn[onclick*="rotate"],
@@ -80,6 +82,18 @@
         .spectator-mode .room-delete-btn,
         .spectator-mode .room-resize-handle {
             display: none !important;
+        }
+        
+        /* 5. (AJOUTÉ) Cache TOUTES les sections de la sidebar */
+        .spectator-mode .sidebar-section {
+            display: none !important;
+        }
+        
+        /* 6. (AJOUTÉ) Ré-affiche UNIQUEMENT les sections autorisées */
+        .spectator-mode .sidebar-section:first-child, /* Section "Statistiques" */
+        .spectator-mode #saveControlsSection,         /* Section "Sauvegardes" (pour le switch de mode) */
+        .spectator-mode .sidebar-section:nth-child(7)  /* Section "Joueurs" (pour la recherche) */ {
+            display: block !important;
         }
 
         .container {
@@ -408,6 +422,21 @@
         .table-element.has-pairing {
             background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
             border-color: #4caf50;
+        }
+        
+        /* NOUVEAU: Style pour mettre en évidence la table d'un joueur */
+        .table-element.highlight-player {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
+            border-color: #ff9800 !important;
+            border-width: 5px !important;
+            box-shadow: 0 0 30px rgba(255, 152, 0, 0.8), 0 0 60px rgba(255, 152, 0, 0.4) !important;
+            z-index: 1000 !important;
+            animation: pulse-highlight 1s ease-in-out 3;
+        }
+        
+        @keyframes pulse-highlight {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .table-content { transform-origin: center center; }
@@ -1047,6 +1076,71 @@
             /* Ombre pour la lisibilité sur tous les fonds */
             text-shadow: 0 0 25px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.5);
         }
+                /* AJOUT: Cacher les sélecteurs d'outils en mode spectateur */
+        .spectator-mode #selectTool,
+        .spectator-mode #multiselectTool,
+        .spectator-mode #panTool,
+        .spectator-mode #moveboardTool {
+            display: none !important;
+        }
+
+        /* AJOUT: Cacher les "..." des scores non saisis en mode spectateur */
+        .spectator-mode .board-container:not(.board-scored) .player-score {
+            visibility: hidden; /* On cache juste le texte, pas l'espace */
+        }
+        /* NOUVEAU: Styles pour l'interrupteur (toggle switch) */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            margin-bottom: 6px; /* Maintient l'espacement */
+        }
+        .switch-container span {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9em; /* Correspond à .control-group label */
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 54px; /* Taille réduite */
+            height: 28px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #667eea; /* Couleur Arbitre */
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
     </style>
 </head>
 <body>
@@ -1083,19 +1177,19 @@
                 </div>
 
                 <div class="sidebar-section" id="saveControlsSection">
-                    <h3 onclick="toggleAccordion(this)">💾 Sauvegardes</h3>
+                    <h3 onclick="toggleAccordion(this)">💾 Mode</h3>
                     <div class="sidebar-content">
                         
-                        <div class="control-group" style="margin-top: 12px;">
-                            <label for="modeSelector" style="font-weight: bold;">🎮 Mode :</label>
-                            <select id="modeSelector" style="font-weight: 600;">
-                                <option value="spectator">👁️ Spectateur</option>
-                                <option value="arbiter">👨‍⚖️ Arbitre</option>
-                            </select>
+                        <div class="switch-container">
+                            <span>Mode <strong id="modeSwitchLabel">Arbitre</strong></span>
+                            <label class="switch">
+                                <input type="checkbox" id="modeSwitch">
+                                <span class="slider"></span>
+                            </label>
                         </div>
                         
                         <div class="control-group">
-                            <label for="saveStrategySelector" style="font-weight: bold;">📡 Sauvegarde :</label>
+                            <label for="saveStrategySelector" style="font-weight: bold;">Sauvegarde :</label>
                             <select id="saveStrategySelector">
                                 <option value="server_only" selected>☁️ Serveur</option>
                                 <option value="local_only">💾 Local</option>
@@ -1106,6 +1200,9 @@
                             📂 Historique Serveur
                         </button>
                         
+                        <button class="btn-info" onclick="showArbiterPasswordModal()">🔐 Changer Mot de Passe</button>
+                        <button class="btn-success" onclick="showPlayerLoginModal()">🧑‍🤝‍🧑 Mode Saisie Joueurs</button>
+
                         <div id="saveStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 0.8em; display: none; word-wrap: break-word;">
                             </div>
                     </div>
@@ -1206,7 +1303,8 @@
                             <label for="qrNumTables">Nombre d'échiquiers à générer :</label>
                             <input type="number" id="qrNumTables" min="1" max="2000" value="50">
                         </div>
-                        <button class="btn-info" onclick="generateQRFiches()">🖨️ Générer Fiches QR</button>
+                        <button class="btn-info" onclick="generateQRFiches()">🖨️ Générer Fiches QR Résultats</button>
+                        <button class="btn-success" onclick="generatePlayerQRCodes()" style="margin-top: 10px;">🎫 Générer QR-codes Joueurs</button>
                     </div>
                 </div>
 
@@ -1227,11 +1325,6 @@
                             </select>
                         </div>
                         <button class="btn-info" id="exportVisualPdfBtn" onclick="exportVisualPDF()">🖨️ Plan</button>
-                        
-                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-                        
-                        <button class="btn-info" onclick="showArbiterPasswordModal()">🔐 Définir Mot de Passe</button>
-                        <button class="btn-success" onclick="showPlayerLoginModal()">🧑‍🤝‍🧑 Mode Saisie Joueurs</button>
                         
                         <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
 
@@ -1329,7 +1422,7 @@
                 <option value="1-0">1-0</option>
                 <option value="0-1">0-1</option>
                 <option value="1/2-1/2">½-½</option>
-                <option value="1-F">1-F (Blanc gagne F)</option>
+                <option valuea="1-F">1-F (Blanc gagne F)</option>
                 <option value="F-1">F-1 (Noir gagne F)</option>
                 <option value="1/2-0">½-0</option>
                 <option value="0-1/2">0-½</option>
@@ -1434,29 +1527,53 @@
             </div>
         </div>
     </div>
-    <div id="playerHomeModal" class="modal-overlay" style="z-index: 10001; flex-direction: column; background: rgba(240, 240, 240, 0.98);">
-        <div class="modal-content" style="width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
-            <h2 style="font-size: 1.8em;">Saisie des Résultats (Ronde: <span id="playerModeRound"></span>)</h2>
-            <p style="text-align: center; font-size: 1.1em; margin-bottom: 25px;">
-                Comment voulez-vous saisir votre résultat ?
-            </p>
-            <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-                <button class="btn-success" style="font-size: 1.2em; padding: 15px;" onclick="startQRScanner()">
-                    📷 Scanner QR Code
-                </button>
-                <button class="btn-primary" style="font-size: 1.2em; padding: 15px;" onclick="showPlayerPlanView()">
-                    🗺️ Saisir depuis le plan
-                </button>
-                <button class="btn-info" style="font-size: 1.2em; padding: 15px;" onclick="showPlayerListSearch()">
-                    🧑‍🤝‍🧑 Choisir mon nom (liste)
-                </button>
-                <button class="btn-info" style="font-size: 1.2em; padding: 15px;" onclick="showPlayerTextSearch()">
-                    🔍 Chercher par nom
-                </button>
-            </div>
-            <button class="btn-danger" style="margin-top: 30px; width: auto; padding: 10px 20px; display: block; margin-left: auto; margin-right: auto;" onclick="promptToLogoutPlayer()">
-                Quitter le Mode Saisie
+   <div id="playerHomeModal" class="modal-overlay" style="z-index: 10001; flex-direction: column; background: rgba(240, 240, 240, 0.98);">
+    <div class="modal-content" style="width: 90%; max-width: 800px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <h2 style="font-size: 1.8em; text-align: center;">Voir sa table / Encoder un résultat (Ronde: <span id="playerModeRound"></span>)</h2>
+        
+        <div style="text-align: center; margin-bottom: 25px; margin-top: 15px;">
+            <button class="btn-success" style="font-size: 1.2em; padding: 15px; width: 70%;" onclick="startQRScanner()">
+                📷 Scanner QR Code (résultat)
             </button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            
+            <div style="border: 2px solid #667eea; border-radius: 10px; padding: 20px;">
+                <h3 style="text-align: center; color: #667eea; margin-top: 0; margin-bottom: 20px;">📍 Où est ma table ?</h3>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                    <button class="btn-primary" style="font-size: 1.1em; padding: 12px;" onclick="startPlayerQRScanner()">
+                        🎫 Scanner mon QR-code
+                    </button>
+                    <button class="btn-info" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerListSearch('VIEW')">
+                        🧑‍🤝‍🧑 Chercher (Liste)
+                    </button>
+                    <button class="btn-info" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerTextSearch('VIEW')">
+                        🔍 Chercher (Texte)
+                    </button>
+                </div>
+            </div>
+            
+            <div style="border: 2px solid #11998e; border-radius: 10px; padding: 20px;">
+                <h3 style="text-align: center; color: #11998e; margin-top: 0; margin-bottom: 20px;">✍️ Encoder un résultat</h3>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                    <button class="btn-primary" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerPlanView()">
+                        🗺️ Saisir (Plan)
+                    </button>
+                    <button class="btn-info" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerListSearch('ENCODE')">
+                        🧑‍🤝‍🧑 Choisir (Liste)
+                    </button>
+                    <button class="btn-info" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerTextSearch('ENCODE')">
+                        🔍 Chercher (Texte)
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+        
+        <button class="btn-danger" style="margin-top: 30px; width: auto; padding: 10px 20px; display: block; margin-left: auto; margin-right: auto;" onclick="promptToLogoutPlayer()">
+            Quitter le Mode Saisie
+        </button>
         </div>
     </div>
     <div id="playerTextSearchModal" class="modal-overlay" style="z-index: 10002;">
@@ -1532,6 +1649,45 @@
         <span id="bigTimerDisplay">00:00</span>
     </div>
 
+    <div id="playerTableInfoModal" style="
+        display: none; 
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 700px;
+        background: rgba(255, 255, 255, 0.25); /* <-- CORRECTION: Transparence */
+        backdrop-filter: blur(5px); /* <-- NOUVEAU: Effet de flou */
+        -webkit-backdrop-filter: blur(5px); /* <-- NOUVEAU: Support Safari */
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        z-index: 10003; 
+        border: 4px solid #667eea;
+        pointer-events: none;
+        ">
+        <button id="closePlayerTableInfoBtn" style="position: absolute; top: 15px; right: 15px; background: #eb3349; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2em; cursor: pointer; display: flex; align-items: center; justify-content: center; pointer-events: auto;">×</button>
+        
+        <div style="font-size: 3em; margin-bottom: 30px; font-weight: bold; color: #2c3e50;">
+            <span id="playerTableInfoName"></span>
+        </div>
+        <div style="font-size: 2.5em; margin-bottom: 20px; color: #34495e;">
+            Table <span id="playerTableInfoTable" style="color: #e74c3c; font-weight: bold;"></span>
+        </div>
+        <div style="font-size: 2em; margin-bottom: 15px; padding: 20px; background: rgba(236, 240, 241, 0.75); border-radius: 10px;">
+            <div style="margin-bottom: 10px;">
+                <span id="playerTableInfoColor" style="font-weight: bold;"></span>
+            </div>
+            <div style="margin-top: 10px; font-size: 0.9em;">
+                contre
+            </div>
+            <div style="margin-top: 10px; font-weight: bold; color: #2c3e50;">
+                <span id="playerTableInfoOpponent"></span>
+            </div>
+        </div>
+    </div>
 
     <script>
         // --- NOUVEAU: Gestion Accordéon ---
@@ -1559,8 +1715,8 @@
         // --- Fin Gestion Accordéon ---
 
         // --- Gestion Multi-Rondes ---
-        let roundsStore = {};
-        let currentRoundKey = 'ronde1';
+        window.roundsStore = {};
+        window.currentRoundKey = 'ronde1';
 
         // --- Templates de salle (Supprimé) ---
         // const roomTemplates = { ... }; // SUPPRIMÉ
@@ -1630,22 +1786,19 @@
         const START_MARGIN = 100;
         
         // --- Sauvegarde Auto LocalStorage ---
-        const SAVE_KEY = 'chessRoomManagerSave';
-        const SAVE_KEY_TIMESTAMP = 'chessRoomManagerSaveTimestamp'; 
-        const SERVER_URL = 'save.php';
-        const USE_SERVER_SYNC = true;
+        window.SAVE_KEY = 'chessRoomManagerSave';
+        window.SAVE_KEY_TIMESTAMP = 'chessRoomManagerSaveTimestamp'; 
+        window.SERVER_URL = 'save.php';
+        window.USE_SERVER_SYNC = true;
+        // NOUVEAU: Clé pour mémoriser la stratégie
+        const STRATEGY_KEY = 'chessRoomSaveStrategy';
         
         // === NOUVEAU SYSTÈME DE SAUVEGARDE ===
-        // MODIFIÉ: tournamentName supprimé, les cases à cocher sont gérées par chessroom-save-system.js
-        // let tournamentName = ''; // SUPPRIMÉ
-        let currentSaveMode = 'arbiter'; // 'arbiter' ou 'spectator'
-        // let autoSaveLocalEnabled = true; // Géré par le système de sauvegarde
-        // let autoSaveServerEnabled = false; // Géré par le système de sauvegarde
-        // let autoSyncEnabled = true; // Géré par le système de sauvegarde
-        let localSaveInterval = null;
-        let serverSyncInterval = null;
-        let lastServerTimestamp = 0;
-        let lastLocalSaveTime = 0; // <-- NOUVELLE LIGNE
+        window.currentSaveMode = 'arbiter'; // 'arbiter' ou 'spectator'
+        window.localSaveInterval = null;
+        window.serverSyncInterval = null;
+        window.lastServerTimestamp = 0;
+        window.lastLocalSaveTime = 0; 
 
         // ========================================
 // SYNCHRONISATION SERVEUR
@@ -1666,7 +1819,6 @@
             roundsStore: JSON.parse(JSON.stringify(roundsStore)),
             currentRoundKey: currentRoundKey,
             arbiterPassword: arbiterPassword
-            // SUPPRIMÉ: tournamentName
         };
         
         Object.values(dataToSave.roundsStore).forEach(roundState => {
@@ -1680,9 +1832,6 @@
         const json = JSON.stringify(dataToSave);
         localStorage.setItem(SAVE_KEY, json);
         localStorage.setItem(SAVE_KEY_TIMESTAMP, Date.now().toString());
-        
-        // MODIFIÉ: La logique de sauvegarde serveur est gérée par onResultSaved()
-        // et les timers dans chessroom-save-system.js
         
     } catch (error) {
         console.error("Erreur lors de la sauvegarde auto:", error);
@@ -2054,7 +2203,6 @@
             // SUPPRIMÉ
             alert("Cette fonctionnalité a été retirée.");
         }
-
         // --- Fonctions d'historique (Modifiées pour le store) ---
         function saveHistoryState() {
             if (isUndoRedoing) return; 
@@ -2440,7 +2588,7 @@
         function moveGhost(e) {
             if (!movingBoard) return;
             movingBoard.element.style.left = (e.clientX - movingBoard.offsetX) + 'px';
-            movingBoard.element.style.top = (e.clientY - movingVhost.offsetY) + 'px';
+            movingBoard.element.style.top = (e.clientY - movingBoard.offsetY) + 'px';
         }
 
         function handleTableDropEnter(e) {
@@ -4502,6 +4650,8 @@
         let qrStream = null;
         let qrScanInterval = null;
         let qrStagedResult = null; // Résultat en attente de validation
+        // CORRECTION: Distinguer le type de scan
+        let currentScanMode = 'RESULT'; // 'RESULT' ou 'PLAYER_ID'
 
         // --- Fonction de Notification ---
         function showNotification(message, type = 'success') {
@@ -4600,11 +4750,178 @@
             showNotification(`${num} fiches générées`, 'success');
         }
 
+        // --- NOUVELLE FONCTION: Générer les QR-codes d'identification des joueurs ---
+        function generatePlayerQRCodes() {
+            
+            // Récupérer tous les joueurs de la ronde 1
+            if (!roundsStore['ronde1']) {
+                showNotification('Aucune ronde 1 trouvée. Importez d\'abord les appariements.', 'error');
+                return;
+            }
+            
+            const ronde1State = roundsStore['ronde1'];
+            const players = [];
+            
+            // Parcourir tous les échiquiers de la ronde 1 pour extraire les joueurs
+            ronde1State.physicalTables.forEach(pt => {
+                pt.boards.forEach(board => {
+                    if (board.players) {
+                        // Ajouter le joueur blanc
+                        if (board.players.white && board.players.white.name) {
+                            const whiteName = board.players.white.name.trim();
+                            const whiteElo = board.players.white.elo || '';
+                            if (!players.find(p => p.name === whiteName)) {
+                                players.push({ name: whiteName, elo: whiteElo });
+                            }
+                        }
+                        // Ajouter le joueur noir
+                        if (board.players.black && board.players.black.name) {
+                            const blackName = board.players.black.name.trim();
+                            const blackElo = board.players.black.elo || '';
+                            if (!players.find(p => p.name === blackName)) {
+                                players.push({ name: blackName, elo: blackElo });
+                            }
+                        }
+                    }
+                });
+            });
+            
+            if (players.length === 0) {
+                showNotification('Aucun joueur trouvé dans la ronde 1. Importez d\'abord les appariements.', 'error');
+                return;
+            }
+            
+            // Trier les joueurs par nom
+            players.sort((a, b) => a.name.localeCompare(b.name));
+            
+            // Créer le HTML pour l'impression
+            let htmlContent = `
+                <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+                <title>QR-codes Joueurs - ${players.length} joueurs</title>
+                <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
+                <style>
+                    body { 
+                        font-family: Arial, sans-serif; 
+                        padding: 20px;
+                    }
+                    .qr-grid { 
+                        display: grid; 
+                        grid-template-columns: repeat(4, 1fr); 
+                        gap: 15px;
+                        page-break-inside: avoid;
+                    }
+                    .qr-item { 
+                        border: 2px dashed #333; 
+                        padding: 15px; 
+                        text-align: center;
+                        page-break-inside: avoid;
+                        background: white;
+                    }
+                    .qr-item h4 { 
+                        margin: 10px 0 5px 0; 
+                        font-size: 14px;
+                        word-wrap: break-word;
+                    }
+                    .qr-item .elo { 
+                        font-size: 12px; 
+                        color: #666; 
+                        margin: 5px 0;
+                    }
+                    .qr-item .instructions {
+                        font-size: 10px;
+                        color: #999;
+                        margin-top: 5px;
+                        font-style: italic;
+                    }
+                    h1 {
+                        text-align: center;
+                        margin-bottom: 30px;
+                        color: #2c3e50;
+                    }
+                    @media print {
+                        body { margin: 10mm; }
+                        .qr-grid { gap: 10px; }
+                        .qr-item { padding: 10px; }
+                    }
+                </style>
+                </head><body>
+                <h1>🎫 QR-codes d'Identification des Joueurs</h1>
+                <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                    Découpez et distribuez ces QR-codes aux joueurs pour qu'ils puissent rapidement trouver leur table.
+                </p>
+                <div class="qr-grid">
+            `;
+            
+            // Générer un QR-code pour chaque joueur
+            players.forEach((player, index) => {
+                const qrData = JSON.stringify({ 
+                    type: 'player', 
+                    name: player.name,
+                    elo: player.elo 
+                });
+                
+                htmlContent += `
+                    <div class="qr-item">
+                        <div id="player-qr-${index}"></div>
+                        <h4>${escapeHtml(player.name)}</h4>
+                        ${player.elo ? `<div class="elo">Élo: ${player.elo}</div>` : ''}
+                        <div class="instructions">Scanner pour trouver ma table</div>
+                    </div>
+                `;
+            });
+            
+            htmlContent += `
+                </div>
+                <script>
+                    window.onload = () => {
+                        const players = ${JSON.stringify(players)};
+                        players.forEach((player, index) => {
+                            const qrData = JSON.stringify({ 
+                                type: 'player', 
+                                name: player.name,
+                                elo: player.elo 
+                            });
+                            try {
+                                new QRCode(document.getElementById(\`player-qr-\${index}\`), {
+                                    text: qrData,
+                                    width: 100,
+                                    height: 100,
+                                    colorDark: "#000000",
+                                    colorLight: "#ffffff"
+                                });
+                            } catch(e) { 
+                                console.error('Erreur QR-code:', e); 
+                            }
+                        });
+                        
+                        // Lancer l'impression après génération
+                        setTimeout(() => window.print(), 1000);
+                    };
+                <\/script>
+            </body></html>`;
+            
+            // Ouvrir dans une nouvelle fenêtre
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            showNotification(`${players.length} QR-codes joueurs générés`, 'success');
+        }
+        
+        // Fonction helper pour échapper le HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
 
         // --- 2. Logique de SCAN de QR Code ---
 
-        async function startQRScanner() {
-            // NOUVEAU: Cacher la modale d'accueil si on est en mode joueur
+        // CORRECTION: Fonction unifiée pour démarrer le scanner
+        async function startGenericQRScanner(scanMode) {
+            // scanMode: 'RESULT' (défaut) ou 'PLAYER_ID'
+            currentScanMode = scanMode || 'RESULT';
+            
             if (isPlayerMode) {
                 document.getElementById('playerHomeModal').style.display = 'none';
             }
@@ -4640,7 +4957,7 @@
                         
                         if (code && code.data) {
                             clearInterval(qrScanInterval);
-                            onScanSuccess(code.data);
+                            onScanSuccess(code.data); // La gestion se fait dans onScanSuccess
                         }
                     }
                 }, 300);
@@ -4651,6 +4968,17 @@
                 stopQRScanner();
             }
         }
+        
+        // Wrapper pour l'ancien bouton "Scanner QR Code (résultat)"
+        function startQRScanner() {
+            startGenericQRScanner('RESULT');
+        }
+        
+        // Wrapper pour le nouveau bouton "Scanner mon QR-code" (pour trouver sa table)
+        function startPlayerQRScanner() {
+            startGenericQRScanner('PLAYER_ID');
+        }
+
 
         function stopQRScanner() {
             if (qrStream) {
@@ -4674,21 +5002,53 @@
             
             try {
                 const parsed = JSON.parse(data);
+                
+                // --- GESTION DU SCAN ---
+                
+                // CAS 1: On a scanné un QR JOUEUR ('player')
+                if (parsed.type === 'player' && parsed.name) {
+                    
+                    // CAS 1a: On voulait trouver sa table (mode PLAYER_ID)
+                    if (currentScanMode === 'PLAYER_ID') {
+                        findPlayerTable(parsed.name, parsed.elo);
+                    } 
+                    // CAS 1b: On voulait scanner un RÉSULTAT (mode RESULT)
+                    else {
+                        // Si on est arbitre, on cherche la table pour la montrer
+                        if (!isPlayerMode) {
+                            findPlayerTable(parsed.name, parsed.elo);
+                        } 
+                        // Si on est joueur, on cherche la partie pour l'ENCODER
+                        else {
+                            findPlayerByName(parsed.name, true); // true = bypass alert
+                        }
+                    }
+                    return;
+                }
+                
+                // CAS 2: On a scanné un QR RÉSULTAT ('result')
                 if (parsed.type === 'result' && parsed.table && parsed.result) {
                     
+                    // On ne peut scanner un résultat que si on est en mode 'RESULT'
+                    // (ou en mode 'PLAYER_ID' si on est arbitre, par flexibilité)
+                    if (currentScanMode === 'PLAYER_ID' && isPlayerMode) {
+                         showNotification('Scan annulé. Vous devez scanner votre QR-code joueur, pas un résultat.', 'error');
+                         if(isPlayerMode) document.getElementById('playerHomeModal').style.display = 'flex';
+                         return;
+                    }
+                    
+                    // Logique de validation du résultat (code existant)
                     qrStagedResult = parsed;
                     const { board } = findBoard(parsed.table);
                     
-                    // MODIFIÉ: Logique d'affichage de la validation
                     const boardNum = parsed.table;
                     const resultStr = formatResult(parsed.result);
                     let whiteName = "N/A";
                     let blackName = "N/A";
 
-                    // NOUVEAU: Vérifier si le score est déjà saisi (UNIQUEMENT en mode joueur)
                     if (board && (board.score.white !== '' || board.score.black !== '') && isPlayerMode) {
                         showNotification("Ce résultat a déjà été saisi.", "info");
-                        cancelQRValidation(); // Annule et retourne à l'accueil
+                        cancelQRValidation(); 
                         return;
                     }
 
@@ -4711,7 +5071,7 @@
                     document.getElementById('qrValidationModal').style.display = 'flex';
 
                 } else {
-                    showNotification('QR Code invalide', 'error');
+                    showNotification('QR Code invalide ou non reconnu', 'error');
                     if(isPlayerMode) document.getElementById('playerHomeModal').style.display = 'flex';
                 }
             } catch (e) {
@@ -4768,7 +5128,7 @@
         
         // --- NOUVELLES FONCTIONS MODE JOUEUR ---
         
-        let arbiterPassword = null;
+        window.arbiterPassword = null;
         let isPlayerMode = false;
 
         function showArbiterPasswordModal() {
@@ -4784,10 +5144,26 @@
             }
             arbiterPassword = pass.length > 0 ? pass : null;
             document.getElementById('arbiterPassModal').style.display = 'none';
+            
             if (arbiterPassword) {
                 showNotification("Mot de passe arbitre enregistré.", "success");
+                
+                // --- CORRECTION AJOUTÉE ---
+                // Basculer automatiquement en mode Arbitre
+                if (window.ChessRoomSave && typeof window.ChessRoomSave.setMode === 'function') {
+                    window.ChessRoomSave.setMode('arbiter');
+                }
+                // --- FIN CORRECTION ---
+                
             } else {
                 showNotification("Mot de passe arbitre désactivé.", "info");
+                
+                // --- CORRECTION AJOUTÉE ---
+                // (Sécurité) Si le mdp est supprimé, forcer le mode spectateur
+                if (window.ChessRoomSave && typeof window.ChessRoomSave.setMode === 'function') {
+                    window.ChessRoomSave.setMode('spectator');
+                }
+                // --- FIN CORRECTION ---
             }
             autoSaveToLocalStorage();
         }
@@ -4871,10 +5247,11 @@
         }
         
         // --- NOUVEAU: Gestion Recherche Joueur (Texte) ---
-        function showPlayerTextSearch() {
+        function showPlayerTextSearch(mode = 'ENCODE') {
             document.getElementById('playerHomeModal').style.display = 'none';
             document.getElementById('playerSearchInput').value = '';
             populatePlayerSearchSuggestions(); // Pré-remplir
+            document.getElementById('playerTextSearchModal').dataset.mode = mode;
             document.getElementById('playerTextSearchModal').style.display = 'flex';
             document.getElementById('playerSearchInput').focus();
         }
@@ -4929,30 +5306,44 @@
         }
         
         function findPlayerFromTextSearch() {
+            const mode = document.getElementById('playerTextSearchModal').dataset.mode || 'ENCODE'; // <-- AJOUTÉ
             const name = document.getElementById('playerSearchInput').value;
-            document.getElementById('playerSearchInput').value = ''; // NOUVEAU: Vider le champ
+            document.getElementById('playerSearchInput').value = ''; 
             if (!name || name.trim().length < 2) {
                 alert("Veuillez entrer un nom valide.");
                 return;
             }
             
-            findPlayerByName(name.trim());
+            // --- MODIFIÉ ---
+            if (mode === 'VIEW') {
+                findPlayerTable(name.trim()); 
+            } else {
+                findPlayerByName(name.trim()); 
+            }
+            // --- FIN MODIFICATION ---
+            
             document.getElementById('playerTextSearchModal').style.display = 'none';
         }
         
         // --- NOUVEAU: Gestion Recherche Joueur (Liste) ---
-        function showPlayerListSearch() {
+        function showPlayerListSearch(mode = 'ENCODE') { 
             document.getElementById('playerHomeModal').style.display = 'none';
-            
+            document.getElementById('playerListSearchModal').dataset.mode = mode;
+                        
             const select = document.getElementById('playerListSelect');
             select.innerHTML = '<option value="">-- Sélectionnez votre nom --</option>';
             const playerList = [];
 
             physicalTables.forEach(table => {
                 table.boards.forEach(board => {
-                    // NOUVEAU: Filtre
-                    if (board.players && (board.score.white === '' && board.score.black === '')) {
+                    // NOUVEAU: Filtre (mode ENCODE)
+                    if (mode === 'ENCODE' && board.players && (board.score.white === '' && board.score.black === '')) {
                         playerList.push({ name: getSimplePlayerName(board.players.white.name), board: board.boardNumber });
+                        playerList.push({ name: getSimplePlayerName(board.players.black.name), board: board.boardNumber });
+                    }
+                    // NOUVEAU: Pas de filtre (mode VIEW)
+                    else if (mode === 'VIEW' && board.players) {
+                         playerList.push({ name: getSimplePlayerName(board.players.white.name), board: board.boardNumber });
                         playerList.push({ name: getSimplePlayerName(board.players.black.name), board: board.boardNumber });
                     }
                 });
@@ -4981,18 +5372,24 @@
         }
 
         function findPlayerFromListSearch() {
+            const mode = document.getElementById('playerListSearchModal').dataset.mode || 'ENCODE'; // <-- AJOUTÉ
             const name = document.getElementById('playerListSelect').value;
             if (!name) {
                 alert("Veuillez sélectionner votre nom.");
                 return;
             }
             
-            findPlayerByName(name);
+            // --- MODIFIÉ ---
+            if (mode === 'VIEW') {
+                findPlayerTable(name);
+            } else {
+                findPlayerByName(name);
+            }
             document.getElementById('playerListSearchModal').style.display = 'none';
         }
         
         // --- NOUVEAU: Logique de recherche commune ---
-        function findPlayerByName(name) {
+        function findPlayerByName(name, fromQR = false) {
             const searchTerm = name.toLowerCase();
             let foundGame = null;
 
@@ -5014,8 +5411,162 @@
             if (foundGame) {
                 showSimplifiedScoreModal(foundGame.board, foundGame.physicalTable);
             } else {
-                alert(`Aucune partie non terminée trouvée pour "${name}" dans cette ronde.`);
-                document.getElementById('playerHomeModal').style.display = 'flex'; // Retour accueil
+                // CORRECTION: Ne pas alerter si on vient d'un scan QR (car on va chercher dans les tables terminées)
+                if (!fromQR) {
+                    alert(`Aucune partie non terminée trouvée pour "${name}" dans cette ronde.`);
+                    document.getElementById('playerHomeModal').style.display = 'flex'; // Retour accueil
+                }
+                
+                // CORRECTION: Si on vient d'un QR et qu'on n'a pas trouvé de partie non terminée,
+                // c'est que le résultat est déjà saisi.
+                if (fromQR) {
+                    showNotification("Cette partie est déjà terminée.", "info");
+                    document.getElementById('playerHomeModal').style.display = 'flex'; // Retour accueil
+                }
+            }
+        }
+
+
+        // --- NOUVELLE FONCTION: Trouver la table d'un joueur depuis son QR-code ---
+        function findPlayerTable(playerName, playerElo) {
+            const searchTerm = playerName.toLowerCase().trim();
+            let foundGame = null;
+            let playerColor = null;
+
+            // Chercher le joueur dans la ronde actuelle
+            for (const physicalTable of physicalTables) {
+                for (const board of physicalTable.boards) {
+                    if (board.players) {
+                        const whiteName = board.players.white ? board.players.white.name.toLowerCase().trim() : '';
+                        const blackName = board.players.black ? board.players.black.name.toLowerCase().trim() : '';
+                        
+                        if (whiteName === searchTerm) {
+                            foundGame = { board, physicalTable };
+                            playerColor = 'white';
+                            break;
+                        } else if (blackName === searchTerm) {
+                            foundGame = { board, physicalTable };
+                            playerColor = 'black';
+                            break;
+                        }
+                    }
+                }
+                if (foundGame) break;
+            }
+
+            if (foundGame) {
+                // === MODIFICATION START ===
+
+                // 1. Cacher toutes les modales (accueil, recherche)
+                document.getElementById('playerHomeModal').style.display = 'none';
+                document.getElementById('playerTextSearchModal').style.display = 'none';
+                document.getElementById('playerListSearchModal').style.display = 'none';
+                
+                // 2. Passer en mode plan
+                document.body.classList.add('player-plan-view-mode');
+                setTool('pan'); 
+                renderAllTables(); 
+                
+                // 3. Mettre en évidence et scroller
+                highlightPlayerTable(foundGame.physicalTable, foundGame.board);
+                
+                // 4. Afficher le popup d'info
+                showPlayerTableInfo(foundGame.board, foundGame.physicalTable, playerColor, playerName, playerElo);
+                
+                // === MODIFICATION END ===
+            } else {
+                showNotification(`Partie non trouvée pour "${playerName}" dans cette ronde.`, 'error');
+                // Ré-afficher la modale d'accueil si non trouvé
+                if (isPlayerMode) {
+                    document.getElementById('playerHomeModal').style.display = 'flex';
+                }
+            }
+        }
+
+        function closePlayerTableInfo() {
+    document.getElementById('playerTableInfoModal').style.display = 'none';
+    
+    // Enlever la surbrillance
+    document.querySelectorAll('.table-element').forEach(el => {
+        el.classList.remove('highlight-player');
+    });
+
+    // Revenir à l'accueil joueur (le hub central)
+    if (isPlayerMode) {
+        // Quitter le mode plan
+        document.body.classList.remove('player-plan-view-mode');
+        // Afficher le hub
+        document.getElementById('playerHomeModal').style.display = 'flex';
+    }
+}
+
+        // MODIFIÉ: Version unique et corrigée de showPlayerTableInfo
+        function showPlayerTableInfo(board, physicalTable, playerColor, playerName, playerElo) {
+            if (!board.players) return;
+            
+            // --- Logique de l'ancienne fonction (pour définir les variables) ---
+            const boardNum = board.boardNumber;
+            const whitePlayer = board.players.white;
+            const blackPlayer = board.players.black;
+            
+            let opponentName, opponentElo, colorText;
+            if (playerColor === 'white') {
+                opponentName = getSimplePlayerName(blackPlayer.name);
+                opponentElo = blackPlayer.elo || '';
+                colorText = '⚪ Blancs';
+            } else {
+                opponentName = getSimplePlayerName(whitePlayer.name);
+                opponentElo = whitePlayer.elo || '';
+                colorText = '⚫ Noirs';
+            }
+            
+            // Formater le nom du joueur avec son Élo
+            const playerDisplayName = `${playerName}${playerElo ? ' (' + playerElo + ')' : ''}`;
+            const opponentDisplayName = `${opponentName}${opponentElo ? ' (' + opponentElo + ')' : ''}`;
+            // --- Fin de l'ancienne logique ---
+
+            
+            // --- Logique de la nouvelle fonction (pour afficher le popup) ---
+            
+            // Mettre à jour la modale
+            document.getElementById('playerTableInfoName').textContent = playerDisplayName;
+            document.getElementById('playerTableInfoTable').textContent = boardNum;
+            document.getElementById('playerTableInfoColor').textContent = colorText;
+            document.getElementById('playerTableInfoOpponent').textContent = opponentDisplayName;
+            
+            // Afficher la modale (popup)
+            document.getElementById('playerTableInfoModal').style.display = 'block';
+            
+            // Assigner le click handler pour le bouton X (au cas où)
+            const closeBtn = document.getElementById('closePlayerTableInfoBtn');
+            
+            // Fermer automatiquement après 5 secondes
+            const autoCloseTimer = setTimeout(() => {
+                closePlayerTableInfo();
+            }, 5000); // 5 secondes
+            
+            // Si l'utilisateur clique sur X, annuler le timer et fermer
+            closeBtn.onclick = () => {
+                clearTimeout(autoCloseTimer);
+                closePlayerTableInfo();
+            };
+            // --- Fin de la nouvelle logique ---
+        }
+
+        // Fonction pour mettre en évidence la table du joueur sur le plan
+        function highlightPlayerTable(physicalTable, board) {
+            // Enlever toute mise en évidence précédente
+            document.querySelectorAll('.table-element').forEach(el => {
+                el.classList.remove('highlight-player');
+            });
+            
+            // Trouver l'élément DOM de la table
+            const tableElement = document.querySelector(`[data-table-id="${physicalTable.id}"]`);
+            if (tableElement) {
+                tableElement.classList.add('highlight-player');
+                
+                // Scroller vers la table si nécessaire
+                tableElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
@@ -5093,13 +5644,19 @@
         // --- Initialisation ---
             document.addEventListener('DOMContentLoaded', async () => {
                 
-                // NOUVEAU: Ouvrir le premier accordéon par défaut (SUPPRIMÉ)
-                /*
+                // NOUVEAU: Ouvrir le premier accordéon par défaut (Statistiques)
                 const firstAccordionHeader = document.querySelector('.sidebar-section h3');
                 if (firstAccordionHeader) {
                     toggleAccordion(firstAccordionHeader);
                 }
-                */
+                
+                
+                // CORRECTION: Recharger la stratégie de sauvegarde depuis localStorage
+                const savedStrategy = localStorage.getItem(STRATEGY_KEY) || 'server_only';
+                const strategySelect = document.getElementById('saveStrategySelector');
+                if (strategySelect) {
+                    strategySelect.value = savedStrategy;
+                }
                 
                 // Note: Le chargement des données est maintenant géré par chessroom-save-system.js
                 // qui s'occupe de charger depuis le serveur ou le localStorage selon la configuration
@@ -5153,6 +5710,16 @@
             
             // NOUVEAU: Écouteur de synchronisation entre onglets
             window.addEventListener('storage', (e) => {
+                // CORRECTION: On écoute la clé de stratégie
+                if (e.key === STRATEGY_KEY && e.newValue) {
+                    const strategySelect = document.getElementById('saveStrategySelector');
+                    if (strategySelect) {
+                        strategySelect.value = e.newValue;
+                        // On simule le changement pour déclencher les rechargements
+                        strategySelect.dispatchEvent(new Event('change'));
+                    }
+                }
+                
                 if (e.key === SAVE_KEY && e.newValue) {
                     
                     if (isPlayerMode) return;
@@ -5161,8 +5728,15 @@
                          console.log('Synchronisation en attente, modale ouverte.');
                          return;
                     }
+                    
+                    // CORRECTION: Ne synchroniser que si on est en mode 'local_only'
+                    // (le mode serveur est géré par le timer de synchro)
+                    const currentStrategy = document.getElementById('saveStrategySelector').value;
+                    if (currentStrategy !== 'local_only') {
+                        return;
+                    }
 
-                    console.log('Changement de sauvegarde détecté, rafraîchissement...');
+                    console.log('Changement de sauvegarde (local) détecté, rafraîchissement...');
                     try {
                         const data = JSON.parse(e.newValue);
                         if (data && data.roundsStore) {
@@ -5176,7 +5750,7 @@
                             loadStateFromStore(currentRoundKey);
                             updateRoundSelector();
                             
-                            showNotification('Plan mis à jour (synchro.)', 'info');
+                            showNotification('Plan mis à jour (synchro. locale)', 'info');
                         }
                     } catch (err) {
                         console.error('Erreur de synchronisation:', err);
@@ -5245,7 +5819,7 @@ function createNewTournament() {
     // On réutilise la logique existante de clearAll mais avec un message spécifique
     // clearAll() contient déjà un confirm(), mais pour être sûr du message "Nouveau Tournoi":
     
-    if (confirm("⚠️ ATTENTION : Vous allez créer un NOUVEAU TOURNOI.\n\nToutes les données actuelles (toutes les rondes, joueurs, scores, configurations) seront effacées.\n\nVoulez-vous vraiment continuer ?")) {
+    if (confirm("⚠️ ATTENTION : Vous allez créer un NOUAU TOURNOI.\n\nToutes les données actuelles (toutes les rondes, joueurs, scores, configurations) seront effacées.\n\nVoulez-vous vraiment continuer ?")) {
         // On appelle la logique de nettoyage sans redemander confirmation (on bypass le confirm du clearAll en exécutant son contenu directement ou en le modifiant légèrement, mais ici on va appeler la logique de reset manuellement pour être propre).
         
         localStorage.removeItem(SAVE_KEY);
@@ -5253,29 +5827,29 @@ function createNewTournament() {
 
         // Réinitialisation des variables globales
         physicalTables = [];
-        rooms = [];
-        nextPhysicalTableId = 1;
-        nextRoomId = 1;
-        nextBoardNumber = 1;
-        historyStack = [];
-        redoStack = [];
+        rooms= [];
+                nextPhysicalTableId = 1;
+                nextRoomId = 1;
+                nextBoardNumber = 1;
+                historyStack = [];
+                redoStack = [];
 
-        // Réinitialisation du store
-        roundsStore = {};
-        currentRoundKey = 'ronde1'; // On repart à la ronde 1
-        
-        // Charger l'état vide
-        loadStateFromStore('ronde1');
-        updateRoundSelector();
+                // Réinitialisation du store
+                roundsStore = {};
+                currentRoundKey = 'ronde1'; // On repart à la ronde 1
+                
+                // Charger l'état vide
+                loadStateFromStore('ronde1');
+                updateRoundSelector();
 
-        document.getElementById('canvas').innerHTML = '';
-        updateStats();
-        
-        saveHistoryState(); // Sauvegarder l'état vide
-        
-        showNotification("Nouveau tournoi créé.", "success");
-    }
-}
+                document.getElementById('canvas').innerHTML = '';
+                updateStats();
+                
+                saveHistoryState(); // Sauvegarder l'état vide
+                
+                showNotification("Nouveau tournoi créé.", "success");
+            }
+        }
     </script>
     
     <script src="chessroom-save-system.js"></script>

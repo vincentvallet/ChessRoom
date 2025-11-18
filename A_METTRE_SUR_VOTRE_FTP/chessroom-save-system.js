@@ -567,26 +567,43 @@ function showHistoryList(historyItems) {
 function setMode(mode) {
     currentSaveMode = mode;
     
-    const modeSelector = document.getElementById('modeSelector');
+    // NOUVEAU: Récupérer les éléments du switch
+    const modeSwitch = document.getElementById('modeSwitch');
+    const modeSwitchLabel = document.getElementById('modeSwitchLabel');
     const saveStrategySelector = document.getElementById('saveStrategySelector');
     const btnShowHistory = document.getElementById('btnShowHistory');
     
     if (mode === SAVE_CONFIG.modes.ARBITER) {
         // Mode Arbitre : peut sauvegarder
-        if (modeSelector) modeSelector.value = 'arbiter';
+        if (modeSwitch) modeSwitch.checked = true;
+        if (modeSwitchLabel) modeSwitchLabel.textContent = 'Arbitre';
         if (btnShowHistory) btnShowHistory.disabled = false;
         if (saveStrategySelector) saveStrategySelector.disabled = false;
         
         document.body.classList.remove('spectator-mode');
         
+        // --- CORRECTION AJOUTÉE ---
+        if (typeof setTool === 'function') {
+            setTool('select'); // Remettre l'outil "Sélection" par défaut
+        }
+        // --- FIN CORRECTION ---
+        
         showSaveStatus('info', '👨‍⚖️ Mode Arbitre activé - Vous pouvez modifier et sauvegarder');
+        
     } else {
         // Mode Spectateur : lecture seule
-        if (modeSelector) modeSelector.value = 'spectator';
+        if (modeSwitch) modeSwitch.checked = false;
+        if (modeSwitchLabel) modeSwitchLabel.textContent = 'Spectateur';
         if (btnShowHistory) btnShowHistory.disabled = false; // Peut voir l'historique
         if (saveStrategySelector) saveStrategySelector.disabled = true;
         
         document.body.classList.add('spectator-mode');
+        
+        // --- CORRECTION AJOUTÉE ---
+        if (typeof setTool === 'function') {
+            setTool('pan'); // Forcer le mode "Bouger"
+        }
+        // --- FIN CORRECTION ---
         
         showSaveStatus('info', '👁️ Mode Spectateur activé - Lecture seule');
     }
@@ -633,32 +650,33 @@ function initSaveControls() {
     console.log('🔧 Initialisation des contrôles de sauvegarde...');
     
     setTimeout(() => {
-        const modeSelector = document.getElementById('modeSelector');
+        // MODIFIÉ: Cible le nouvel interrupteur
+        const modeSwitch = document.getElementById('modeSwitch');
         const saveStrategySelector = document.getElementById('saveStrategySelector');
         const btnShowHistory = document.getElementById('btnShowHistory');
         
         console.log('🔍 Éléments trouvés:', {
-            modeSelector: !!modeSelector,
+            modeSwitch: !!modeSwitch, // Modifié
             saveStrategySelector: !!saveStrategySelector,
             btnShowHistory: !!btnShowHistory
         });
         
-        if (!modeSelector) {
-            console.error('❌ Sélecteur de mode non trouvé !');
+        if (!modeSwitch) { // Modifié
+            console.error('❌ Interrupteur de mode non trouvé !'); // Modifié
             return;
         }
         
-        // Listener pour changement de mode avec validation
-        modeSelector?.addEventListener('change', (e) => {
-            const newMode = e.target.value;
+        // MODIFIÉ: Listener pour l'interrupteur (change)
+        modeSwitch?.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
             
-            // Si on passe de spectateur à arbitre, demander le mot de passe
-            if (newMode === 'arbiter' && currentSaveMode === SAVE_CONFIG.modes.SPECTATOR) {
+            if (isChecked) { 
+                // --- Tente de passer en mode Arbitre ---
                 if (!arbiterPassword) {
                     // Pas de mot de passe défini, créer un maintenant
                     alert("⚠️ Aucun mot de passe arbitre n'est défini.\n\nVeuillez en créer un pour sécuriser l'accès au mode Arbitre.");
                     document.getElementById('arbiterPassModal').style.display = 'flex';
-                    modeSelector.value = 'spectator'; // Rester en spectateur
+                    e.target.checked = false; // Rester en spectateur
                     return;
                 }
                 
@@ -668,10 +686,11 @@ function initSaveControls() {
                 document.getElementById('switchArbiterPassInput').focus();
                 
                 // Remettre temporairement en spectateur (sera changé après validation)
-                modeSelector.value = 'spectator';
+                e.target.checked = false;
+                
             } else {
-                // Passage de arbitre à spectateur : toujours autorisé
-                setMode(newMode);
+                // --- Passe en mode Spectateur (toujours autorisé) ---
+                setMode(SAVE_CONFIG.modes.SPECTATOR);
             }
         });
         
@@ -691,6 +710,13 @@ function initSaveControls() {
                 } else {
                     showSaveStatus('info', 'Mode local activé - Aucune sauvegarde locale');
                 }
+            }
+            
+            // NOUVEAU: Mémoriser le choix
+            try {
+                localStorage.setItem(STRATEGY_KEY, newStrategy);
+            } catch (e) {
+                console.warn("Impossible de mémoriser la stratégie de sauvegarde.", e);
             }
             
             setupAutoSaveIntervals();
@@ -717,8 +743,7 @@ window.validateSwitchToArbiter = function() {
     if (enteredPassword === arbiterPassword) {
         // Mot de passe correct
         document.getElementById('switchToArbiterModal').style.display = 'none';
-        document.getElementById('modeSelector').value = 'arbiter';
-        setMode(SAVE_CONFIG.modes.ARBITER);
+        setMode(SAVE_CONFIG.modes.ARBITER); // setMode va cocher la case
         showSaveStatus('success', '✅ Mode Arbitre activé');
     } else {
         // Mot de passe incorrect
@@ -731,7 +756,6 @@ window.validateSwitchToArbiter = function() {
 // Fonction pour annuler le passage en mode Arbitre
 window.cancelSwitchToArbiter = function() {
     document.getElementById('switchToArbiterModal').style.display = 'none';
-    document.getElementById('modeSelector').value = 'spectator';
 };
 
 // ===== HOOK DE SAUVEGARDE APRÈS RÉSULTAT =====
