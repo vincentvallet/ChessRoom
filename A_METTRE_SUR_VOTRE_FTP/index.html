@@ -95,6 +95,10 @@
         .spectator-mode .sidebar-section:nth-child(7)  /* Section "Joueurs" (pour la recherche) */ {
             display: block !important;
         }
+        /* AJOUT: Cacher la barre de raccourcis en bas en mode spectateur */
+        .spectator-mode .shortcut-bar {
+            display: none !important;
+        }
 
         .container {
             max-width: 100%;
@@ -1422,7 +1426,7 @@
                 <option value="1-0">1-0</option>
                 <option value="0-1">0-1</option>
                 <option value="1/2-1/2">½-½</option>
-                <option valuea="1-F">1-F (Blanc gagne F)</option>
+                <option value="1-F">1-F (Blanc gagne F)</option>
                 <option value="F-1">F-1 (Noir gagne F)</option>
                 <option value="1/2-0">½-0</option>
                 <option value="0-1/2">0-½</option>
@@ -2027,9 +2031,11 @@
             const newLayout = JSON.parse(JSON.stringify(physicalTables));
             newLayout.forEach(pt => {
                 pt.boards.forEach(b => {
-                    b.players = null;
-                    b.score = { white: "", black: "" };
-                    b.flipped = false;
+                    // Initialiser avec des joueurs vides (Table Verte)
+                    b.players = { 
+                        white: { name: "", elo: "", comment: "" },
+                        black: { name: "", elo: "", comment: "" }
+                    };
                 });
             });
             
@@ -2398,6 +2404,10 @@
                 let currentX, currentY, currentCol, xDir, yDir;
                 
                 if (physicalTables.length === 0) {
+                    nextBoardNumber = 1;      // On repart à l'échiquier 1
+                    nextPhysicalTableId = 1;  // On repart à l'ID interne 1
+                    // ==============================
+
                     let layout = getLayoutConfig();
                     currentX = layout.startX;
                     currentY = layout.startY;
@@ -2456,7 +2466,11 @@
                     for (let j = 0; j < actualBoardsForThisTable; j++) {
                          physicalTable.boards.push({
                             boardNumber: nextBoardNumber++,
-                            players: null, 
+                            // CORRECTION: Initialiser avec des joueurs vides (Table Verte)
+                            players: { 
+                                white: { name: "", elo: "", comment: "" },
+                                black: { name: "", elo: "", comment: "" }
+                            },
                             flipped: false,
                             score: { white: "", black: "" } 
                          });
@@ -3006,7 +3020,7 @@
                     const table = physicalTables.find(t => t.id === id);
                     if (table) {
                         table.boards.forEach(board => {
-                            if (board.players) board.flipped = !board.flipped;
+                            board.flipped = !board.flipped;
                         });
                         updateTableDisplay(id); 
                     }
@@ -3053,12 +3067,20 @@
                         
                         const buildPlayerHTML = (player, color, score) => {
                             if (!player) return ''; 
-                            const playerNameFormatted = formatPlayerName(player.name);
+                            
+                            // CORRECTION: Afficher "Blancs/Noirs" si le nom est vide
+                            let displayNameHTML;
+                            if (!player.name || player.name.trim() === "") {
+                                const label = color === 'white' ? 'Blancs' : 'Noirs';
+                                displayNameHTML = `<span style="color: #999; font-style: italic;">${label}</span>`;
+                            } else {
+                                displayNameHTML = formatPlayerName(player.name);
+                            }
+
                             const playerElo = player.elo || '----';
                             const playerCommentHTML = player.comment ? `<div class="player-comment">${player.comment}</div>` : '';
                             
-                            // En mode arbitre uniquement, onclick sur les scores
-                            const scoreClickEvent = !isPlayerMode ? 
+                            const scoreClickEvent = (currentSaveMode === 'arbiter' && !isPlayerMode) ? 
                                 `onclick="event.stopPropagation(); editScore(${boardNumForEvent})"` : '';
                             
                             return playerCommentHTML + `
@@ -3066,9 +3088,9 @@
                                     <div class="player-color ${color}"></div>
                                     <div class="player-info">
                                         <div class="player-name" 
-                                             title="Cliquez pour commenter ${player.name}"
+                                             title="Cliquez pour commenter"
                                              onclick="event.stopPropagation(); editPlayerComment(${boardNumForEvent}, '${color}')">
-                                             ${playerNameFormatted}
+                                             ${displayNameHTML}
                                         </div>
                                         <div class="player-elo">${playerElo}</div>
                                     </div>
@@ -3087,7 +3109,25 @@
                         playersHTML = isInverted ? (blackPlayerHTML + whitePlayerHTML) : (whitePlayerHTML + blackPlayerHTML);
                         
                     } else {
-                         playersHTML = '<div style="color: #999; font-size: 0.8em; text-align: center;">En attente</div>';
+                    // AJOUT: Afficher les emplacements Blancs/Noirs si la table est vide
+                    const whitePlaceholderHTML = `
+                        <div class="player" style="opacity: 0.5;">
+                            <div class="player-color white"></div>
+                            <div class="player-info" style="font-style: italic; color: #666;">
+                                Blancs
+                            </div>
+                        </div>
+                    `;
+                    const blackPlaceholderHTML = `
+                        <div class="player" style="opacity: 0.5;">
+                            <div class="player-color black"></div>
+                            <div class="player-info" style="font-style: italic; color: #666;">
+                                Noirs
+                            </div>
+                        </div>
+                    `;
+
+                    playersHTML = isInverted ? (blackPlaceholderHTML + whitePlaceholderHTML) : (whitePlaceholderHTML + blackPlaceholderHTML);
                     }
 
                     const boardContainer = document.createElement('div');
@@ -3108,7 +3148,7 @@
                     boardContainer.dataset.boardNumber = board.boardNumber;
                     
                     boardContainer.innerHTML = `
-                        <button class="flip-btn-single" onclick="event.stopPropagation(); flipSingleBoard(${boardNumForEvent})">🔄</button>
+                        <button class="flip-btn-single" onmousedown="event.stopPropagation()" onclick="event.stopPropagation(); flipSingleBoard(${boardNumForEvent})">🔄</button>
                         <div class="board-number board-number-display" title="Double-cliquez pour éditer" onDblClick="event.stopPropagation(); editBoardNumber(${boardNumForEvent})">
                             ${board.boardNumber}
                         </div>
@@ -3594,25 +3634,26 @@
                     }
                     
                     if (!pairings[boardNum]) {
-                        let whitePlayer, blackPlayer, whiteElo, blackElo;
-                        if (colorInfo.includes('blancs')) {
-                            whitePlayer = player1Name;
-                            whiteElo = player1Elo;
-                            blackPlayer = player2Name;
-                            blackElo = player2Elo;
-                        } else {
-                            whitePlayer = player2Name;
-                            whiteElo = player2Elo;
-                            blackPlayer = player1Name;
-                            blackElo = player1Elo;
-                        }
-                        
-                        pairings[boardNum] = {
-                            white: { name: whitePlayer, elo: whiteElo, comment: "" },
-                            black: { name: blackPlayer, elo: blackElo, comment: "" }
-                        };
-                        
-                        if (boardNum > maxBoardNum) maxBoardNum = boardNum;
+                    let papiWhite, papiBlack, papiWhiteElo, papiBlackElo;
+                    if (colorInfo.includes('blancs')) {
+                        papiWhite = player1Name;
+                        papiWhiteElo = player1Elo;
+                        papiBlack = player2Name;
+                        papiBlackElo = player2Elo;
+                    } else {
+                        papiWhite = player2Name;
+                        papiWhiteElo = player2Elo;
+                        papiBlack = player1Name;
+                        papiBlackElo = player1Elo;
+                    }
+
+                    // On stocke les joueurs selon le fichier PAPI, pas l'assignation finale
+                    pairings[boardNum] = {
+                        papiW: { name: papiWhite, elo: papiWhiteElo, comment: "" },
+                        papiB: { name: papiBlack, elo: papiBlackElo, comment: "" }
+                    };
+
+                    if (boardNum > maxBoardNum) maxBoardNum = boardNum;
                     }
                 } catch (e) {
                     console.warn('Skipped a row during PAPI parse:', e);
@@ -3671,13 +3712,20 @@
                     };
 
                     boardsForThisTable.forEach(boardNum => {
-                        const pairing = pairings[boardNum]; 
-                        physicalTable.boards.push({
-                            boardNumber: boardNum,
-                            players: pairing, 
-                            flipped: false,
-                            score: { white: "", black: "" } 
-                        });
+                    const pairingData = pairings[boardNum];
+
+                    // Pour une nouvelle disposition, on assigne PAPI-Blanc -> Blanc
+                    const finalPlayers = {
+                        white: pairingData.papiW,
+                        black: pairingData.papiB
+                    };
+
+                    physicalTable.boards.push({
+                        boardNumber: boardNum,
+                        players: finalPlayers, 
+                        flipped: false, // Correct, c'est un nouveau plan
+                        score: { white: "", black: "" } 
+                    });
                     });
                     
                     physicalTables.push(physicalTable);
@@ -3692,15 +3740,32 @@
                 setTimeout(fitAllTables, 100); 
 
             } else {
-                // La disposition existe, on fusionne les appariements
-                physicalTables.forEach(pt => {
-                    pt.boards.forEach(b => {
-                        const pairing = pairings[b.boardNumber];
-                        if (pairing) {
-                            b.players = pairing;
-                            b.score = { white: "", black: "" };
-                            b.flipped = false;
+            // La disposition existe, on fusionne les appariements
+            physicalTables.forEach(pt => {
+                pt.boards.forEach(b => {
+                    const pairingData = pairings[b.boardNumber];
+
+                    if (pairingData) {
+                        // --- LOGIQUE D'ASSIGNATION CORRIGÉE ---
+                        // On respecte l'état 'b.flipped' DÉJÀ PRÉSENT
+                        if (b.flipped) {
+                            // INVERSÉ: Le "Blanc PAPI" va aux Noirs
+                            b.players = {
+                                white: pairingData.papiB, // Le Noir PAPI
+                                black: pairingData.papiW  // Le Blanc PAPI
+                            };
+                        } else {
+                            // NORMAL: Le "Blanc PAPI" va aux Blancs
+                            b.players = {
+                                white: pairingData.papiW,
+                                black: pairingData.papiB
+                            };
                         }
+                        // --- FIN DE LA LOGIQUE ---
+
+                        b.score = { white: "", black: "" };
+                        // On NE TOUCHE PAS à b.flipped, on le conserve !
+                    }
                     });
                 });
             }
@@ -3716,10 +3781,16 @@
 
 
         function clearPairings() {
-            physicalTables.forEach(t => t.boards.forEach(b => {
-                b.players = null;
-                b.score = { white: "", black: "" }; 
-            }));
+            physicalTables.forEach(t => {
+                t.boards.forEach(b => {
+                    // Réinitialiser avec structure vide (Table Verte)
+                    b.players = { 
+                        white: { name: "", elo: "", comment: "" },
+                        black: { name: "", elo: "", comment: "" }
+                    };
+                });
+            });
+            
             renderAllTables();
             updateStats();
             
@@ -4343,26 +4414,26 @@
 
         // --- Stats, Zoom, etc. ---
         function updateStats() {
-            let totalBoards = 0, pairedBoards = 0, remainingBoards = 0; // NOUVEAU: Ajout de remainingBoards
+            let totalBoards = 0, pairedBoards = 0, remainingBoards = 0;
             
             physicalTables.forEach(t => {
                 totalBoards += t.boards.length;
                 t.boards.forEach(b => { 
-                    if (b.players) {
+                    // CORRECTION: On ne compte que si un nom est présent
+                    if (b.players && (b.players.white.name || b.players.black.name)) {
                         pairedBoards++; 
                         
-                        // NOUVEAU: Calcul des échiquiers restants
                         if (b.score.white === '' && b.score.black === '') {
                             remainingBoards++;
                         }
                     }
                 });
             });
-            
+
             document.getElementById('totalBoards').textContent = totalBoards;
             document.getElementById('pairedBoards').textContent = pairedBoards;
             document.getElementById('totalPlayers').textContent = pairedBoards * 2;
-            document.getElementById('remainingBoards').textContent = remainingBoards; // NOUVEAU: Mise à jour du HTML
+            document.getElementById('remainingBoards').textContent = remainingBoards;
         }
         
         function resetZoom() { applyZoom(1); }
@@ -4615,7 +4686,7 @@
             }
             
             // NOUVEAU: Désactiver les raccourcis en mode joueur
-            if (isPlayerMode) return;
+            if (isPlayerMode || (window.currentSaveMode && window.currentSaveMode === 'spectator')) return;
             
             if (document.getElementById('scoreModal').style.display === 'flex') return;
             
@@ -5052,7 +5123,7 @@
                         return;
                     }
 
-                    if (board && board.players) {
+                    if (board) {
                         whiteName = getSimplePlayerName(board.players.white.name);
                         blackName = getSimplePlayerName(board.players.black.name);
                     } else if (board) {
