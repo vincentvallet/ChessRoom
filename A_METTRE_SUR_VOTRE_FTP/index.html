@@ -3746,26 +3746,19 @@
                     const pairingData = pairings[b.boardNumber];
 
                     if (pairingData) {
-                        // --- LOGIQUE D'ASSIGNATION CORRIGÉE ---
-                        // On respecte l'état 'b.flipped' DÉJÀ PRÉSENT
-                        if (b.flipped) {
-                            // INVERSÉ: Le "Blanc PAPI" va aux Noirs
-                            b.players = {
-                                white: pairingData.papiB, // Le Noir PAPI
-                                black: pairingData.papiW  // Le Blanc PAPI
-                            };
-                        } else {
-                            // NORMAL: Le "Blanc PAPI" va aux Blancs
+                            // --- LOGIQUE CORRIGÉE ---
+                            // On assigne STRICTEMENT selon l'appariement (Blanc = Blanc)
+                            // L'état 'b.flipped' ne change que l'affichage visuel, pas les données.
                             b.players = {
                                 white: pairingData.papiW,
                                 black: pairingData.papiB
                             };
-                        }
-                        // --- FIN DE LA LOGIQUE ---
+                            
+                            // On conserve l'état 'flipped' existant pour l'affichage
+                            // (on ne touche pas à b.flipped)
 
-                        b.score = { white: "", black: "" };
-                        // On NE TOUCHE PAS à b.flipped, on le conserve !
-                    }
+                            b.score = { white: "", black: "" };
+                        }
                     });
                 });
             }
