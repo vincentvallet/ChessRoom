@@ -1771,6 +1771,80 @@
             background-color: #e9ecef;
             color: #6c757d;
         }
+
+        /* =====================================================
+       STYLES POPUP INFO JOUEUR (CORRIGÉS & RÉDUITS)
+    ===================================================== */
+    #playerTableInfoModal {
+        display: none; 
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%; max-width: 450px; /* Plus étroit */
+        background: rgba(255, 255, 255, 0.98); /* Fond blanc opaque */
+        border-radius: 12px;
+        padding: 25px 20px;
+        text-align: center;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        z-index: 10005; 
+        border: 3px solid #667eea;
+        pointer-events: auto; /* Clics activés */
+    }
+
+    /* Bouton Fermer */
+    #closePlayerTableInfoBtn {
+        position: absolute; top: 10px; right: 10px;
+        background: #eb3349; color: white;
+        border: none; border-radius: 50%;
+        width: 30px; height: 30px;
+        font-size: 1.2em; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Nom du joueur suivi */
+    .info-name-container {
+        font-size: 1.6em; /* Était 3em -> Réduit de moitié */
+        margin-bottom: 10px;
+        font-weight: 800;
+        color: #2c3e50;
+        word-wrap: break-word;
+        line-height: 1.2;
+    }
+
+    /* "Table X" */
+    .info-table-container {
+        font-size: 1.4em; /* Était 2.5em */
+        margin-bottom: 15px;
+        color: #34495e;
+    }
+    #playerTableInfoTable {
+        color: #e74c3c; font-weight: bold; font-size: 1.2em;
+    }
+
+    /* Bloc Adversaire */
+    .info-opponent-block {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+
+    /* Couleur (Blancs/Noirs) */
+    .info-color {
+        font-size: 1.2em; font-weight: bold; margin-bottom: 5px;
+    }
+
+    .info-vs {
+        font-size: 0.9em; color: #7f8c8d; font-style: italic; margin-bottom: 5px;
+    }
+
+    /* Nom de l'adversaire */
+    .info-opponent-name {
+        font-size: 1.3em; /* Était 2em -> Réduit */
+        font-weight: bold;
+        color: #2c3e50;
+        word-wrap: break-word; /* Coupe les noms très longs */
+    }
     </style>
 </head>
 
@@ -1785,34 +1859,9 @@
 
             <div class="sidebar">
 
-                <div class="sidebar-section"> <h3 onclick="toggleAccordion(this)">📊 Statistiques</h3>
-                    <div class="sidebar-content">
-                        <div class="stats">
-                            <div class="stat-item">
-                                <div class="stat-label">Total</div>
-                                <div class="stat-value" id="totalBoards">0</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Échiquiers</div>
-                                <div class="stat-value" id="pairedBoards">0</div>
-                            </div>
-
-                            <div class="stat-item" style="background-color: #fff3cd; border-color: #ffeeba;">
-                                <div class="stat-label" style="color: #856404;">Restants</div>
-                                <div class="stat-value" id="remainingBoards" style="color: #856404;">0</div>
-                            </div>
-
-                            <div class="stat-item">
-                                <div class="stat-label">Joueurs</div>
-                                <div class="stat-value" id="totalPlayers">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="sidebar-section" id="liveFollowSection">
                     <h3 onclick="toggleAccordion(this); setTimeout(updateSpectatorPlayerList, 100);" style="background: #e8f5e9; color: #2e7d32; cursor: pointer;">
-                        🕵️ Suivi Joueur (Live)
+                        🕵️ Suivi (Live)
                     </h3>
                     
                     <div class="sidebar-content expanded">
@@ -1843,6 +1892,31 @@
                             <button class="btn-danger" style="width: 100%; font-size: 0.9em;" onclick="stopAutoWatch()">
                                 ⏹️ Arrêter le suivi
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section"> <h3 onclick="toggleAccordion(this)">📊 Statistiques</h3>
+                    <div class="sidebar-content">
+                        <div class="stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Total</div>
+                                <div class="stat-value" id="totalBoards">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Échiquiers</div>
+                                <div class="stat-value" id="pairedBoards">0</div>
+                            </div>
+
+                            <div class="stat-item" style="background-color: #fff3cd; border-color: #ffeeba;">
+                                <div class="stat-label" style="color: #856404;">Restants</div>
+                                <div class="stat-value" id="remainingBoards" style="color: #856404;">0</div>
+                            </div>
+
+                            <div class="stat-item">
+                                <div class="stat-label">Joueurs</div>
+                                <div class="stat-value" id="totalPlayers">0</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2371,43 +2445,23 @@
         <span id="bigTimerDisplay">00:00</span>
     </div>
 
-    <div id="playerTableInfoModal" style="
-        display: none; 
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
-        max-width: 700px;
-        background: rgba(255, 255, 255, 0.25); /* <-- CORRECTION: Transparence */
-        backdrop-filter: blur(5px); /* <-- NOUVEAU: Effet de flou */
-        -webkit-backdrop-filter: blur(5px); /* <-- NOUVEAU: Support Safari */
-        border-radius: 15px;
-        padding: 40px;
-        text-align: center;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        z-index: 10003; 
-        border: 4px solid #667eea;
-        pointer-events: none;
-        ">
-        <button id="closePlayerTableInfoBtn"
-            style="position: absolute; top: 15px; right: 15px; background: #eb3349; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2em; cursor: pointer; display: flex; align-items: center; justify-content: center; pointer-events: auto;">×</button>
+    <div id="playerTableInfoModal">
+        <button id="closePlayerTableInfoBtn">×</button>
 
-        <div style="font-size: 3em; margin-bottom: 30px; font-weight: bold; color: #2c3e50;">
+        <div class="info-name-container">
             <span id="playerTableInfoName"></span>
         </div>
-        <div style="font-size: 2.5em; margin-bottom: 20px; color: #34495e;">
-            Table <span id="playerTableInfoTable" style="color: #e74c3c; font-weight: bold;"></span>
+        
+        <div class="info-table-container">
+            Table <span id="playerTableInfoTable"></span>
         </div>
-        <div
-            style="font-size: 2em; margin-bottom: 15px; padding: 20px; background: rgba(236, 240, 241, 0.75); border-radius: 10px;">
-            <div style="margin-bottom: 10px;">
-                <span id="playerTableInfoColor" style="font-weight: bold;"></span>
+        
+        <div class="info-opponent-block">
+            <div class="info-color">
+                <span id="playerTableInfoColor"></span>
             </div>
-            <div style="margin-top: 10px; font-size: 0.9em;">
-                contre
-            </div>
-            <div style="margin-top: 10px; font-weight: bold; color: #2c3e50;">
+            <div class="info-vs">contre</div>
+            <div class="info-opponent-name">
                 <span id="playerTableInfoOpponent"></span>
             </div>
         </div>
@@ -7738,7 +7792,7 @@
 
 <script>
 // =====================================================
-// SYSTÈME DE SUIVI JOUEUR V6 (ROBUSTE & PERSISTANT)
+// SYSTÈME DE SUIVI JOUEUR V7 (CORRECTIF NOMS ADVERSAIRES)
 // =====================================================
 
 window.watchedPlayerName = localStorage.getItem('chessRoomWatchedPlayer') || null;
@@ -7747,7 +7801,6 @@ window.wakeLock = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.watchedPlayerName) {
-        // Petit délai pour laisser le temps au chargement initial
         setTimeout(() => enableTrackingMode(window.watchedPlayerName), 500);
     }
 });
@@ -7806,9 +7859,7 @@ function enableTrackingMode(name) {
 
     if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(e => console.log(e));
     
-    // Force le redessin pour appliquer le style jaune immédiatement
     if (typeof renderAllTables === 'function') renderAllTables();
-    
     checkAndRedirectPlayer();
 }
 
@@ -7820,7 +7871,6 @@ window.stopAutoWatch = function() {
     document.getElementById('playerSelectContainer').style.display = 'block';
     document.getElementById('playerTrackingContainer').style.display = 'none';
     
-    // Nettoyage visuel
     if (typeof renderAllTables === 'function') renderAllTables();
     updateSpectatorPlayerList();
 };
@@ -7841,7 +7891,6 @@ window.checkAndRedirectPlayer = function() {
         return;
     }
 
-    // Normalisation pour comparaison
     const normalize = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
     const targetName = normalize(window.watchedPlayerName);
     
@@ -7862,10 +7911,14 @@ window.checkAndRedirectPlayer = function() {
                         tableId: table.id,
                         boardNum: board.boardNumber,
                         color: isWhite ? '⚪ Blancs' : '⚫ Noirs',
-                        opponent: isWhite ? board.players.black.name : board.players.white.name,
+                        // On récupère les vrais objets joueurs complets pour l'affichage
+                        playerObj: isWhite ? board.players.white : board.players.black,
+                        opponentObj: isWhite ? board.players.black : board.players.white,
+                        // Pour le panneau latéral
+                        opponentName: isWhite ? board.players.black.name : board.players.white.name,
                         opponentElo: isWhite ? board.players.black.elo : board.players.white.elo,
-                        rawWhite: board.players.white.name,
-                        rawElo: isWhite ? board.players.white.elo : board.players.black.elo
+                        rawWhite: board.players.white, // Objet complet
+                        rawBlack: board.players.black  // Objet complet
                     };
                     break;
                 }
@@ -7879,37 +7932,43 @@ window.checkAndRedirectPlayer = function() {
         infoDiv.innerHTML = `
             <div style="color: #667eea; font-weight: bold; font-size: 1.4em; margin-bottom: 5px;">Table ${foundData.boardNum}</div>
             <div style="font-size: 1.1em; margin-bottom: 5px;">${foundData.color}</div>
-            <div style="font-size: 0.9em; color: #555;">Contre : <strong>${foundData.opponent}</strong> ${oppEloDisplay}</div>
+            <div style="font-size: 0.9em; color: #555;">Contre : <strong>${foundData.opponentName}</strong> ${oppEloDisplay}</div>
         `;
         infoDiv.style.borderColor = "#28a745"; 
 
-        // Signature unique : Ronde + Table + Adversaire
-        const currentSignature = currentRoundKey + "_" + foundData.boardNum + "_" + foundData.opponent;
+        const currentSignature = currentRoundKey + "_" + foundData.boardNum + "_" + foundData.opponentName;
         
-        // Si c'est un NOUVEL appariement (ou rechargement), on zoome et on affiche le popup
+        // DÉTECTION DE CHANGEMENT POUR LE POPUP
         if (window.lastFoundSignature !== currentSignature) {
             console.log("Nouveau match détecté -> Zoom & Popup");
             window.lastFoundSignature = currentSignature;
             
-            // 1. Scroll (avec un petit délai pour laisser le temps au rendu)
+            // 1. Scroll
             setTimeout(() => {
                 const el = document.getElementById(`phys-table-${foundData.tableId}`);
                 if(el) el.scrollIntoView({behavior: "smooth", block: "center"});
             }, 300);
             
-            // 2. Popup (qui ne se ferme plus seul)
+            // 2. Popup CORRECTEMENT REMPLI
             if (typeof showPlayerTableInfo === 'function') {
-                // On ferme d'abord l'ancien s'il existe pour éviter les bugs
+                // Fermer l'ancien
                 const oldModal = document.getElementById('playerTableInfoModal');
                 if(oldModal) oldModal.style.display = 'none';
 
                 setTimeout(() => {
+                    // On passe les vrais objets joueurs ici !
                     showPlayerTableInfo(
-                        { boardNumber: foundData.boardNum, players: { white: {name: "...", elo: ""}, black: {name: "...", elo: ""} } }, 
+                        { 
+                            boardNumber: foundData.boardNum, 
+                            players: { 
+                                white: foundData.rawWhite, 
+                                black: foundData.rawBlack 
+                            } 
+                        }, 
                         null, 
                         (foundData.color.includes('Blanc') ? 'white' : 'black'), 
                         window.watchedPlayerName, 
-                        foundData.rawElo
+                        foundData.playerObj.elo // Elo du joueur suivi
                     );
                 }, 400);
             }
