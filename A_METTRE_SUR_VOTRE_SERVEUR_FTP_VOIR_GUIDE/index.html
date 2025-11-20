@@ -223,7 +223,7 @@
         }
 
         .table-element.hidden-by-filter {
-             display: none !important;
+            display: none !important;
         }
 
         #projectorReturnBtn:hover {
@@ -303,6 +303,7 @@
         .spectator-mode .sidebar-section {
             display: none !important;
         }
+
         .spectator-mode #liveFollowSection {
             display: block !important;
         }
@@ -322,7 +323,7 @@
         /* =========================================================
            CORRECTION : Forcer l'affichage du Suivi en Spectateur
         ========================================================= */
-        
+
         /* Rendre visibles les boutons et le menu déroulant UNIQUEMENT dans la section Suivi */
         .spectator-mode #liveFollowSection button,
         .spectator-mode #liveFollowSection select {
@@ -749,20 +750,27 @@
 
         /* STYLE SURBRILLANCE JOUEUR (JAUNE PERMANENT) */
         .table-element.highlight-player {
-            background-color: #fff176 !important; /* Jaune vif fond */
-            border: 4px solid #ff6f00 !important; /* Bordure Orange/Rouge */
-            box-shadow: 0 0 20px rgba(255, 111, 0, 0.6) !important; /* Halo lumineux */
-            z-index: 9999 !important; /* Toujours au-dessus des autres */
-            transform: scale(1.05); /* Légèrement grossi */
+            background-color: #fff176 !important;
+            /* Jaune vif fond */
+            border: 4px solid #ff6f00 !important;
+            /* Bordure Orange/Rouge */
+            box-shadow: 0 0 20px rgba(255, 111, 0, 0.6) !important;
+            /* Halo lumineux */
+            z-index: 9999 !important;
+            /* Toujours au-dessus des autres */
+            transform: scale(1.05);
+            /* Légèrement grossi */
             transition: all 0.3s ease;
         }
-        
+
         /* En mode sombre, on adapte pour que ça ne pique pas les yeux */
         body.dark-mode .table-element.highlight-player {
             background-color: #fdd835 !important;
             border-color: #ff6f00 !important;
-            color: #000 !important; /* Force le texte en noir pour lisibilité */
+            color: #000 !important;
+            /* Force le texte en noir pour lisibilité */
         }
+
         body.dark-mode .table-element.highlight-player .player-name {
             color: #000 !important;
         }
@@ -1741,17 +1749,22 @@
         CORRECTION : Mode Sombre pour les tables terminées
         ===================================================== */
         body.dark-mode .board-container.board-scored {
-            background-color: #4a1a1a !important; /* Rouge foncé pour le fond */
-            border-color: #ff5252 !important;     /* Rouge vif pour la bordure */
+            background-color: #4a1a1a !important;
+            /* Rouge foncé pour le fond */
+            border-color: #ff5252 !important;
+            /* Rouge vif pour la bordure */
         }
 
         body.dark-mode .board-container.board-scored .player-name {
-            color: #ffdcdc !important; /* Texte clair légèrement rosé */
+            color: #ffdcdc !important;
+            /* Texte clair légèrement rosé */
         }
 
         body.dark-mode .board-container.board-scored .board-number {
-            color: #ff8a80 !important; /* Numéro d'échiquier rouge clair */
+            color: #ff8a80 !important;
+            /* Numéro d'échiquier rouge clair */
         }
+
         /* --- CORRECTIONS MODE SPECTATEUR --- */
 
         /* 1. Afficher la section des Rondes */
@@ -1775,76 +1788,101 @@
         /* =====================================================
        STYLES POPUP INFO JOUEUR (CORRIGÉS & RÉDUITS)
     ===================================================== */
-    #playerTableInfoModal {
-        display: none; 
-        position: fixed;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        width: 90%; max-width: 450px; /* Plus étroit */
-        background: rgba(255, 255, 255, 0.98); /* Fond blanc opaque */
-        border-radius: 12px;
-        padding: 25px 20px;
-        text-align: center;
-        box-shadow: 0 15px 50px rgba(0,0,0,0.5);
-        z-index: 10005; 
-        border: 3px solid #667eea;
-        pointer-events: auto; /* Clics activés */
-    }
+        #playerTableInfoModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 450px;
+            /* Plus étroit */
+            background: rgba(255, 255, 255, 0.98);
+            /* Fond blanc opaque */
+            border-radius: 12px;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            z-index: 10005;
+            border: 3px solid #667eea;
+            pointer-events: auto;
+            /* Clics activés */
+        }
 
-    /* Bouton Fermer */
-    #closePlayerTableInfoBtn {
-        position: absolute; top: 10px; right: 10px;
-        background: #eb3349; color: white;
-        border: none; border-radius: 50%;
-        width: 30px; height: 30px;
-        font-size: 1.2em; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-    }
+        /* Bouton Fermer */
+        #closePlayerTableInfoBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #eb3349;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    /* Nom du joueur suivi */
-    .info-name-container {
-        font-size: 1.6em; /* Était 3em -> Réduit de moitié */
-        margin-bottom: 10px;
-        font-weight: 800;
-        color: #2c3e50;
-        word-wrap: break-word;
-        line-height: 1.2;
-    }
+        /* Nom du joueur suivi */
+        .info-name-container {
+            font-size: 1.6em;
+            /* Était 3em -> Réduit de moitié */
+            margin-bottom: 10px;
+            font-weight: 800;
+            color: #2c3e50;
+            word-wrap: break-word;
+            line-height: 1.2;
+        }
 
-    /* "Table X" */
-    .info-table-container {
-        font-size: 1.4em; /* Était 2.5em */
-        margin-bottom: 15px;
-        color: #34495e;
-    }
-    #playerTableInfoTable {
-        color: #e74c3c; font-weight: bold; font-size: 1.2em;
-    }
+        /* "Table X" */
+        .info-table-container {
+            font-size: 1.4em;
+            /* Était 2.5em */
+            margin-bottom: 15px;
+            color: #34495e;
+        }
 
-    /* Bloc Adversaire */
-    .info-opponent-block {
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-    }
+        #playerTableInfoTable {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
 
-    /* Couleur (Blancs/Noirs) */
-    .info-color {
-        font-size: 1.2em; font-weight: bold; margin-bottom: 5px;
-    }
+        /* Bloc Adversaire */
+        .info-opponent-block {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
 
-    .info-vs {
-        font-size: 0.9em; color: #7f8c8d; font-style: italic; margin-bottom: 5px;
-    }
+        /* Couleur (Blancs/Noirs) */
+        .info-color {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
 
-    /* Nom de l'adversaire */
-    .info-opponent-name {
-        font-size: 1.3em; /* Était 2em -> Réduit */
-        font-weight: bold;
-        color: #2c3e50;
-        word-wrap: break-word; /* Coupe les noms très longs */
-    }
+        .info-vs {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        /* Nom de l'adversaire */
+        .info-opponent-name {
+            font-size: 1.3em;
+            /* Était 2em -> Réduit */
+            font-weight: bold;
+            color: #2c3e50;
+            word-wrap: break-word;
+            /* Coupe les noms très longs */
+        }
     </style>
 </head>
 
@@ -1860,32 +1898,38 @@
             <div class="sidebar">
 
                 <div class="sidebar-section" id="liveFollowSection">
-                    <h3 onclick="toggleAccordion(this); setTimeout(updateSpectatorPlayerList, 100);" style="background: #e8f5e9; color: #2e7d32; cursor: pointer;">
+                    <h3 onclick="toggleAccordion(this); setTimeout(updateSpectatorPlayerList, 100);"
+                        style="background: #e8f5e9; color: #2e7d32; cursor: pointer;">
                         🕵️ Suivi (Live)
                     </h3>
-                    
+
                     <div class="sidebar-content expanded">
-                        <div style="background: #e8f5e9; color: #2e7d32; padding: 5px 10px; font-weight: bold; text-align: center; font-size: 0.9em; border-bottom: 1px solid #c8e6c9; margin-bottom: 10px; border-radius: 4px;">
+                        <div
+                            style="background: #e8f5e9; color: #2e7d32; padding: 5px 10px; font-weight: bold; text-align: center; font-size: 0.9em; border-bottom: 1px solid #c8e6c9; margin-bottom: 10px; border-radius: 4px;">
                             En cours : <span id="spectatorRoundDisplay">--</span>
                         </div>
 
                         <div id="playerSelectContainer">
                             <label style="font-weight: bold; font-size: 0.9em; color: #555;">Joueur à suivre ?</label>
-                            <select id="spectatorPlayerSelect" style="width: 100%; padding: 8px; margin-top: 5px; font-size: 1em; border: 2px solid #2e7d32; background: white;">
+                            <select id="spectatorPlayerSelect"
+                                style="width: 100%; padding: 8px; margin-top: 5px; font-size: 1em; border: 2px solid #2e7d32; background: white;">
                                 <option value="">-- Charger la liste --</option>
                             </select>
 
-                            <button class="btn-success" style="margin-top: 10px; width: 100%; font-weight: bold;" onclick="startAutoWatchFromList()">
+                            <button class="btn-success" style="margin-top: 10px; width: 100%; font-weight: bold;"
+                                onclick="startAutoWatchFromList()">
                                 ▶️ Activer le Suivi
                             </button>
                         </div>
 
                         <div id="playerTrackingContainer" style="display: none; text-align: center;">
-                            <div style="background: #2e7d32; color: white; padding: 8px; border-radius: 5px; margin-bottom: 10px;">
+                            <div
+                                style="background: #2e7d32; color: white; padding: 8px; border-radius: 5px; margin-bottom: 10px;">
                                 Suivi de : <strong id="trackingPlayerName" style="font-size: 1.1em;">...</strong>
                             </div>
 
-                            <div id="trackingLiveInfo" style="background: white; border: 2px solid #667eea; padding: 10px; border-radius: 5px; margin-bottom: 10px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;">
+                            <div id="trackingLiveInfo"
+                                style="background: white; border: 2px solid #667eea; padding: 10px; border-radius: 5px; margin-bottom: 10px; min-height: 60px; display: flex; flex-direction: column; justify-content: center;">
                                 <span style="font-size: 1.2em; font-weight: bold; color: #666;">⏳ En attente...</span>
                             </div>
 
@@ -1896,7 +1940,8 @@
                     </div>
                 </div>
 
-                <div class="sidebar-section"> <h3 onclick="toggleAccordion(this)">📊 Statistiques</h3>
+                <div class="sidebar-section">
+                    <h3 onclick="toggleAccordion(this)">📊 Statistiques</h3>
                     <div class="sidebar-content">
                         <div class="stats">
                             <div class="stat-item">
@@ -1922,7 +1967,7 @@
                 </div>
 
                 <div class="sidebar-section" id="saveControlsSection">
-                        <h3 onclick="toggleAccordion(this)">💾 Mode</h3>
+                    <h3 onclick="toggleAccordion(this)">💾 Mode</h3>
                     <div class="sidebar-content">
 
                         <div class="switch-container">
@@ -2068,31 +2113,32 @@
                 <div class="sidebar-section">
                     <h3 onclick="toggleAccordion(this)">🎛️ Actions</h3>
                     <div class="sidebar-content">
-                        
+
                         <button class="tool-btn" onclick="toggleProjectorMode()">📽️ Mode Projecteur</button>
                         <button class="tool-btn" onclick="toggleDarkMode()">🌙 Mode Sombre</button>
 
-                        <div style="margin-top: 15px; border-top: 1px solid #ddd; padding-top: 10px; background: #fdfaff; border-radius: 5px; padding: 10px;">
-                            <button id="btnSubscribeNotif" class="btn-info" style="background: #6f42c1; border: none; width: 100%;" onclick="setupGeneralNotification()">
-                                🔔 M'avertir (Nouvelle Ronde)
-                            </button>
-                            <div id="notifStatus" style="display:none; font-size: 0.85em; margin-top: 5px; padding: 5px; border-radius: 4px; background: #e8f5e9; color: #2e7d32;"></div>
-                        </div>
+
 
                         <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
-                            <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Filtres Tables :</label>
+                            <label
+                                style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Filtres
+                                Tables :</label>
                             <div class="filter-buttons">
-                                <button id="filterBtnAll" class="filter-btn active" onclick="filterTables('all')">Toutes</button>
-                                <button id="filterBtnPlaying" class="filter-btn" onclick="filterTables('playing')">En cours</button>
-                                <button id="filterBtnFinished" class="filter-btn" onclick="filterTables('finished')">Terminées</button>
+                                <button id="filterBtnAll" class="filter-btn active"
+                                    onclick="filterTables('all')">Toutes</button>
+                                <button id="filterBtnPlaying" class="filter-btn" onclick="filterTables('playing')">En
+                                    cours</button>
+                                <button id="filterBtnFinished" class="filter-btn"
+                                    onclick="filterTables('finished')">Terminées</button>
                             </div>
                         </div>
 
                         <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
 
                         <button class="btn-info" onclick="exportToPDF()">📄 Résultats (PDF)</button>
-                        <button class="btn-secondary" onclick="exportToTRF()" style="margin-top: 5px;">🌍 Export TRF (FIDE)</button>
-                        
+                        <button class="btn-secondary" onclick="exportToTRF()" style="margin-top: 5px;">🌍 Export TRF
+                            (FIDE)</button>
+
                         <div class="control-group" style="margin-top: 10px; margin-bottom: 5px;">
                             <label for="pdfOrientation" style="font-size: 0.9em;">Orientation Plan :</label>
                             <select id="pdfOrientation" style="padding: 4px 8px; font-size: 0.9em;">
@@ -2100,7 +2146,8 @@
                                 <option value="p">Portrait</option>
                             </select>
                         </div>
-                        <button class="btn-info" id="exportVisualPdfBtn" onclick="exportVisualPDF()">🖨️ Imprimer le Plan</button>
+                        <button class="btn-info" id="exportVisualPdfBtn" onclick="exportVisualPDF()">🖨️ Imprimer le
+                            Plan</button>
 
                         <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
 
@@ -2111,81 +2158,81 @@
                 </div>
             </div>
             <div class="workspace">
-            <div class="toolbar">
-                <button class="tool-btn active" onclick="setTool('select')" id="selectTool">
-                    &nbsp;&nbsp;&nbsp;🖱️ Sélection
-                </button>
-                <button class="tool-btn" onclick="setTool('multiselect')" id="multiselectTool">
-                    ☑️ Plusieurs
-                </button>
-                <button class="tool-btn" onclick="setTool('pan')" id="panTool">
-                    ✋ Bouger
-                </button>
-                <button class="tool-btn" onclick="setTool('moveboard')" id="moveboardTool">
-                    ⇭ Déplacer
-                </button>
+                <div class="toolbar">
+                    <button class="tool-btn active" onclick="setTool('select')" id="selectTool">
+                        &nbsp;&nbsp;&nbsp;🖱️ Sélection
+                    </button>
+                    <button class="tool-btn" onclick="setTool('multiselect')" id="multiselectTool">
+                        ☑️ Plusieurs
+                    </button>
+                    <button class="tool-btn" onclick="setTool('pan')" id="panTool">
+                        ✋ Bouger
+                    </button>
+                    <button class="tool-btn" onclick="setTool('moveboard')" id="moveboardTool">
+                        ⇭ Déplacer
+                    </button>
 
-                <button class="tool-btn" onclick="undo()" id="undoButton" title="Annuler (Ctrl+Z)" disabled>
-                    ↶
-                </button>
-                <button class="tool-btn" onclick="redo()" id="redoButton" title="Rétablir (Ctrl+Y)" disabled>
-                    ↷
-                </button>
+                    <button class="tool-btn" onclick="undo()" id="undoButton" title="Annuler (Ctrl+Z)" disabled>
+                        ↶
+                    </button>
+                    <button class="tool-btn" onclick="redo()" id="redoButton" title="Rétablir (Ctrl+Y)" disabled>
+                        ↷
+                    </button>
 
-                <button class="tool-btn" onclick="deleteSelected()" title="Supprimer (Touche Suppr ou Retour)">
-                    🗑️ Effacer
-                </button>
-                <button class="tool-btn" onclick="duplicateSelected()" title="Dupliquer (Ctrl+D)">
-                    📋 Dupliquer
-                </button>
-                <button class="tool-btn" onclick="rotateSelected()" title="Rotation (R)">
-                    ↻ Tourner
-                </button>
-                <button class="tool-btn" onclick="flipPlayersSelected()">
-                    🔄 Inverser
-                </button>
+                    <button class="tool-btn" onclick="deleteSelected()" title="Supprimer (Touche Suppr ou Retour)">
+                        🗑️ Effacer
+                    </button>
+                    <button class="tool-btn" onclick="duplicateSelected()" title="Dupliquer (Ctrl+D)">
+                        📋 Dupliquer
+                    </button>
+                    <button class="tool-btn" onclick="rotateSelected()" title="Rotation (R)">
+                        ↻ Tourner
+                    </button>
+                    <button class="tool-btn" onclick="flipPlayersSelected()">
+                        🔄 Inverser
+                    </button>
 
-                <button class="btn-success" onclick="startQRScanner()" title="Scanner un résultat par QR Code"
-                    style="margin: 0;">
-                    📷 QR-codes
-                </button>
+                    <button class="btn-success" onclick="startQRScanner()" title="Scanner un résultat par QR Code"
+                        style="margin: 0;">
+                        📷 QR-codes
+                    </button>
 
-                <div class="timer-controls">
-                    <label for="timerMinutes" style="font-size: 0.9em; color: #333;">Minuteur :</label>
-                    <input type="number" id="timerMinutes" value="15" min="-240">
-                    <button class="btn-success btn-small" onclick="startRoundTimer()">▶</button>
-                    <button class="btn-danger btn-small" onclick="stopRoundTimer()">⏹</button>
-                    <span id="roundTimer">00:00</span>
+                    <div class="timer-controls">
+                        <label for="timerMinutes" style="font-size: 0.9em; color: #333;">Minuteur :</label>
+                        <input type="number" id="timerMinutes" value="15" min="-240">
+                        <button class="btn-success btn-small" onclick="startRoundTimer()">▶</button>
+                        <button class="btn-danger btn-small" onclick="stopRoundTimer()">⏹</button>
+                        <span id="roundTimer">00:00</span>
 
-                    <button class="btn-secondary btn-small" id="toggleBigTimerBtn" onclick="toggleBigTimer()"
-                        title="Masquer/Afficher le chrono plein écran"
-                        style="margin-left: 5px; display: none;">👁️</button>
+                        <button class="btn-secondary btn-small" id="toggleBigTimerBtn" onclick="toggleBigTimer()"
+                            title="Masquer/Afficher le chrono plein écran"
+                            style="margin-left: 5px; display: none;">👁️</button>
+                    </div>
+                    <div style="margin-left: auto; color: #6c757d; font-size: 0.9em;">
+                        Nb: <span id="selectedCount">0</span> | Z: <span id="zoomLevel">100%</span>
+                    </div>
                 </div>
-                <div style="margin-left: auto; color: #6c757d; font-size: 0.9em;">
-                    Nb: <span id="selectedCount">0</span> | Z: <span id="zoomLevel">100%</span>
+
+                <div class="canvas-container" id="canvasContainer">
+                    <div class="canvas" id="canvas"></div>
                 </div>
-            </div>
 
-            <div class="canvas-container" id="canvasContainer">
-                <div class="canvas" id="canvas"></div>
-            </div>
+                <div class="zoom-controls">
+                    <input type="range" min="10" max="200" value="100" class="zoom-slider" id="zoomSlider"
+                        oninput="applyZoom(this.value / 100)" onchange="applyZoom(this.value / 100)">
+                    <button class="zoom-btn btn-secondary" onclick="resetZoom()" title="Zoom 100%">⊙</button>
+                    <button class="zoom-btn btn-secondary" onclick="fitAllTables()"
+                        title="Voir toutes les tables">⛶</button>
+                </div>
 
-            <div class="zoom-controls">
-                <input type="range" min="10" max="200" value="100" class="zoom-slider" id="zoomSlider"
-                    oninput="applyZoom(this.value / 100)" onchange="applyZoom(this.value / 100)">
-                <button class="zoom-btn btn-secondary" onclick="resetZoom()" title="Zoom 100%">⊙</button>
-                <button class="zoom-btn btn-secondary" onclick="fitAllTables()"
-                    title="Voir toutes les tables">⛶</button>
-            </div>
+                <div class="shortcut-bar">
+                    <span>S</span> Sél. <span>P</span> Dépl. <span>M</span> Multi-Sél. <span>Ctrl+Z</span> Annuler
+                    <span>Suppr/Retour</span> Suppr. <span>R</span> Rotation <span>Ctrl+A</span> Tout Sél.
+                </div>
 
-            <div class="shortcut-bar">
-                <span>S</span> Sél. <span>P</span> Dépl. <span>M</span> Multi-Sél. <span>Ctrl+Z</span> Annuler
-                <span>Suppr/Retour</span> Suppr. <span>R</span> Rotation <span>Ctrl+A</span> Tout Sél.
             </div>
-
         </div>
-        </div>
-        
+
     </div>
     </div>
 
@@ -2327,38 +2374,46 @@
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            
-            <div style="border: 2px solid #667eea; border-radius: 10px; padding: 20px;">
-                <h3 style="text-align: center; color: #667eea; margin-top: 0; margin-bottom: 20px;">📍 Où est ma table ?</h3>
-                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-                    <button class="btn-primary" style="font-size: 1.1em; padding: 12px;" onclick="startPlayerQRScanner()">
-                        🎫 Scanner mon QR-code
-                    </button>
-                    <button class="btn-info" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerListSearch('VIEW')">
-                        🧑‍🤝‍🧑 Chercher (Liste)
-                    </button>
-                    <button class="btn-info" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerTextSearch('VIEW')">
-                        🔍 Chercher (Texte)
-                    </button>
+
+                <div style="border: 2px solid #667eea; border-radius: 10px; padding: 20px;">
+                    <h3 style="text-align: center; color: #667eea; margin-top: 0; margin-bottom: 20px;">📍 Où est ma
+                        table ?</h3>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                        <button class="btn-primary" style="font-size: 1.1em; padding: 12px;"
+                            onclick="startPlayerQRScanner()">
+                            🎫 Scanner mon QR-code
+                        </button>
+                        <button class="btn-info" style="font-size: 1.1em; padding: 12px;"
+                            onclick="showPlayerListSearch('VIEW')">
+                            🧑‍🤝‍🧑 Chercher (Liste)
+                        </button>
+                        <button class="btn-info" style="font-size: 1.1em; padding: 12px;"
+                            onclick="showPlayerTextSearch('VIEW')">
+                            🔍 Chercher (Texte)
+                        </button>
+                    </div>
                 </div>
-            </div>
-            
-            <div style="border: 2px solid #11998e; border-radius: 10px; padding: 20px;">
-                <h3 style="text-align: center; color: #11998e; margin-top: 0; margin-bottom: 20px;">✍️ Encoder un résultat</h3>
-                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-                    <button class="btn-primary" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerPlanView()">
-                        🗺️ Saisir (Plan)
-                    </button>
-                    <button class="btn-info" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerListSearch('ENCODE')">
-                        🧑‍🤝‍🧑 Choisir (Liste)
-                    </button>
-                    <button class="btn-info" style="font-size: 1.1em; padding: 12px;" onclick="showPlayerTextSearch('ENCODE')">
-                        🔍 Chercher (Texte)
-                    </button>
+
+                <div style="border: 2px solid #11998e; border-radius: 10px; padding: 20px;">
+                    <h3 style="text-align: center; color: #11998e; margin-top: 0; margin-bottom: 20px;">✍️ Encoder un
+                        résultat</h3>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                        <button class="btn-primary" style="font-size: 1.1em; padding: 12px;"
+                            onclick="showPlayerPlanView()">
+                            🗺️ Saisir (Plan)
+                        </button>
+                        <button class="btn-info" style="font-size: 1.1em; padding: 12px;"
+                            onclick="showPlayerListSearch('ENCODE')">
+                            🧑‍🤝‍🧑 Choisir (Liste)
+                        </button>
+                        <button class="btn-info" style="font-size: 1.1em; padding: 12px;"
+                            onclick="showPlayerTextSearch('ENCODE')">
+                            🔍 Chercher (Texte)
+                        </button>
+                    </div>
                 </div>
+
             </div>
-            
-        </div>
 
             <button class="btn-danger"
                 style="margin-top: 30px; width: auto; padding: 10px 20px; display: block; margin-left: auto; margin-right: auto;"
@@ -2451,11 +2506,11 @@
         <div class="info-name-container">
             <span id="playerTableInfoName"></span>
         </div>
-        
+
         <div class="info-table-container">
             Table <span id="playerTableInfoTable"></span>
         </div>
-        
+
         <div class="info-opponent-block">
             <div class="info-color">
                 <span id="playerTableInfoColor"></span>
@@ -2716,9 +2771,9 @@
             nextBoardNumber = state.nextBoardNumber;
             historyStack = JSON.parse(JSON.stringify(state.historyStack));
             redoStack = JSON.parse(JSON.stringify(state.redoStack));
-            
+
             // Gestion du Timer
-            clearInterval(timerInterval); 
+            clearInterval(timerInterval);
             timerInterval = null;
 
             const savedTimerState = state.timerState || { mode: 'stop', targetTime: 0, hidden: false, startTime: 0 };
@@ -2737,14 +2792,14 @@
             if (timerMode !== 'stop') {
                 timerInterval = setInterval(updateTimer, 500);
             }
-            updateTimer(); 
+            updateTimer();
 
             renderAllTables();
             // renderAllTables(); // Doublon supprimé
             renderAllRooms();
             updateStats();
             updateHistoryButtons();
-            
+
             if (typeof updateSpectatorPlayerList === 'function') {
                 updateSpectatorPlayerList();
             }
@@ -3297,7 +3352,8 @@
                                 black: { name: "", elo: "", comment: "" }
                             },
                             flipped: false,
-                            score: { white: "", black: "" }
+                            score: { white: "", black: "" },
+                            arbiterComment: { text: "", flag: "none" }
                         });
                         currentBoardCount++;
                     }
@@ -3366,10 +3422,7 @@
 
                 element.prepend(contentInner);
 
-                const flagClass = physicalTable.arbiterComment ? `flag-${physicalTable.arbiterComment.flag}` : 'flag-none';
-
                 element.innerHTML += `
-                    <div class="arbiter-flag ${flagClass}" onclick="event.stopPropagation(); editArbiterComment(${physicalTable.id})" title="Commentaire arbitre">⚐</div>
                     <div class="delete-btn" onclick="event.stopPropagation(); deleteTable(${physicalTable.id})">×</div>
                     <div class="rotate-btn" onclick="event.stopPropagation(); rotateTable(${physicalTable.id})">↻</div>
                     <div class="resize-handle handle-left" onmousedown="event.stopPropagation(); startResize(event, ${physicalTable.id}, 'left')">⬌</div>
@@ -3446,34 +3499,27 @@
 
         // --- Modification des Éléments ---
 
-        // Commentaire Arbitre (Table)
-        function editArbiterComment(tableId) {
-            const table = physicalTables.find(t => t.id === tableId);
-            if (!table) return;
+        // Commentaire Arbitre (Échiquier)
+        function editArbiterComment(boardNum) {
+            const { board, physicalTable } = findBoard(boardNum);
+            if (!board) return;
 
-            if (!table.arbiterComment) {
-                table.arbiterComment = { text: "", flag: "none" };
+            if (!board.arbiterComment) {
+                board.arbiterComment = { text: "", flag: "none" };
             }
 
-            const currentText = table.arbiterComment.text || '';
-            const newText = prompt("Ajouter/modifier le commentaire arbitre pour cette table:", currentText);
+            const currentText = board.arbiterComment.text || '';
+            const newText = prompt(`Ajouter/modifier le commentaire arbitre pour l'échiquier ${boardNum}:`, currentText);
 
             if (newText !== null) {
-                const currentFlag = table.arbiterComment.flag || 'none';
+                const currentFlag = board.arbiterComment.flag || 'none';
                 const newFlag = prompt("Couleur du drapeau (none, red, yellow, green):", currentFlag);
 
                 // CORRECTION: Modifier AVANT de sauvegarder
-                table.arbiterComment.text = newText.trim();
-                table.arbiterComment.flag = newFlag ? newFlag.trim().toLowerCase() : 'none';
+                board.arbiterComment.text = newText.trim();
+                board.arbiterComment.flag = newFlag ? newFlag.trim().toLowerCase() : 'none';
 
-                const element = document.getElementById(`phys-table-${tableId}`);
-                if (element) {
-                    const flagEl = element.querySelector('.arbiter-flag');
-                    if (flagEl) {
-                        flagEl.className = `arbiter-flag flag-${table.arbiterComment.flag}`;
-                    }
-                }
-
+                updateTableDisplay(physicalTable.id);
                 saveHistoryState();
             }
         }
@@ -3862,6 +3908,7 @@
                         updateTableDisplay(id);
                     }
                 });
+
                 saveHistoryState(); // Sauvegarder APRÈS
             } catch (error) { console.error('Error in flipPlayersSelected:', error); }
         }
@@ -3889,7 +3936,16 @@
                 let hasVisibleBoards = false;
                 let tableIsHighlight = false; // Pour savoir si on allume toute la table
 
-                table.boards.forEach((board) => {
+                // --- LOGIQUE INVERSION TABLE 1 (Layout TR/BR) ---
+                let boardsToRender = [...table.boards];
+                const corner = document.getElementById('startCorner') ? document.getElementById('startCorner').value : 'tl';
+                // Si la table contient l'échiquier 1 ET que le layout commence à droite (tr ou br)
+                const hasBoard1 = table.boards.some(b => b.boardNumber === 1);
+                if (hasBoard1 && (corner === 'tr' || corner === 'br')) {
+                    boardsToRender.reverse();
+                }
+
+                boardsToRender.forEach((board) => {
                     const isInverted = (table.rotation === 180 && !board.flipped) || (table.rotation !== 180 && board.flipped);
                     if (board.players === null) allPaired = false;
                     const boardNumForEvent = (typeof board.boardNumber === 'string') ? `'${board.boardNumber.replace(/'/g, "\\'")}'` : board.boardNumber;
@@ -3901,7 +3957,7 @@
                     if (targetName && board.players) {
                         const pWhite = normalize(board.players.white.name);
                         const pBlack = normalize(board.players.black.name);
-                        
+
                         // On vérifie si le nom suivi est contenu dans le nom du joueur (ex: "Dupont" dans "DUPONT Jean")
                         if ((pWhite && pWhite.includes(targetName)) || (pBlack && pBlack.includes(targetName))) {
                             isBoardHighlight = true;
@@ -3913,68 +3969,88 @@
                         boardHasPlayers = true;
                         const buildPlayerHTML = (player, color, score) => {
                             if (!player) return '';
-                            let displayNameHTML = (!player.name || player.name.trim() === "") 
-                                ? `<span style="color: #999; font-style: italic;">${color === 'white' ? 'Blancs' : 'Noirs'}</span>` 
+                            let displayNameHTML = (!player.name || player.name.trim() === "")
+                                ? `<span style="color: #999; font-style: italic;">${color === 'white' ? 'Blancs' : 'Noirs'}</span>`
                                 : formatPlayerName(player.name);
-                            
+
+                            // Ajout du commentaire joueur
+                            let commentHTML = '';
+                            if (player.comment && player.comment.trim() !== "") {
+                                commentHTML = `<div class="player-comment">${player.comment}</div>`;
+                            }
+
                             return `
-                                <div class="player" data-color="${color}">
-                                    <div class="player-color ${color}"></div>
-                                    <div class="player-info">
-                                        <div class="player-name" onclick="event.stopPropagation(); editPlayerComment(${boardNumForEvent}, '${color}')">${displayNameHTML}</div>
-                                        <div class="player-elo">${player.elo || '----'}</div>
-                                    </div>
-                                    <div class="player-score" onclick="event.stopPropagation(); editScore(${boardNumForEvent})">${score || '...'}</div>
-                                </div>`;
+                        <div class="player" data-color="${color}">
+                            <div class="player-color ${color}"></div>
+                            <div class="player-info">
+                                <div class="player-name" title="${player.name}" onclick="event.stopPropagation(); editPlayerComment(${boardNumForEvent}, '${color}')">${displayNameHTML}</div>
+                                <div class="player-elo">${player.elo || '----'}</div>
+                                ${commentHTML}
+                            </div>
+                            <div class="player-score" onclick="event.stopPropagation(); editScore(${boardNumForEvent})">${score || '...'}</div>
+                        </div>`;
                         };
                         const whiteHTML = buildPlayerHTML(board.players.white, 'white', board.score.white);
                         const blackHTML = buildPlayerHTML(board.players.black, 'black', board.score.black);
                         playersHTML = isInverted ? (blackHTML + whiteHTML) : (whiteHTML + blackHTML);
                     } else {
-                        // ... (Code placeholder identique) ...
-                        playersHTML = `<div class="player" style="opacity:0.5">...</div>`; 
+                        playersHTML = `<div class="player" style="opacity:0.5">...</div>`;
                     }
 
                     const hasScore = (board.score && (board.score.white !== '' || board.score.black !== ''));
                     if (!isPlayerMode || !document.body.classList.contains('player-plan-view-mode') || !hasScore) hasVisibleBoards = true;
 
                     // === APPLICATION DU STYLE JAUNE DIRECTEMENT ICI ===
-                    const highlightStyle = isBoardHighlight ? 
+                    const highlightStyle = isBoardHighlight ?
                         'background-color: #fff59d !important; border: 3px solid #ff6f00 !important; box-shadow: 0 0 15px #ff6f00 !important;' : '';
 
+                    // --- DRAPEAU ARBITRE ---
+                    const flagClass = (board.arbiterComment && board.arbiterComment.flag) ? `flag-${board.arbiterComment.flag}` : 'flag-none';
+                    const flagHTML = `<div class="arbiter-flag ${flagClass}" onclick="event.stopPropagation(); editArbiterComment(${boardNumForEvent})" title="Commentaire arbitre" style="position:absolute; top:-10px; left:-10px; z-index:10;">⚐</div>`;
+
                     const boardHTML = `
-                        <div class="board-container ${hasScore ? 'board-scored' : ''} ${boardHasPlayers ? 'has-players' : ''}" 
-                             data-board-number="${board.boardNumber}"
-                             style="${highlightStyle}">
-                            <button class="flip-btn-single" onclick="event.stopPropagation(); flipSingleBoard(${boardNumForEvent})">🔄</button>
-                            <div class="board-number board-number-display" onDblClick="event.stopPropagation(); editBoardNumber(${boardNumForEvent})">${board.boardNumber}</div>
-                            <div class="players-container">${playersHTML}</div>
-                        </div>`;
+                <div class="board-container ${hasScore ? 'board-scored' : ''} ${boardHasPlayers ? 'has-players' : ''}"
+                     data-board-number="${board.boardNumber}"
+                     style="${highlightStyle}">
+                    ${flagHTML}
+                    <button class="flip-btn-single" onclick="event.stopPropagation(); flipSingleBoard(${boardNumForEvent})">🔄</button>
+                    <div class="board-number board-number-display" onDblClick="event.stopPropagation(); editBoardNumber(${boardNumForEvent})">${board.boardNumber}</div>
+                    <div class="players-container">${playersHTML}</div>
+                </div>`;
 
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = boardHTML;
-                    const boardContainer = tempDiv.firstElementChild;
-                    
-                    // Listeners (identiques)
-                    boardContainer.addEventListener('click', function (e) {
-                        if (isPlayerMode && document.body.classList.contains('player-plan-view-mode') && boardHasPlayers) {
-                            e.stopPropagation(); editScore(board.boardNumber);
+                    const boardEl = tempDiv.firstElementChild;
+
+                    boardEl.addEventListener('mousedown', (e) => {
+                        if (currentTool === 'moveboard') {
+                            e.stopPropagation();
+                            startMoveBoard(e, board.boardNumber, tableId);
                         }
                     });
-                    boardContainer.addEventListener('mousedown', (e) => {
-                         if (currentTool === 'moveboard' && !isPlayerMode) { e.stopPropagation(); startMoveBoard(e, board.boardNumber, table.id); }
-                    });
 
-                    contentInner.appendChild(boardContainer);
+                    // Clic pour voir les détails en mode joueur OU saisir le score
+                    boardEl.addEventListener('click', (e) => {
+                        if (isPlayerMode && boardHasPlayers) {
+                            e.stopPropagation();
+                            // NOUVEAU: Clic n'importe où sur l'échiquier ouvre la saisie de score
+                            if (document.body.classList.contains('player-plan-view-mode')) {
+                                showSimplifiedScoreModal(board, table);
+                            }
+                        }
+                    });
+                    contentInner.appendChild(boardEl);
                 });
 
-                element.style.display = (isPlayerMode && document.body.classList.contains('player-plan-view-mode') && !hasVisibleBoards) ? 'none' : 'block';
-                if (allPaired) element.classList.add('has-pairing'); else element.classList.remove('has-pairing');
+                // Mise à jour de l'état visuel de la table (pairing, highlight)
+                if (allPaired && table.boards.length > 0) {
+                    element.classList.add('has-pairing');
+                } else {
+                    element.classList.remove('has-pairing');
+                }
 
-                // Si un des échiquiers est allumé, on met la table en avant plan
                 if (tableIsHighlight) {
-                    element.style.zIndex = '9999';
-                    element.classList.add('highlight-player'); // Pour le style global
+                    element.classList.add('highlight-player');
                 } else {
                     element.classList.remove('highlight-player');
                 }
@@ -4796,7 +4872,7 @@
                 checkAndRedirectPlayer();
             }
         }
-        
+
 
         function exportToPDF() {
             if (physicalTables.length === 0) {
@@ -6115,9 +6191,7 @@
         }
 
         function returnToPlayerHome() {
-            document.body.classList.remove('player-plan-view-mode');
-            document.getElementById('playerHomeModal').style.display = 'flex';
-            renderAllTables(); // Re-rendre pour afficher normalement
+            closePlayerTableInfo();
         }
 
         // --- NOUVEAU: Gestion Recherche Joueur (Texte) ---
@@ -6285,8 +6359,231 @@
             if (foundGame) {
                 showSimplifiedScoreModal(foundGame.board, foundGame.physicalTable);
             } else {
-                // CORRECTION: Ne pas alerter si on vient d'un scan QR (car on va chercher dans les tables terminées)
-                if (!fromQR) {
+                // CORRECTION: Ne pas alerter si on vient d'un scan QR (car on va chercher da// --- NOUVEAU: Gestion Suivi Multi-Joueurs ---
+                let watchedPlayers = [];
+                let lastWatchedResults = {}; // Pour détecter les changements d'état
+
+                // Initialisation au chargement
+                try {
+                    const stored = localStorage.getItem('chessRoomWatchedPlayers');
+                    if (stored) {
+                        watchedPlayers = JSON.parse(stored);
+                        if (!Array.isArray(watchedPlayers)) watchedPlayers = [];
+                    }
+                } catch (e) {
+                    watchedPlayers = [];
+                }
+
+                function enableTrackingMode(playerName) {
+                    if (!playerName) return;
+
+                    // Ajouter si pas déjà présent
+                    if (!watchedPlayers.includes(playerName)) {
+                        watchedPlayers.push(playerName);
+                        localStorage.setItem('chessRoomWatchedPlayers', JSON.stringify(watchedPlayers));
+                    }
+
+                    document.getElementById('playerSelectContainer').style.display = 'none';
+                    document.getElementById('playerTrackingContainer').style.display = 'block';
+
+                    // Mettre à jour l'affichage
+                    checkAndRedirectPlayer();
+                }
+
+                window.stopAutoWatch = function (nameToRemove = null) {
+                    if (nameToRemove) {
+                        watchedPlayers = watchedPlayers.filter(p => p !== nameToRemove);
+                    } else {
+                        if (confirm("Arrêter le suivi de TOUS les joueurs ?")) {
+                            watchedPlayers = [];
+                        } else {
+                            return;
+                        }
+                    }
+                    localStorage.setItem('chessRoomWatchedPlayers', JSON.stringify(watchedPlayers));
+
+                    // Nettoyer les états précédents pour ce joueur
+                    if (nameToRemove && lastWatchedResults[nameToRemove]) {
+                        delete lastWatchedResults[nameToRemove];
+                    } else if (!nameToRemove) {
+                        lastWatchedResults = {};
+                    }
+
+                    if (watchedPlayers.length === 0) {
+                        document.getElementById('playerSelectContainer').style.display = 'block';
+                        document.getElementById('playerTrackingContainer').style.display = 'none';
+                        document.getElementById('trackingLiveInfo').innerHTML = '';
+                        // Supprimer le bouton "Ajouter" s'il existe
+                        const addBtn = document.getElementById('btnAddAnotherPlayer');
+                        if (addBtn) addBtn.remove();
+                    } else {
+                        checkAndRedirectPlayer();
+                    }
+
+                    if (typeof renderAllTables === 'function') renderAllTables();
+                    updateSpectatorPlayerList();
+                };
+
+                // Fonction de vérification et mise à jour (Multi-joueurs)
+                function checkAndRedirectPlayer() {
+                    if (watchedPlayers.length === 0) return;
+
+                    const container = document.getElementById('trackingLiveInfo');
+                    if (!container) return;
+
+                    container.innerHTML = ''; // Reset des cartes
+
+                    // Gestion du bouton "Ajouter un joueur" (sous le bouton rouge)
+                    let addBtn = document.getElementById('btnAddAnotherPlayer');
+                    if (!addBtn) {
+                        addBtn = document.createElement('button');
+                        addBtn.id = 'btnAddAnotherPlayer';
+                        addBtn.className = 'btn-info';
+                        addBtn.innerHTML = '➕ Suivre un autre joueur';
+                        addBtn.style.width = '100%';
+                        addBtn.style.marginTop = '10px';
+                        addBtn.onclick = () => {
+                            document.getElementById('playerSelectContainer').style.display = 'block';
+                            document.getElementById('playerTrackingContainer').style.display = 'none';
+                        };
+                        // Insérer après le bouton rouge (qui est le dernier enfant de playerTrackingContainer normalement)
+                        const trackingContainer = document.getElementById('playerTrackingContainer');
+                        trackingContainer.appendChild(addBtn);
+                    }
+
+                    // S'assurer que le bouton rouge est visible et a le bon texte
+                    // (Le bouton rouge est statique dans le HTML, on ne le touche pas, mais on ajoute le bouton bleu après)
+
+                    watchedPlayers.forEach(name => {
+                        const card = document.createElement('div');
+                        card.className = 'info-box';
+                        card.style.marginBottom = '15px';
+                        card.style.position = 'relative';
+
+                        // Bouton supprimer ce joueur
+                        const delBtn = document.createElement('button');
+                        delBtn.innerHTML = '🗑️';
+                        delBtn.style.position = 'absolute';
+                        delBtn.style.top = '5px';
+                        delBtn.style.right = '5px';
+                        delBtn.style.background = 'none';
+                        delBtn.style.border = 'none';
+                        delBtn.style.cursor = 'pointer';
+                        delBtn.style.fontSize = '1.2em';
+                        delBtn.onclick = () => stopAutoWatch(name);
+                        card.appendChild(delBtn);
+
+                        const searchTerm = name.toLowerCase();
+                        let foundGame = null;
+                        let playerColor = null;
+
+                        // Recherche de la partie
+                        for (const physicalTable of physicalTables) {
+                            for (const board of physicalTable.boards) {
+                                if (board.players) {
+                                    const whiteName = board.players.white ? board.players.white.name.toLowerCase().trim() : '';
+                                    const blackName = board.players.black ? board.players.black.name.toLowerCase().trim() : '';
+
+                                    if (whiteName === searchTerm || whiteName.includes(searchTerm)) {
+                                        foundGame = { physicalTable, board, color: 'white' };
+                                        playerColor = 'white';
+                                        break;
+                                    }
+                                    if (blackName === searchTerm || blackName.includes(searchTerm)) {
+                                        foundGame = { physicalTable, board, color: 'black' };
+                                        playerColor = 'black';
+                                        break;
+                                    }
+                                }
+                            }
+                            if (foundGame) break;
+                        }
+
+                        if (foundGame) {
+                            const { board, physicalTable } = foundGame;
+                            const whitePlayer = board.players.white;
+                            const blackPlayer = board.players.black;
+
+                            let opponentName = playerColor === 'white' ? blackPlayer.name : whitePlayer.name;
+                            let myColorDisplay = playerColor === 'white' ? "⚪ Blancs" : "⚫ Noirs";
+
+                            let statusHTML = '';
+                            let isFinished = false;
+                            let resultText = '';
+
+                            // Vérification du résultat
+                            if (board.score.white !== '' || board.score.black !== '') {
+                                isFinished = true;
+                                resultText = `${board.score.white}-${board.score.black}`;
+                                if (resultText === '1/2-1/2') resultText = '½-½';
+
+                                let resultClass = 'info';
+                                let resultMessage = 'Partie Terminée';
+
+                                // Analyse du résultat pour le joueur suivi
+                                if (playerColor === 'white') {
+                                    if (board.score.white === '1') { resultClass = 'success'; resultMessage = '🏆 Victoire !'; }
+                                    else if (board.score.white === '0') { resultClass = 'error'; resultMessage = '❌ Défaite'; }
+                                    else { resultClass = 'warning'; resultMessage = '⚖️ Nulle'; }
+                                } else {
+                                    if (board.score.black === '1') { resultClass = 'success'; resultMessage = '🏆 Victoire !'; }
+                                    else if (board.score.black === '0') { resultClass = 'error'; resultMessage = '❌ Défaite'; }
+                                    else { resultClass = 'warning'; resultMessage = '⚖️ Nulle'; }
+                                }
+
+                                statusHTML = `
+                    <div class="notification ${resultClass}" style="position: static; opacity: 1; transform: none; margin-top: 10px; text-align: center;">
+                        <div style="font-size: 1.5em; margin-bottom: 5px;">${resultText}</div>
+                        <div>${resultMessage}</div>
+                    </div>
+                `;
+
+                                // --- POPUP SUR LE PLAN (NOUVEAU) ---
+                                // Si le résultat vient d'apparaître (n'était pas là avant)
+                                if (!lastWatchedResults[name]) {
+                                    // On marque comme vu pour ne pas spammer
+                                    lastWatchedResults[name] = resultText;
+
+                                    // Afficher une notification sticky
+                                    showNotification(`Résultat pour ${formatPlayerName(name)} : ${resultText} (${resultMessage})`, resultClass, 10000);
+
+                                    // Optionnel : Afficher une modale spéciale
+                                    // alert(`Résultat pour ${name} : ${resultText}`);
+                                }
+
+                            } else {
+                                statusHTML = `
+                    <div style="margin-top: 10px; text-align: center; color: #2196F3; font-weight: bold;">
+                        ⏳ Partie en cours...
+                    </div>
+                `;
+                                // Reset de l'état si la partie repasse en cours (correction d'erreur)
+                                if (lastWatchedResults[name]) {
+                                    delete lastWatchedResults[name];
+                                }
+                            }
+
+                            card.innerHTML += `
+                <h3 style="margin-top: 0; color: #2c3e50;">${formatPlayerName(name)}</h3>
+                <div style="font-size: 1.1em; margin-bottom: 5px;">
+                    Table <strong style="color: #e74c3c; font-size: 1.3em;">${board.boardNumber}</strong>
+                </div>
+                <div style="margin-bottom: 5px;">
+                    ${myColorDisplay} <span style="color: #7f8c8d;">vs</span> <strong>${formatPlayerName(opponentName)}</strong>
+                </div>
+                ${statusHTML}
+            `;
+                        } else {
+                            card.innerHTML += `
+                <h3 style="margin-top: 0; color: #2c3e50;">${formatPlayerName(name)}</h3>
+                <div style="color: #999; font-style: italic;">
+                    Aucune partie trouvée dans cette ronde.
+                </div>
+            `;
+                        }
+                        container.appendChild(card);
+                    });
+                } if (!fromQR) {
                     alert(`Aucune partie non terminée trouvée pour "${name}" dans cette ronde.`);
                     document.getElementById('playerHomeModal').style.display = 'flex'; // Retour accueil
                 }
@@ -6367,10 +6664,16 @@
 
             // Revenir à l'accueil joueur (le hub central)
             if (isPlayerMode) {
+                // NOUVEAU: Nettoyer le joueur suivi en mode joueur pour ne pas garder la surbrillance
+                localStorage.removeItem('chessRoomWatchedPlayer');
+
                 // Quitter le mode plan
                 document.body.classList.remove('player-plan-view-mode');
                 // Afficher le hub
                 document.getElementById('playerHomeModal').style.display = 'flex';
+
+                // Rafraîchir l'affichage pour enlever le style jaune
+                renderAllTables();
             }
         }
 
@@ -6408,15 +6711,15 @@
             const modal = document.getElementById('playerTableInfoModal');
             modal.style.display = 'block';
             // On réactive les clics sur la modale pour pouvoir utiliser le bouton
-            modal.style.pointerEvents = "auto"; 
+            modal.style.pointerEvents = "auto";
 
             // --- Gestion Fermeture (Uniquement manuelle) ---
             const closeBtn = document.getElementById('closePlayerTableInfoBtn');
-            
+
             // On supprime les anciens listeners pour éviter les doublons
             const newBtn = closeBtn.cloneNode(true);
             closeBtn.parentNode.replaceChild(newBtn, closeBtn);
-            
+
             newBtn.onclick = () => {
                 closePlayerTableInfo();
             };
@@ -6959,7 +7262,7 @@
                         checkAndNotifyPlayer();
                     }
                     if (typeof checkAndRedirectPlayer === 'function') {
-                        checkAndRedirectPlayer(); 
+                        checkAndRedirectPlayer();
                     }
                     return true;
                 } else {
@@ -7684,77 +7987,77 @@
         }
 
         // --- FILTERS ---
-            function filterTables(filter) {
-        // 1. Gestion de l'apparence des boutons
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.getElementById('filterBtn' + filter.charAt(0).toUpperCase() + filter.slice(1));
-        if (activeBtn) activeBtn.classList.add('active');
+        function filterTables(filter) {
+            // 1. Gestion de l'apparence des boutons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('filterBtn' + filter.charAt(0).toUpperCase() + filter.slice(1));
+            if (activeBtn) activeBtn.classList.add('active');
 
-        // 2. Application du filtre sur les tables physiques
-        physicalTables.forEach(table => {
-            const element = document.getElementById(`phys-table-${table.id}`);
-            if (!element) return;
+            // 2. Application du filtre sur les tables physiques
+            physicalTables.forEach(table => {
+                const element = document.getElementById(`phys-table-${table.id}`);
+                if (!element) return;
 
-            // On réinitialise l'affichage
-            element.classList.remove('hidden-by-filter');
+                // On réinitialise l'affichage
+                element.classList.remove('hidden-by-filter');
 
-            if (filter === 'all') return; // Si "Toutes", on s'arrête là (tout est affiché)
+                if (filter === 'all') return; // Si "Toutes", on s'arrête là (tout est affiché)
 
-            // 3. Analyse de l'état de la table
-            let isTableEmpty = true;       // La table est-elle vide de joueurs ?
-            let hasActiveGame = false;     // Y a-t-il au moins une partie en cours ?
-            let isFullyFinished = true;    // Toutes les parties occupées sont-elles finies ?
+                // 3. Analyse de l'état de la table
+                let isTableEmpty = true;       // La table est-elle vide de joueurs ?
+                let hasActiveGame = false;     // Y a-t-il au moins une partie en cours ?
+                let isFullyFinished = true;    // Toutes les parties occupées sont-elles finies ?
 
-            let boardsWithPlayers = 0;
+                let boardsWithPlayers = 0;
 
-            table.boards.forEach(board => {
-                // Vérifie s'il y a des joueurs (Nom non vide)
-                const hasPlayers = board.players && (
-                    (board.players.white && board.players.white.name.trim() !== "") || 
-                    (board.players.black && board.players.black.name.trim() !== "")
-                );
+                table.boards.forEach(board => {
+                    // Vérifie s'il y a des joueurs (Nom non vide)
+                    const hasPlayers = board.players && (
+                        (board.players.white && board.players.white.name.trim() !== "") ||
+                        (board.players.black && board.players.black.name.trim() !== "")
+                    );
 
-                // Vérifie s'il y a un score
-                const hasScore = board.score && (board.score.white !== '' || board.score.black !== '');
+                    // Vérifie s'il y a un score
+                    const hasScore = board.score && (board.score.white !== '' || board.score.black !== '');
 
-                if (hasPlayers) {
-                    isTableEmpty = false;
-                    boardsWithPlayers++;
-                    
-                    if (!hasScore) {
-                        // Partie avec joueurs mais SANS score = En cours
-                        hasActiveGame = true; 
-                        isFullyFinished = false;
+                    if (hasPlayers) {
+                        isTableEmpty = false;
+                        boardsWithPlayers++;
+
+                        if (!hasScore) {
+                            // Partie avec joueurs mais SANS score = En cours
+                            hasActiveGame = true;
+                            isFullyFinished = false;
+                        }
                     }
+                });
+
+                // Si la table n'a que des échiquiers vides, elle n'est pas "finie", elle est juste vide.
+                if (boardsWithPlayers === 0) {
+                    isFullyFinished = false;
+                }
+
+                // 4. Logique de masquage selon le filtre choisi
+                let shouldHide = false;
+
+                if (filter === 'empty') {
+                    // On veut voir les vides -> on cache si NON vide
+                    if (!isTableEmpty) shouldHide = true;
+                }
+                else if (filter === 'playing') {
+                    // On veut voir "En cours" -> on cache si Vide OU si tout est fini
+                    if (isTableEmpty || !hasActiveGame) shouldHide = true;
+                }
+                else if (filter === 'finished') {
+                    // On veut voir "Terminées" -> on cache si Vide OU s'il reste une partie active
+                    if (isTableEmpty || !isFullyFinished) shouldHide = true;
+                }
+
+                // 5. Application
+                if (shouldHide) {
+                    element.classList.add('hidden-by-filter');
                 }
             });
-
-            // Si la table n'a que des échiquiers vides, elle n'est pas "finie", elle est juste vide.
-            if (boardsWithPlayers === 0) {
-                isFullyFinished = false; 
-            }
-
-            // 4. Logique de masquage selon le filtre choisi
-            let shouldHide = false;
-
-            if (filter === 'empty') {
-                // On veut voir les vides -> on cache si NON vide
-                if (!isTableEmpty) shouldHide = true;
-            } 
-            else if (filter === 'playing') {
-                // On veut voir "En cours" -> on cache si Vide OU si tout est fini
-                if (isTableEmpty || !hasActiveGame) shouldHide = true;
-            } 
-            else if (filter === 'finished') {
-                // On veut voir "Terminées" -> on cache si Vide OU s'il reste une partie active
-                if (isTableEmpty || !isFullyFinished) shouldHide = true;
-            }
-
-            // 5. Application
-            if (shouldHide) {
-                element.classList.add('hidden-by-filter');
-            }
-        });
         }
 
         // --- ATOMIC SCORE UPDATE ---
@@ -7790,201 +8093,201 @@
         }
     </script>
 
-<script>
-// =====================================================
-// SYSTÈME DE SUIVI JOUEUR V7 (CORRECTIF NOMS ADVERSAIRES)
-// =====================================================
+    <script>
+        // =====================================================
+        // SYSTÈME DE SUIVI JOUEUR V7 (CORRECTIF NOMS ADVERSAIRES)
+        // =====================================================
 
-window.watchedPlayerName = localStorage.getItem('chessRoomWatchedPlayer') || null;
-window.lastFoundSignature = null; 
-window.wakeLock = null;
+        window.watchedPlayerName = localStorage.getItem('chessRoomWatchedPlayer') || null;
+        window.lastFoundSignature = null;
+        window.wakeLock = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.watchedPlayerName) {
-        setTimeout(() => enableTrackingMode(window.watchedPlayerName), 500);
-    }
-});
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.watchedPlayerName) {
+                setTimeout(() => enableTrackingMode(window.watchedPlayerName), 500);
+            }
+        });
 
-window.updateSpectatorPlayerList = function() {
-    const roundDisplay = document.getElementById('spectatorRoundDisplay');
-    if (roundDisplay && typeof currentRoundKey !== 'undefined') {
-        roundDisplay.textContent = currentRoundKey.replace('ronde', 'Ronde ').replace(/^r/, 'R');
-    }
+        window.updateSpectatorPlayerList = function () {
+            const roundDisplay = document.getElementById('spectatorRoundDisplay');
+            if (roundDisplay && typeof currentRoundKey !== 'undefined') {
+                roundDisplay.textContent = currentRoundKey.replace('ronde', 'Ronde ').replace(/^r/, 'R');
+            }
 
-    if (document.getElementById('playerTrackingContainer').style.display !== 'none') return;
+            if (document.getElementById('playerTrackingContainer').style.display !== 'none') return;
 
-    const select = document.getElementById('spectatorPlayerSelect');
-    if (!select) return;
+            const select = document.getElementById('spectatorPlayerSelect');
+            if (!select) return;
 
-    let players = [];
-    if (typeof roundsStore !== 'undefined' && roundsStore[currentRoundKey]) {
-        const data = roundsStore[currentRoundKey];
-        if (data.physicalTables) {
-            data.physicalTables.forEach(table => {
-                table.boards.forEach(board => {
-                    if (board.players) {
-                        if (board.players.white && board.players.white.name) players.push(board.players.white.name.trim());
-                        if (board.players.black && board.players.black.name) players.push(board.players.black.name.trim());
-                    }
-                });
-            });
-        }
-    }
-    players.sort((a, b) => a.localeCompare(b));
-    players = [...new Set(players)];
-    select.innerHTML = '<option value="">-- Choisir votre nom --</option>';
-    players.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.text = name;
-        select.appendChild(option);
-    });
-};
-
-window.startAutoWatchFromList = function() {
-    const select = document.getElementById('spectatorPlayerSelect');
-    const name = select.value;
-    if (!name) { alert("Merci de choisir un nom."); updateSpectatorPlayerList(); return; }
-    enableTrackingMode(name);
-};
-
-function enableTrackingMode(name) {
-    window.watchedPlayerName = name;
-    localStorage.setItem('chessRoomWatchedPlayer', name);
-    window.lastFoundSignature = null;
-    
-    document.getElementById('playerSelectContainer').style.display = 'none';
-    document.getElementById('playerTrackingContainer').style.display = 'block';
-    document.getElementById('trackingPlayerName').textContent = name;
-
-    if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(e => console.log(e));
-    
-    if (typeof renderAllTables === 'function') renderAllTables();
-    checkAndRedirectPlayer();
-}
-
-window.stopAutoWatch = function() {
-    window.watchedPlayerName = null;
-    localStorage.removeItem('chessRoomWatchedPlayer');
-    window.lastFoundSignature = null;
-    
-    document.getElementById('playerSelectContainer').style.display = 'block';
-    document.getElementById('playerTrackingContainer').style.display = 'none';
-    
-    if (typeof renderAllTables === 'function') renderAllTables();
-    updateSpectatorPlayerList();
-};
-
-// CŒUR DU SYSTÈME
-window.checkAndRedirectPlayer = function() {
-    const roundDisplay = document.getElementById('spectatorRoundDisplay');
-    if (roundDisplay && typeof currentRoundKey !== 'undefined') {
-        roundDisplay.textContent = currentRoundKey.replace('ronde', 'Ronde ').replace(/^r/, 'R');
-    }
-
-    if (!window.watchedPlayerName) return;
-    const infoDiv = document.getElementById('trackingLiveInfo');
-    if (!infoDiv) return;
-
-    if (typeof roundsStore === 'undefined' || !currentRoundKey || !roundsStore[currentRoundKey]) {
-        infoDiv.innerHTML = '<span style="color:#999;">Chargement...</span>';
-        return;
-    }
-
-    const normalize = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
-    const targetName = normalize(window.watchedPlayerName);
-    
-    const tables = roundsStore[currentRoundKey].physicalTables;
-    let found = false;
-    let foundData = {};
-
-    for (const table of tables) {
-        for (const board of table.boards) {
-            if (board.players) {
-                const pWhite = normalize(board.players.white.name);
-                const pBlack = normalize(board.players.black.name);
-
-                if (pWhite.includes(targetName) || pBlack.includes(targetName)) {
-                    found = true;
-                    const isWhite = pWhite.includes(targetName);
-                    foundData = {
-                        tableId: table.id,
-                        boardNum: board.boardNumber,
-                        color: isWhite ? '⚪ Blancs' : '⚫ Noirs',
-                        // On récupère les vrais objets joueurs complets pour l'affichage
-                        playerObj: isWhite ? board.players.white : board.players.black,
-                        opponentObj: isWhite ? board.players.black : board.players.white,
-                        // Pour le panneau latéral
-                        opponentName: isWhite ? board.players.black.name : board.players.white.name,
-                        opponentElo: isWhite ? board.players.black.elo : board.players.white.elo,
-                        rawWhite: board.players.white, // Objet complet
-                        rawBlack: board.players.black  // Objet complet
-                    };
-                    break;
+            let players = [];
+            if (typeof roundsStore !== 'undefined' && roundsStore[currentRoundKey]) {
+                const data = roundsStore[currentRoundKey];
+                if (data.physicalTables) {
+                    data.physicalTables.forEach(table => {
+                        table.boards.forEach(board => {
+                            if (board.players) {
+                                if (board.players.white && board.players.white.name) players.push(board.players.white.name.trim());
+                                if (board.players.black && board.players.black.name) players.push(board.players.black.name.trim());
+                            }
+                        });
+                    });
                 }
             }
-        }
-        if (found) break;
-    }
+            players.sort((a, b) => a.localeCompare(b));
+            players = [...new Set(players)];
+            select.innerHTML = '<option value="">-- Choisir votre nom --</option>';
+            players.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.text = name;
+                select.appendChild(option);
+            });
+        };
 
-    if (found) {
-        const oppEloDisplay = foundData.opponentElo ? `(${foundData.opponentElo})` : '';
-        infoDiv.innerHTML = `
+        window.startAutoWatchFromList = function () {
+            const select = document.getElementById('spectatorPlayerSelect');
+            const name = select.value;
+            if (!name) { alert("Merci de choisir un nom."); updateSpectatorPlayerList(); return; }
+            enableTrackingMode(name);
+        };
+
+        function enableTrackingMode(name) {
+            window.watchedPlayerName = name;
+            localStorage.setItem('chessRoomWatchedPlayer', name);
+            window.lastFoundSignature = null;
+
+            document.getElementById('playerSelectContainer').style.display = 'none';
+            document.getElementById('playerTrackingContainer').style.display = 'block';
+            document.getElementById('trackingPlayerName').textContent = name;
+
+            if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(e => console.log(e));
+
+            if (typeof renderAllTables === 'function') renderAllTables();
+            checkAndRedirectPlayer();
+        }
+
+        window.stopAutoWatch = function () {
+            window.watchedPlayerName = null;
+            localStorage.removeItem('chessRoomWatchedPlayer');
+            window.lastFoundSignature = null;
+
+            document.getElementById('playerSelectContainer').style.display = 'block';
+            document.getElementById('playerTrackingContainer').style.display = 'none';
+
+            if (typeof renderAllTables === 'function') renderAllTables();
+            updateSpectatorPlayerList();
+        };
+
+        // CŒUR DU SYSTÈME
+        window.checkAndRedirectPlayer = function () {
+            const roundDisplay = document.getElementById('spectatorRoundDisplay');
+            if (roundDisplay && typeof currentRoundKey !== 'undefined') {
+                roundDisplay.textContent = currentRoundKey.replace('ronde', 'Ronde ').replace(/^r/, 'R');
+            }
+
+            if (!window.watchedPlayerName) return;
+            const infoDiv = document.getElementById('trackingLiveInfo');
+            if (!infoDiv) return;
+
+            if (typeof roundsStore === 'undefined' || !currentRoundKey || !roundsStore[currentRoundKey]) {
+                infoDiv.innerHTML = '<span style="color:#999;">Chargement...</span>';
+                return;
+            }
+
+            const normalize = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
+            const targetName = normalize(window.watchedPlayerName);
+
+            const tables = roundsStore[currentRoundKey].physicalTables;
+            let found = false;
+            let foundData = {};
+
+            for (const table of tables) {
+                for (const board of table.boards) {
+                    if (board.players) {
+                        const pWhite = normalize(board.players.white.name);
+                        const pBlack = normalize(board.players.black.name);
+
+                        if (pWhite.includes(targetName) || pBlack.includes(targetName)) {
+                            found = true;
+                            const isWhite = pWhite.includes(targetName);
+                            foundData = {
+                                tableId: table.id,
+                                boardNum: board.boardNumber,
+                                color: isWhite ? '⚪ Blancs' : '⚫ Noirs',
+                                // On récupère les vrais objets joueurs complets pour l'affichage
+                                playerObj: isWhite ? board.players.white : board.players.black,
+                                opponentObj: isWhite ? board.players.black : board.players.white,
+                                // Pour le panneau latéral
+                                opponentName: isWhite ? board.players.black.name : board.players.white.name,
+                                opponentElo: isWhite ? board.players.black.elo : board.players.white.elo,
+                                rawWhite: board.players.white, // Objet complet
+                                rawBlack: board.players.black  // Objet complet
+                            };
+                            break;
+                        }
+                    }
+                }
+                if (found) break;
+            }
+
+            if (found) {
+                const oppEloDisplay = foundData.opponentElo ? `(${foundData.opponentElo})` : '';
+                infoDiv.innerHTML = `
             <div style="color: #667eea; font-weight: bold; font-size: 1.4em; margin-bottom: 5px;">Table ${foundData.boardNum}</div>
             <div style="font-size: 1.1em; margin-bottom: 5px;">${foundData.color}</div>
             <div style="font-size: 0.9em; color: #555;">Contre : <strong>${foundData.opponentName}</strong> ${oppEloDisplay}</div>
         `;
-        infoDiv.style.borderColor = "#28a745"; 
+                infoDiv.style.borderColor = "#28a745";
 
-        const currentSignature = currentRoundKey + "_" + foundData.boardNum + "_" + foundData.opponentName;
-        
-        // DÉTECTION DE CHANGEMENT POUR LE POPUP
-        if (window.lastFoundSignature !== currentSignature) {
-            console.log("Nouveau match détecté -> Zoom & Popup");
-            window.lastFoundSignature = currentSignature;
-            
-            // 1. Scroll
-            setTimeout(() => {
-                const el = document.getElementById(`phys-table-${foundData.tableId}`);
-                if(el) el.scrollIntoView({behavior: "smooth", block: "center"});
-            }, 300);
-            
-            // 2. Popup CORRECTEMENT REMPLI
-            if (typeof showPlayerTableInfo === 'function') {
-                // Fermer l'ancien
-                const oldModal = document.getElementById('playerTableInfoModal');
-                if(oldModal) oldModal.style.display = 'none';
+                const currentSignature = currentRoundKey + "_" + foundData.boardNum + "_" + foundData.opponentName;
 
-                setTimeout(() => {
-                    // On passe les vrais objets joueurs ici !
-                    showPlayerTableInfo(
-                        { 
-                            boardNumber: foundData.boardNum, 
-                            players: { 
-                                white: foundData.rawWhite, 
-                                black: foundData.rawBlack 
-                            } 
-                        }, 
-                        null, 
-                        (foundData.color.includes('Blanc') ? 'white' : 'black'), 
-                        window.watchedPlayerName, 
-                        foundData.playerObj.elo // Elo du joueur suivi
-                    );
-                }, 400);
-            }
-        }
+                // DÉTECTION DE CHANGEMENT POUR LE POPUP
+                if (window.lastFoundSignature !== currentSignature) {
+                    console.log("Nouveau match détecté -> Zoom & Popup");
+                    window.lastFoundSignature = currentSignature;
 
-    } else {
-        infoDiv.innerHTML = `
+                    // 1. Scroll
+                    setTimeout(() => {
+                        const el = document.getElementById(`phys-table-${foundData.tableId}`);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 300);
+
+                    // 2. Popup CORRECTEMENT REMPLI
+                    if (typeof showPlayerTableInfo === 'function') {
+                        // Fermer l'ancien
+                        const oldModal = document.getElementById('playerTableInfoModal');
+                        if (oldModal) oldModal.style.display = 'none';
+
+                        setTimeout(() => {
+                            // On passe les vrais objets joueurs ici !
+                            showPlayerTableInfo(
+                                {
+                                    boardNumber: foundData.boardNum,
+                                    players: {
+                                        white: foundData.rawWhite,
+                                        black: foundData.rawBlack
+                                    }
+                                },
+                                null,
+                                (foundData.color.includes('Blanc') ? 'white' : 'black'),
+                                window.watchedPlayerName,
+                                foundData.playerObj.elo // Elo du joueur suivi
+                            );
+                        }, 400);
+                    }
+                }
+
+            } else {
+                infoDiv.innerHTML = `
             <span style="font-size: 1.1em; font-weight: bold; color: #e67e22;">⏳ En attente...</span>
             <div style="font-size: 0.8em; color: #777; margin-top: 5px;">
                 Pas de partie trouvée<br>dans la ronde en cours.
             </div>
         `;
-        infoDiv.style.borderColor = "#e67e22";
-    }
-};
-</script>
+                infoDiv.style.borderColor = "#e67e22";
+            }
+        };
+    </script>
 
 </body>
 
