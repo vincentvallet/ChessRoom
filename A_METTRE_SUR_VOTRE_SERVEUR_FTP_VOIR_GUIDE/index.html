@@ -57,7 +57,6 @@
         body.projector-mode .sidebar,
         body.projector-mode .toolbar,
         body.projector-mode .shortcut-bar,
-        body.projector-mode .zoom-controls,
         body.projector-mode #sidebarToggle,
         body.projector-mode #saveStatus {
             display: none !important;
@@ -84,18 +83,18 @@
         /* Bouton Retour Projecteur */
         #projectorReturnBtn {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            padding: 10px 20px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius: 30px;
+            top: 10px;
+            right: 10px;
+            z-index: 10002;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            border-radius: 20px;
             cursor: pointer;
-            font-size: 1.2em;
+            font-size: 0.85em;
             display: none;
             transition: background 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
         body.projector-mode #projectorReturnBtn {
@@ -1944,23 +1943,21 @@
                     <h3 onclick="toggleAccordion(this)">📊 Statistiques</h3>
                     <div class="sidebar-content">
                         <div class="stats">
-                            <div class="stat-item">
-                                <div class="stat-label">Total</div>
-                                <div class="stat-value" id="totalBoards">0</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">Échiquiers</div>
-                                <div class="stat-value" id="pairedBoards">0</div>
-                            </div>
-
-                            <div class="stat-item" style="background-color: #fff3cd; border-color: #ffeeba;">
-                                <div class="stat-label" style="color: #856404;">Restants</div>
-                                <div class="stat-value" id="remainingBoards" style="color: #856404;">0</div>
-                            </div>
-
-                            <div class="stat-item">
-                                <div class="stat-label">Joueurs</div>
-                                <div class="stat-value" id="totalPlayers">0</div>
+                            <div class="stats">
+                                <div class="stat-item">
+                                    <div class="stat-label">Parties</div>
+                                    <div class="stat-value" id="pairedBoards">0</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Restantes</div>
+                                    <div class="stat-value" id="remainingBoards">0</div>
+                                </div>
+                                <div class="stat-item" id="connectionStatus" title="Statut de connexion">
+                                    <div class="stat-label">Connexion</div>
+                                    <div class="stat-value">
+                                        <span class="status-indicator status-checking"></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2074,6 +2071,20 @@
                             <input type="text" id="roomNameInput" placeholder="Ex: Salle A, Zone Calme...">
                         </div>
                         <button class="btn-info" onclick="addRoom()">+ Ajouter une Salle/Mur</button>
+
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+                        <label style="font-size: 0.9em; font-weight: bold; margin-bottom: 5px; display: block;">Ajout
+                            Rapide :</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                            <button class="btn-secondary" style="font-size: 0.85em; padding: 5px;"
+                                onclick="addPredefinedRoom('arbitrage')">Arbitrage</button>
+                            <button class="btn-secondary" style="font-size: 0.85em; padding: 5px;"
+                                onclick="addPredefinedRoom('toilettes')">Toilettes</button>
+                            <button class="btn-secondary" style="font-size: 0.85em; padding: 5px;"
+                                onclick="addPredefinedRoom('buvette')">Buvette</button>
+                            <button class="btn-secondary" style="font-size: 0.85em; padding: 5px;"
+                                onclick="addPredefinedRoom('analyse')">Analyse</button>
+                        </div>
                     </div>
                 </div>
                 <div class="sidebar-section">
@@ -3235,6 +3246,50 @@
         }
 
 
+        // --- NOUVEAU: Ajout Salle Prédéfinie ---
+        function addPredefinedRoom(type) {
+            let name = "Nouvelle Salle";
+            let color = "#e0e0e0";
+            let width = 200;
+            let height = 150;
+
+            switch (type) {
+                case 'arbitrage':
+                    name = "Table d'Arbitrage";
+                    color = "#ffcdd2"; // Rouge clair
+                    break;
+                case 'toilettes':
+                    name = "Toilettes";
+                    color = "#bbdefb"; // Bleu clair
+                    width = 120;
+                    height = 100;
+                    break;
+                case 'buvette':
+                    name = "Buvette";
+                    color = "#ffe0b2"; // Orange clair
+                    break;
+                case 'analyse':
+                    name = "Salle d'Analyse";
+                    color = "#c8e6c9"; // Vert clair
+                    break;
+            }
+
+            const room = {
+                id: nextRoomId++,
+                name: name,
+                x: lastTablePosition.x + 50,
+                y: lastTablePosition.y + 50,
+                width: width,
+                height: height,
+                color: color
+            };
+
+            rooms.push(room);
+            renderAllRooms();
+            saveHistoryState();
+            showNotification(`Zone "${name}" ajoutée`, 'success');
+        }
+
         // --- Gestion des Outils ---
         function setTool(tool) {
             // NOUVEAU: Ne pas changer d'outil en mode joueur
@@ -3615,10 +3670,12 @@
             if (value === "") {
                 board.score.white = "";
                 board.score.black = "";
+                delete board.scoreTimestamp; // Supprimer timestamp si effacé
             } else {
                 const parts = value.split('-');
                 board.score.white = parts[0] || "";
                 board.score.black = parts[1] || "";
+                board.scoreTimestamp = Date.now(); // Ajouter timestamp
             }
 
             updateTableDisplay(physicalTable.id);
@@ -4005,19 +4062,33 @@
                         'background-color: #fff59d !important; border: 3px solid #ff6f00 !important; box-shadow: 0 0 15px #ff6f00 !important;' : '';
 
                     // --- DRAPEAU ARBITRE ---
-                    const flagClass = (board.arbiterComment && board.arbiterComment.flag) ? `flag-${board.arbiterComment.flag}` : 'flag-none';
-                    const flagHTML = `<div class="arbiter-flag ${flagClass}" onclick="event.stopPropagation(); editArbiterComment(${boardNumForEvent})" title="Commentaire arbitre" style="position:absolute; top:-10px; left:-10px; z-index:10;">⚐</div>`;
+                    let flagHTML = '';
+                    if (board.arbiterComment && board.arbiterComment.flag && board.arbiterComment.flag !== 'none') {
+                        flagHTML = `<div class="arbiter-flag ${board.arbiterComment.flag}" onclick="event.stopPropagation(); editArbiterComment(${boardNumForEvent})"></div>`;
+                    }
+
+                    // --- TIMESTAMP ---
+                    let timestampHTML = '';
+                    if (board.scoreTimestamp && (board.score.white !== '' || board.score.black !== '')) {
+                        const date = new Date(board.scoreTimestamp);
+                        const timeStr = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                        timestampHTML = `<div style="position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); font-size: 0.7em; color: #888; pointer-events: none;">🕒 ${timeStr}</div>`;
+                    }
 
                     const boardHTML = `
-                <div class="board-container ${hasScore ? 'board-scored' : ''} ${boardHasPlayers ? 'has-players' : ''}"
-                     data-board-number="${board.boardNumber}"
-                     style="${highlightStyle}">
-                    ${flagHTML}
-                    <button class="flip-btn-single" onclick="event.stopPropagation(); flipSingleBoard(${boardNumForEvent})">🔄</button>
-                    <div class="board-number board-number-display" onDblClick="event.stopPropagation(); editBoardNumber(${boardNumForEvent})">${board.boardNumber}</div>
-                    <div class="players-container">${playersHTML}</div>
-                </div>`;
+                <div class="board-container ${isBoardHighlight ? 'highlight-player' : ''} ${hasScore ? 'board-scored' : ''} ${boardHasPlayers ? 'has-players' : ''}" 
+                     style="${highlightStyle}"
+                     onclick="if(isPlayerMode && document.body.classList.contains('player-plan-view-mode')) { showSimplifiedScoreModal(findBoard(${boardNumForEvent}).board, findBoard(${boardNumForEvent}).physicalTable); }">
+                    
+                    <div class="board-header">
+                        <span class="board-number" onclick="event.stopPropagation(); editBoardNumber(${boardNumForEvent})">${board.boardNumber}</span>
+                        ${flagHTML}
+                    </div>
 
+                    <div class="players-container">${playersHTML}</div>
+                    ${timestampHTML}
+                </div>
+            `;
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = boardHTML;
                     const boardEl = tempDiv.firstElementChild;
@@ -4322,8 +4393,15 @@
             element.style.height = room.height + 'px';
             element.dataset.roomId = room.id;
 
+            // NOUVEAU: Centrage du texte
+            element.style.display = 'flex';
+            element.style.alignItems = 'center';
+            element.style.justifyContent = 'center';
+            element.style.textAlign = 'center';
+
             element.innerHTML = `
-                <div class="room-title" ondblclick="event.stopPropagation(); renameRoom(${room.id})" title="Double-cliquez pour renommer">
+                <div class="room-title" ondblclick="event.stopPropagation(); renameRoom(${room.id})" title="Double-cliquez pour renommer" 
+                     style="font-size: 2em; font-weight: bold; width: 100%; pointer-events: none;">
                     ${room.name}
                 </div>
                 <div class="room-delete-btn" onclick="event.stopPropagation(); deleteRoom(${room.id})">×</div>
@@ -5293,10 +5371,9 @@
 
         // --- Stats, Zoom, etc. ---
         function updateStats() {
-            let totalBoards = 0, pairedBoards = 0, remainingBoards = 0;
+            let pairedBoards = 0, remainingBoards = 0;
 
             physicalTables.forEach(t => {
-                totalBoards += t.boards.length;
                 t.boards.forEach(b => {
                     // CORRECTION: On ne compte que si un nom est présent
                     if (b.players && (b.players.white.name || b.players.black.name)) {
@@ -5309,12 +5386,12 @@
                 });
             });
 
-            document.getElementById('totalBoards').textContent = totalBoards;
-            document.getElementById('pairedBoards').textContent = pairedBoards;
-            document.getElementById('totalPlayers').textContent = pairedBoards * 2;
-            document.getElementById('remainingBoards').textContent = remainingBoards;
-        }
+            const elPaired = document.getElementById('pairedBoards');
+            const elRemaining = document.getElementById('remainingBoards');
 
+            if (elPaired) elPaired.textContent = pairedBoards;
+            if (elRemaining) elRemaining.textContent = remainingBoards;
+        }
         function resetZoom() { applyZoom(1); }
         function fitAllTables() {
             if (physicalTables.length === 0 && rooms.length === 0) return resetZoom();
@@ -6066,6 +6143,7 @@
                 board.score.white = "1/2";
                 board.score.black = "1/2";
             }
+            board.scoreTimestamp = Date.now(); // Ajouter timestamp
 
             updateTableDisplay(physicalTable.id);
             updateStats();
@@ -6795,6 +6873,9 @@
                 board.score.white = "1/2";
                 board.score.black = "1/2";
             }
+
+            // NOUVEAU: Timestamp
+            board.scoreTimestamp = Date.now();
 
             updateTableDisplay(physicalTable.id);
             updateStats();
