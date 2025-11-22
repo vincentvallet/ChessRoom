@@ -48,8 +48,267 @@
 
 
         /* =====================================================
-            MODE PROJECTEUR (FULL SCREEN)
+           SECTION INSCRIPTIONS (REGISTRATION)
         ===================================================== */
+        #registrationOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f8f9fa;
+            z-index: 10005;
+            /* Au-dessus de tout */
+            display: none;
+            overflow-y: auto;
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            color: #1e293b;
+        }
+
+        #registrationOverlay.active {
+            display: block;
+        }
+
+        .reg-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .reg-badge {
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .reg-badge-local {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .reg-badge-storage {
+            background: #fef3c7;
+            color: #b45309;
+            font-size: 0.8em;
+            margin-left: auto;
+        }
+
+        .reg-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .reg-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .reg-card-label {
+            font-size: 0.9em;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .reg-card-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .reg-text-emerald {
+            color: #059669;
+        }
+
+        .reg-text-amber {
+            color: #d97706;
+        }
+
+        .reg-text-indigo {
+            color: #4f46e5;
+        }
+
+        .reg-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .reg-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .reg-control-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .reg-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-size: 0.95em;
+        }
+
+        .reg-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+            font-size: 0.95em;
+        }
+
+        .reg-btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .reg-btn-primary:hover {
+            background: #4338ca;
+        }
+
+        .reg-btn-success {
+            background: #059669;
+            color: white;
+        }
+
+        .reg-btn-success:hover {
+            background: #047857;
+        }
+
+        .reg-btn-danger {
+            background: #e11d48;
+            color: white;
+        }
+
+        .reg-btn-danger:hover {
+            background: #be123c;
+        }
+
+        .reg-btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .reg-btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .reg-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        .reg-table th {
+            text-align: left;
+            padding: 10px;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+        }
+
+        .reg-table th.sorted {
+            color: #1e40af;
+            font-weight: bold;
+        }
+
+        .reg-table td {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .reg-table tr.cancelled {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .reg-status-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.85em;
+        }
+
+        .bg-emerald-100 {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .bg-rose-100 {
+            background: #ffe4e6;
+            color: #9f1239;
+        }
+
+        .bg-amber-100 {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .bg-indigo-100 {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .bg-slate-100 {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        /* Spinner */
+        .reg-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            animation: spin 0.6s linear infinite;
+        }
+
+        /* FIDE Search Results Modal */
+        #fideSearchModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10010;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #fideSearchResults {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .fide-result-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .fide-result-item:hover {
+            background: #f8f9fa;
+        }
+
         body.projector-mode {
             overflow: hidden;
         }
@@ -1940,26 +2199,79 @@
                 </div>
 
                 <div class="sidebar-section">
-                    <h3 onclick="toggleAccordion(this)">📊 Statistiques</h3>
+                    <h3 onclick="toggleAccordion(this)">📊 Stats/Filtres</h3>
                     <div class="sidebar-content">
-                        <div class="stats">
-                            <div class="stats">
-                                <div class="stat-item">
-                                    <div class="stat-label">Parties</div>
-                                    <div class="stat-value" id="pairedBoards">0</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-label">Restantes</div>
-                                    <div class="stat-value" id="remainingBoards">0</div>
-                                </div>
-                                <div class="stat-item" id="connectionStatus" title="Statut de connexion">
-                                    <div class="stat-label">Connexion</div>
-                                    <div class="stat-value">
-                                        <span class="status-indicator status-checking"></span>
-                                    </div>
-                                </div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-label">Total</div>
+                                <div class="stat-value" id="totalBoards">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">En cours</div>
+                                <div class="stat-value" id="activeBoards">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Terminées</div>
+                                <div class="stat-value" id="finishedBoards">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Restantes</div>
+                                <div class="stat-value" id="remainingBoards">0</div>
                             </div>
                         </div>
+
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+
+                        <div class="control-group">
+                            <label>Actions Rapides :</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                                <button class="tool-btn" onclick="toggleProjectorMode()" style="font-size: 0.8em;">📽️
+                                    Projecteur</button>
+                                <button class="tool-btn" onclick="toggleDarkMode()" style="font-size: 0.8em;">🌙
+                                    Sombre</button>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                            <label
+                                style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Filtres
+                                Tables :</label>
+                            <div class="filter-buttons">
+                                <button id="filterBtnAll" class="filter-btn active"
+                                    onclick="filterTables('all')">Toutes</button>
+                                <button id="filterBtnPlaying" class="filter-btn" onclick="filterTables('playing')">En
+                                    cours</button>
+                                <button id="filterBtnFinished" class="filter-btn"
+                                    onclick="filterTables('finished')">Terminées</button>
+                            </div>
+                        </div>
+
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+
+                        <button class="btn-info" onclick="exportToPDF()">📄 Résultats (PDF)</button>
+                        <button class="btn-secondary" onclick="exportToTRF()" style="margin-top: 5px;">🌍 Export TRF
+                            (FIDE)</button>
+
+                        <div class="control-group" style="margin-top: 10px; margin-bottom: 5px;">
+                            <label for="pdfOrientation" style="font-size: 0.9em;">Orientation Plan :</label>
+                            <select id="pdfOrientation" style="padding: 4px 8px; font-size: 0.9em;">
+                                <option value="l">Paysage</option>
+                                <option value="p">Portrait</option>
+                            </select>
+                        </div>
+                        <button class="btn-info" id="exportVisualPdfBtn" onclick="exportVisualPDF()">🖨️ Imprimer le
+                            Plan</button>
+
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+
+                        <button class="btn-secondary" onclick="saveLayout()">💾 Sauvegarder le Tournoi</button>
+                        <button class="btn-secondary" onclick="loadLayout()">📂 Charger le Tournoi</button>
+                        <button class="btn-danger" onclick="clearAll()">🗑️ Tout effacer</button>
+
+                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
+                        <label style="font-size: 0.8em; font-weight: bold; color: #666;">Outils Debug :</label>
+                        <button class="btn-warning" onclick="forceSaveToServer()"
+                            style="font-size: 0.8em; margin-top: 5px;">⚠️ Forcer Sauvegarde Serveur</button>
                     </div>
                 </div>
 
@@ -2090,20 +2402,42 @@
                 <div class="sidebar-section">
                     <h3 onclick="toggleAccordion(this)">🎮 Appariements</h3>
                     <div class="sidebar-content">
-                        <label for="pairingFileInput" class="file-upload-label">📁 Charger</label>
+                        <div class="control-group">
+                            <label>Système d'appariement :</label>
+                            <select id="pairingSystemSelect">
+                                <option value="swiss">Système Suisse (FIDE)</option>
+                                <option value="cup">Système Coupe (KO)</option>
+                                <option value="roundrobin">Toutes Rondes (Berger)</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Ronde à générer :</label>
+                            <input type="number" id="nextRoundNum" value="1" min="1" style="width: 60px;">
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn-primary" onclick="generatePairingsUI()" style="flex: 1;">⚙️
+                                Générer</button>
+                            <button class="btn-secondary" onclick="openTournamentSettings()"
+                                title="Options Avancées">🛠️</button>
+                        </div>
+                        <div id="pairingMsg" style="font-size:0.8em; color:#666; margin-top:5px;"></div>
+
+                        <hr style="margin: 15px 0; border: 1px solid #e9ecef;">
+
+                        <label for="pairingFileInput" class="file-upload-label">📁 Charger Papi/Fichier</label>
                         <input type="file" id="pairingFileInput" accept=".html,.htm" onchange="loadPapiFile(event)">
 
                         <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
 
                         <div class="control-group">
-                            <label for="boardCount">Échiquiers à créer :</label>
+                            <label for="boardCount">Échiquiers manuels :</label>
                             <input type="number" id="boardCount" min="1" max="2000" value="10">
                         </div>
-                        <button class="btn-primary" onclick="addBoards()">Ajouter</button>
+                        <button class="btn-secondary" onclick="addBoards()">+ Ajouter Tables Vides</button>
 
                         <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
 
-                        <button class="btn-danger" onclick="clearPairings()">Effacer</button>
+                        <button class="btn-danger" onclick="clearPairings()">Effacer Appariements</button>
                     </div>
                 </div>
 
@@ -2121,50 +2455,16 @@
                     </div>
                 </div>
 
+
                 <div class="sidebar-section">
-                    <h3 onclick="toggleAccordion(this)">🎛️ Actions</h3>
+                    <h3 onclick="toggleAccordion(this)">⚙️ Gestion</h3>
                     <div class="sidebar-content">
-
-                        <button class="tool-btn" onclick="toggleProjectorMode()">📽️ Mode Projecteur</button>
-                        <button class="tool-btn" onclick="toggleDarkMode()">🌙 Mode Sombre</button>
-
-
-
-                        <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
-                            <label
-                                style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Filtres
-                                Tables :</label>
-                            <div class="filter-buttons">
-                                <button id="filterBtnAll" class="filter-btn active"
-                                    onclick="filterTables('all')">Toutes</button>
-                                <button id="filterBtnPlaying" class="filter-btn" onclick="filterTables('playing')">En
-                                    cours</button>
-                                <button id="filterBtnFinished" class="filter-btn"
-                                    onclick="filterTables('finished')">Terminées</button>
-                            </div>
-                        </div>
-
-                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-
-                        <button class="btn-info" onclick="exportToPDF()">📄 Résultats (PDF)</button>
-                        <button class="btn-secondary" onclick="exportToTRF()" style="margin-top: 5px;">🌍 Export TRF
-                            (FIDE)</button>
-
-                        <div class="control-group" style="margin-top: 10px; margin-bottom: 5px;">
-                            <label for="pdfOrientation" style="font-size: 0.9em;">Orientation Plan :</label>
-                            <select id="pdfOrientation" style="padding: 4px 8px; font-size: 0.9em;">
-                                <option value="l">Paysage</option>
-                                <option value="p">Portrait</option>
-                            </select>
-                        </div>
-                        <button class="btn-info" id="exportVisualPdfBtn" onclick="exportVisualPDF()">🖨️ Imprimer le
-                            Plan</button>
-
-                        <hr style="margin: 10px 0; border: 1px solid #e9ecef;">
-
-                        <button class="btn-secondary" onclick="saveLayout()">💾 Sauvegarder le Tournoi</button>
-                        <button class="btn-secondary" onclick="loadLayout()">📂 Charger le Tournoi</button>
-                        <button class="btn-danger" onclick="clearAll()">🗑️ Tout effacer</button>
+                        <button class="btn-primary" onclick="openRegistrationOverlay()">📋 Inscriptions &
+                            Pointage</button>
+                        <button class="btn-secondary" onclick="exportToPDF()">📄 Imprimer Appariements</button>
+                        <button class="btn-secondary" onclick="exportVisualPDF()">🖼️ Exporter Plan (Image)</button>
+                        <button class="btn-secondary" onclick="exportToTRF()">🌍 Exporter TRF (FIDE)</button>
+                        <button class="btn-danger" onclick="clearAll()">🗑️ Tout Effacer</button>
                     </div>
                 </div>
             </div>
@@ -2448,6 +2748,207 @@
             </div>
         </div>
     </div>
+    <!-- OVERLAY INSCRIPTIONS -->
+    <div id="registrationOverlay">
+        <div class="max-w-7xl mx-auto">
+            <header class="reg-header">
+                <button class="reg-btn reg-btn-secondary" onclick="closeRegistrationOverlay()">⬅ Retour</button>
+                <div class="reg-badge reg-badge-local">Local</div>
+                <h1 style="font-size: 1.5em; font-weight: bold;">Gestion d'inscriptions et pointage</h1>
+                <span class="reg-badge reg-badge-storage">Stockage LocalStorage</span>
+            </header>
+
+            <section class="reg-grid">
+                <div class="reg-card">
+                    <div class="reg-card-label">Inscrits</div>
+                    <div id="aggTotal" class="reg-card-value">0</div>
+                </div>
+                <div class="reg-card">
+                    <div class="reg-card-label">Pointés</div>
+                    <div id="aggChecked" class="reg-card-value reg-text-emerald">0</div>
+                </div>
+                <div class="reg-card">
+                    <div class="reg-card-label">Restants</div>
+                    <div id="aggRemaining" class="reg-card-value reg-text-amber">0</div>
+                </div>
+                <div class="reg-card">
+                    <div class="reg-card-label">Payés</div>
+                    <div id="aggPaid" class="reg-card-value reg-text-indigo">0</div>
+                </div>
+            </section>
+
+            <section class="reg-section">
+                <div class="reg-controls">
+                    <div class="reg-control-group">
+                        <label class="reg-card-label">Recherche</label>
+                        <input id="regSearch" type="text" class="reg-input" placeholder="Nom ou Licence...">
+                    </div>
+                    <div class="reg-control-group">
+                        <label class="reg-card-label">Statut</label>
+                        <select id="regFilterStatus" class="reg-input">
+                            <option value="">Tous</option>
+                            <option>Pointé</option>
+                            <option>Non pointé</option>
+                            <option>Annulé</option>
+                        </select>
+                    </div>
+                    <div class="reg-control-group">
+                        <label class="reg-card-label">Paiement</label>
+                        <select id="regFilterPayment" class="reg-input">
+                            <option value="">Tous</option>
+                            <option>Réglé</option>
+                            <option>Non réglé</option>
+                            <option>Exonéré</option>
+                        </select>
+                    </div>
+                    <button id="btnResetRegFilters" class="reg-btn reg-btn-secondary"
+                        style="margin-bottom: 2px;">Réinitialiser</button>
+                </div>
+                <div class="reg-controls" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                    <button id="btnExportReg" class="reg-btn reg-btn-success">Exporter JSON</button>
+                    <button id="btnImportReg" class="reg-btn reg-btn-primary">Importer JSON</button>
+                    <input id="regJsonImportInput" type="file" accept=".json" style="display:none">
+                    <button id="btnPurgeReg" class="reg-btn reg-btn-danger" style="margin-left: auto;">Purger
+                        Inscriptions</button>
+                </div>
+            </section>
+
+            <section class="reg-section">
+                <h2 style="font-size: 1.2em; font-weight: 600; margin-bottom: 15px;">Ajouter une inscription</h2>
+                <form id="formAddReg" class="reg-controls" style="align-items: flex-start;">
+                    <div class="reg-control-group" style="flex: 2;">
+                        <label class="reg-card-label">Recherche FIDE (Nom ou ID)</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input id="fideSearchInput" type="text" class="reg-input"
+                                placeholder="ex: Carlsen ou 1503014" onkeydown="if(event.key === 'Enter') searchFIDE()">
+                            <button type="button" class="reg-btn reg-btn-primary" onclick="searchFIDE()">🔍</button>
+                        </div>
+                        <p style="font-size: 0.8em; color: #666; margin-top: 2px;">Connexion directe FIDE via proxy</p>
+                    </div>
+
+                    <div class="reg-control-group">
+                        <label class="reg-card-label">Nom</label>
+                        <input id="regLast" type="text" class="reg-input" required>
+                    </div>
+                    <div class="reg-control-group">
+                        <label class="reg-card-label">Prénom</label>
+                        <input id="regFirst" type="text" class="reg-input" required>
+                    </div>
+                    <div class="reg-control-group">
+                        <label class="reg-card-label">Elo (Std)</label>
+                        <input id="regElo" type="number" class="reg-input" value="1000">
+                    </div>
+                    <div class="reg-control-group">
+                        <label class="reg-card-label">Club / Fed</label>
+                        <input id="regClub" type="text" class="reg-input">
+                    </div>
+                    <div class="reg-control-group">
+                        <label class="reg-card-label">Fide ID</label>
+                        <input id="regFideId" type="text" class="reg-input">
+                    </div>
+
+                    <div style="width: 100%; margin-top: 10px;">
+                        <button type="submit" class="reg-btn reg-btn-success">Ajouter l'inscription</button>
+                        <span id="regAddMsg" style="margin-left: 10px; font-size: 0.9em;"></span>
+                    </div>
+                </form>
+            </section>
+
+            <section class="reg-section">
+                <div style="overflow-x: auto;">
+                    <table class="reg-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="lastName" onclick="sortRegList('lastName')">Nom</th>
+                                <th data-sort="firstName">Prénom</th>
+                                <th data-sort="eloSlow" onclick="sortRegList('eloSlow')">Elo</th>
+                                <th>Club/Fed</th>
+                                <th>Fide ID</th>
+                                <th>Statut</th>
+                                <th>Paiement</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="regTbody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- FIDE Search Modal -->
+    <div id="fideSearchModal">
+        <div class="modal-content" style="width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+            <h3>Résultats FIDE</h3>
+            <div style="margin-bottom: 10px; display: flex; gap: 5px;">
+                <button class="btn-warning" onclick="testProxies()" style="font-size: 0.8em; padding: 2px 5px;">🧪
+                    Tester les Proxies</button>
+                <button class="btn-info" onclick="showFideRawHtml()" style="font-size: 0.8em; padding: 2px 5px;">📄 Voir
+                    HTML Brut</button>
+            </div>
+            <div id="fideSearchResults" style="overflow-y: auto; flex: 1;"></div>
+            <button class="btn-secondary" style="margin-top: 10px;"
+                onclick="document.getElementById('fideSearchModal').style.display='none'">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Tournament Settings Modal -->
+    <div id="tournamentSettingsModal" class="modal-overlay" style="z-index: 10005;">
+        <div class="modal-content" style="width: 500px;">
+            <h3>🛠️ Options Avancées du Tournoi</h3>
+
+            <div class="control-group">
+                <label style="font-weight: bold;">Départages (Tie-Breaks) :</label>
+                <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 5px;">
+                    <label><input type="checkbox" id="tbBuchholz" checked> Buchholz (Cut 1)</label>
+                    <label><input type="checkbox" id="tbSonneborn" checked> Sonneborn-Berger</label>
+                    <label><input type="checkbox" id="tbDirect" checked> Rencontre Directe</label>
+                    <label><input type="checkbox" id="tbProgressive"> Progressif</label>
+                </div>
+            </div>
+
+            <hr style="margin: 15px 0; border: 1px solid #eee;">
+
+            <div class="control-group">
+                <label style="font-weight: bold;">Points Fictifs :</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                    <div>
+                        <label>Bye (Exempt) :</label>
+                        <select id="ptsBye" class="reg-input">
+                            <option value="1.0">1.0 Point</option>
+                            <option value="0.5">0.5 Point</option>
+                            <option value="0">0 Point</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Absent (Forfait) :</label>
+                        <select id="ptsAbsent" class="reg-input">
+                            <option value="0">0 Point</option>
+                            <option value="0.5">0.5 Point</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="margin: 15px 0; border: 1px solid #eee;">
+
+            <div class="control-group">
+                <label style="font-weight: bold;">Appariements :</label>
+                <div style="margin-top: 5px;">
+                    <label><input type="checkbox" id="optAcceleration"> Accélération (FIDE)</label>
+                    <p style="font-size: 0.8em; color: #666;">(Sépare les forts/faibles dès la ronde 1 pour éviter les
+                        écarts trop grands)</p>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-primary" onclick="saveTournamentSettings()">💾 Enregistrer</button>
+                <button class="btn-secondary"
+                    onclick="document.getElementById('tournamentSettingsModal').style.display='none'">Annuler</button>
+            </div>
+        </div>
+    </div>
+
     <div id="playerListSearchModal" class="modal-overlay" style="z-index: 10002;">
         <div class="modal-content" style="width: 90%; max-width: 500px;">
             <h3>Choisir ma partie</h3>
@@ -4740,6 +5241,7 @@
                         white: { name: "", elo: "", comment: "" },
                         black: { name: "", elo: "", comment: "" }
                     };
+                    b.score = { white: '', black: '' };
                 });
             });
 
@@ -7218,6 +7720,7 @@
                     roundsStore: JSON.parse(JSON.stringify(roundsStore)),
                     currentRoundKey: currentRoundKey,
                     arbiterPassword: arbiterPassword,
+                    registrations: RegDB.getAll(), // NOUVEAU: Sauvegarde des inscrits
                     lastModified: Date.now(),
                     clientTimestamp: lastServerTimestamp, // Optimistic Locking
                     savedBy: currentSaveMode
@@ -7247,20 +7750,30 @@
 
                 if (response.ok) {
                     const result = await response.json();
+                    console.log("✅ Save Response:", result); // Debug Log
                     if (result.success) {
                         if (result.timestamp) lastServerTimestamp = result.timestamp;
                         showSaveStatus('success', `☁️ Sauvegarde serveur réussie`);
                         return true;
                     }
                 } else {
+                    console.error("❌ Server Error:", response.status, response.statusText); // Debug Log
                     showSaveStatus('error', 'Erreur serveur : ' + response.status);
                 }
                 return false;
             } catch (error) {
-                console.error('❌ Erreur serveur:', error);
+                console.error('❌ Erreur serveur (Catch):', error);
                 showSaveStatus('error', 'Impossible de contacter le serveur');
                 return false;
             }
+        }
+
+        async function forceSaveToServer() {
+            if (!confirm("Forcer la sauvegarde ? Cela enverra toutes les données actuelles au serveur.")) return;
+            console.log("⚠️ Force Save Initiated");
+            const success = await saveToServer();
+            if (success) alert("Sauvegarde forcée réussie !");
+            else alert("Echec de la sauvegarde forcée. Vérifiez la console.");
         }
 
         async function loadFromServer(isAutoSync = false) {
@@ -7314,6 +7827,13 @@
                     roundsStore = data.roundsStore;
                     currentRoundKey = data.currentRoundKey || 'ronde1';
                     arbiterPassword = data.arbiterPassword || null;
+
+                    // NOUVEAU: Restauration des inscrits
+                    if (data.registrations && Array.isArray(data.registrations)) {
+                        RegDB.purge();
+                        data.registrations.forEach(r => RegDB.add(r));
+                        loadRegistrations();
+                    }
 
                     // Migration des données
                     Object.values(roundsStore).forEach(roundState => {
@@ -8370,6 +8890,968 @@
         };
     </script>
 
+    <script>
+        // =====================================================
+        // MODULE INSCRIPTIONS & POINTAGE (V1)
+        // =====================================================
+
+        const REG_APP_ID = 'chess-reg-v1-local';
+        let REG_TOURNAMENT_ID = 'OPEN-' + new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        let REG_CACHE = [];
+        let REG_SORT = { key: 'lastName', dir: 'asc' };
+        let REG_FILTERS = { q: '', status: '', payment: '' };
+
+        // --- Helpers Manquants ---
+        function normalize(str) { return str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : ""; }
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+        function generateUUID() {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // --- Store Local ---
+        class RegistrationStore {
+            constructor(tid) {
+                this.tid = tid;
+                this.key = `ls:${REG_APP_ID}:${this.tid}:registrations`;
+                if (!localStorage.getItem(this.key)) localStorage.setItem(this.key, JSON.stringify([]));
+            }
+            _read() { return JSON.parse(localStorage.getItem(this.key) || '[]'); }
+            _write(arr) { localStorage.setItem(this.key, JSON.stringify(arr)); }
+
+            getAll() { return this._read(); }
+            add(reg) { const arr = this._read(); arr.push(reg); this._write(arr); return arr; }
+            update(id, patch) {
+                const arr = this._read();
+                const i = arr.findIndex(r => r.id === id);
+                if (i >= 0) { arr[i] = { ...arr[i], ...patch }; this._write(arr); }
+                return arr;
+            }
+            purge() { this._write([]); return []; }
+            setAll(list) { this._write(list); return list; }
+        }
+
+        let RegDB = new RegistrationStore(REG_TOURNAMENT_ID);
+
+        // --- UI Functions ---
+        function openRegistrationOverlay() {
+            document.getElementById('registrationOverlay').classList.add('active');
+            loadRegistrations();
+        }
+
+        function closeRegistrationOverlay() {
+            document.getElementById('registrationOverlay').classList.remove('active');
+        }
+
+        function loadRegistrations() {
+            REG_CACHE = RegDB.getAll();
+            renderRegDashboard();
+        }
+
+        function renderRegDashboard() {
+            const list = applyRegFilters(REG_CACHE);
+            sortRegListInternal(list);
+
+            // Aggregates
+            const total = REG_CACHE.length;
+            const active = REG_CACHE.filter(r => r.status !== 'Annulé');
+            const checked = active.filter(r => r.status === 'Pointé').length;
+            const paid = active.filter(r => r.payment === 'Réglé').length;
+
+            document.getElementById('aggTotal').textContent = active.length;
+            document.getElementById('aggChecked').textContent = checked;
+            document.getElementById('aggRemaining').textContent = active.length - checked;
+            document.getElementById('aggPaid').textContent = paid;
+
+            // Table
+            const tbody = document.getElementById('regTbody');
+            tbody.innerHTML = '';
+
+            list.forEach(r => {
+                const isCancelled = r.status === 'Annulé';
+                const tr = document.createElement('tr');
+                if (isCancelled) tr.classList.add('cancelled');
+
+                tr.innerHTML = `
+                    <td style="font-weight:500">${escapeHtml(r.lastName)}</td>
+                    <td>${escapeHtml(r.firstName)}</td>
+                    <td>${r.eloSlow || ''}</td>
+                    <td>${escapeHtml(r.club || '')}</td>
+                    <td style="font-family:monospace; color:#666;">${escapeHtml(r.fideId || '')}</td>
+                    <td><span class="reg-status-badge ${getBadgeClass(r.status)}">${r.status}</span></td>
+                    <td><span class="reg-status-badge ${getBadgeClass(r.payment)}">${r.payment}</span></td>
+                    <td>
+                        <div style="display:flex; gap:5px;">
+                            <button class="reg-btn reg-btn-success" style="padding:4px 8px; font-size:0.8em;" 
+                                onclick="toggleRegStatus('${r.id}')" ${isCancelled ? 'disabled' : ''}>
+                                ${r.status === 'Pointé' ? 'Dépointer' : 'Pointer'}
+                            </button>
+                            <button class="reg-btn reg-btn-indigo" style="padding:4px 8px; font-size:0.8em; background:#e0e7ff; color:#4338ca;" 
+                                onclick="toggleRegPayment('${r.id}')" ${isCancelled ? 'disabled' : ''}>
+                                ${r.payment === 'Réglé' ? '$ Non' : '$ Oui'}
+                            </button>
+                            <button class="reg-btn reg-btn-danger" style="padding:4px 8px; font-size:0.8em;" 
+                                onclick="toggleRegCancel('${r.id}')">
+                                ${isCancelled ? 'Activer' : '×'}
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function applyRegFilters(list) {
+            const q = normalize(REG_FILTERS.q);
+            return list.filter(r => {
+                if (r.status === 'Annulé' && REG_FILTERS.status !== 'Annulé') return false;
+                const matchQ = !q || normalize(`${r.lastName} ${r.firstName} ${r.fideId || ''}`).includes(q);
+                const matchS = !REG_FILTERS.status || r.status === REG_FILTERS.status;
+                const matchP = !REG_FILTERS.payment || r.payment === REG_FILTERS.payment;
+                return matchQ && matchS && matchP;
+            });
+        }
+
+        function sortRegListInternal(list) {
+            const { key, dir } = REG_SORT;
+            const factor = dir === 'asc' ? 1 : -1;
+            list.sort((a, b) => {
+                let va = a[key], vb = b[key];
+                if (key === 'eloSlow') { va = Number(va || 0); vb = Number(vb || 0); }
+                else { va = (va || '').toString().toLowerCase(); vb = (vb || '').toString().toLowerCase(); }
+                return va < vb ? -1 * factor : va > vb ? 1 * factor : 0;
+            });
+
+            // Update headers
+            document.querySelectorAll('.reg-table th').forEach(th => {
+                th.classList.remove('sorted');
+                if (th.dataset.sort === key) th.classList.add('sorted');
+            });
+        }
+
+        function sortRegList(key) {
+            if (REG_SORT.key === key) REG_SORT.dir = REG_SORT.dir === 'asc' ? 'desc' : 'asc';
+            else { REG_SORT.key = key; REG_SORT.dir = 'asc'; }
+            renderRegDashboard();
+        }
+
+        function getBadgeClass(status) {
+            if (status === 'Pointé') return 'bg-emerald-100';
+            if (status === 'Annulé') return 'bg-rose-100';
+            if (status === 'Réglé') return 'bg-indigo-100';
+            if (status === 'Exonéré') return 'bg-slate-100';
+            return 'bg-amber-100';
+        }
+
+        // --- Actions ---
+        function toggleRegStatus(id) {
+            const r = REG_CACHE.find(x => x.id === id);
+            if (!r) return;
+            const next = r.status === 'Pointé' ? 'Non pointé' : 'Pointé';
+            REG_CACHE = RegDB.update(id, { status: next });
+            renderRegDashboard();
+        }
+
+        function toggleRegPayment(id) {
+            const r = REG_CACHE.find(x => x.id === id);
+            if (!r) return;
+            const next = r.payment === 'Réglé' ? 'Non réglé' : 'Réglé';
+            REG_CACHE = RegDB.update(id, { payment: next });
+            renderRegDashboard();
+        }
+
+        function toggleRegCancel(id) {
+            const r = REG_CACHE.find(x => x.id === id);
+            if (!r) return;
+            const next = r.status === 'Annulé' ? 'Non pointé' : 'Annulé';
+            if (confirm(`Voulez-vous vraiment ${next === 'Annulé' ? 'annuler' : 'réactiver'} cette inscription ?`)) {
+                REG_CACHE = RegDB.update(id, { status: next });
+                renderRegDashboard();
+            }
+        }
+
+        // --- FIDE Search ---
+        // --- FIDE Search (Fixed) ---
+        let lastFideHtml = ""; // Stocke le dernier HTML pour debug
+
+        async function searchFIDE() {
+            const query = document.getElementById('fideSearchInput').value.trim();
+            if (query.length < 3) {
+                alert("Veuillez entrer au moins 3 caractères.");
+                return;
+            }
+
+            const btn = document.querySelector('#formAddReg button[onclick="searchFIDE()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳';
+            btn.disabled = true;
+
+            const container = document.getElementById('fideSearchResults');
+            container.innerHTML = '<p style="text-align:center; padding:20px;">Recherche via API FIDE Players...</p>';
+            document.getElementById('fideSearchModal').style.display = 'flex';
+
+            try {
+                // 1. Utilisation du BON endpoint (Datasette)
+                // Note: _shape=array force le retour d'une liste d'objets JSON propre
+                const apiUrl = `https://fide-players.fly.dev/players/players.json?_search=${encodeURIComponent(query)}&_sort=fideid&_shape=array`;
+                console.log("Appel API:", apiUrl);
+
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur API (${response.status})`);
+                }
+
+                const players = await response.json();
+                console.log(`${players.length} joueurs trouvés`);
+
+                const results = [];
+
+                // 2. Mapping des champs (Datasette renvoie les noms de colonnes en minuscules généralement)
+                if (Array.isArray(players)) {
+                    players.forEach(p => {
+                        results.push({
+                            name: p.name,
+                            fed: p.federation || p.country || '',
+                            title: p.title || '',
+                            rating: p.standard_rating || p.rating || '0',
+                            fideId: p.fideid || p.id
+                        });
+                    });
+                }
+
+                if (results.length === 0) {
+                    container.innerHTML = '<div style="padding:20px; text-align:center;">Aucun joueur trouvé avec ce nom.</div>';
+                } else {
+                    showFideResults(results);
+                }
+
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = `
+                    <div style="text-align:center; padding:20px; color: red;">
+                        <p>❌ Erreur: ${error.message}</p>
+                        <p style="font-size:0.9em; color:#555;">
+                            L'API externe semble indisponible.
+                        </p>
+                        <a href="https://ratings.fide.com/index.phtml?search=${encodeURIComponent(query)}" target="_blank" class="btn-primary" style="margin-top:10px; display:inline-block;">
+                            Ouvrir FIDE.com ↗️
+                        </a>
+                    </div>
+                `;
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function testProxies() {
+            const proxies = [
+                { name: 'CodeTabs', url: (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}` },
+                { name: 'AllOrigins', url: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
+                { name: 'CorsProxy', url: (u) => `https://corsproxy.io/?${encodeURIComponent(u)}` }
+            ];
+
+            const targetUrl = `https://ratings.fide.com/index.phtml?search=Carlsen`;
+            let report = "Rapport de test des proxies :\n\n";
+
+            for (const p of proxies) {
+                report += `🔹 ${p.name} : `;
+                try {
+                    const start = Date.now();
+                    const res = await fetch(p.url(targetUrl));
+                    const time = Date.now() - start;
+                    if (res.ok) {
+                        const txt = await res.text();
+                        report += `✅ OK (${time}ms, ${txt.length} bytes)\n`;
+                    } else {
+                        report += `❌ HTTP ${res.status}\n`;
+                    }
+                } catch (e) {
+                    report += `❌ Erreur: ${e.message}\n`;
+                }
+            }
+
+            alert(report);
+        }
+
+        function showFideRawHtml() {
+            if (!lastFideHtml) {
+                alert("Aucune recherche FIDE n'a été effectuée. Faites d'abord une recherche.");
+                return;
+            }
+            const container = document.getElementById('fideSearchResults');
+            container.innerHTML = `
+                <div style="padding: 10px;">
+                    <p><strong>HTML Brut (${lastFideHtml.length} caractères) :</strong></p>
+                    <textarea readonly style="width: 100%; height: 400px; font-size: 0.7em; font-family: monospace; border: 1px solid #ccc; padding: 5px;">${lastFideHtml.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</textarea>
+                </div>
+            `;
+            document.getElementById('fideSearchModal').style.display = 'flex';
+        }
+
+        function showFideResults(results) {
+            const container = document.getElementById('fideSearchResults');
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:20px; color:#666;">Aucun résultat trouvé.</p>';
+            } else if (results.length === 1) {
+                // Un seul résultat : remplir directement le formulaire
+                fillRegForm(results[0]);
+                document.getElementById('fideSearchModal').style.display = 'none';
+            } else {
+                // Plusieurs résultats : afficher une table de sélection
+                const header = document.createElement('div');
+                header.style.cssText = 'padding: 15px; background: #f5f5f5; border-bottom: 2px solid #ddd; font-weight: bold;';
+                header.innerHTML = `${results.length} joueur(s) trouvé(s) - Cliquez pour sélectionner :`;
+                container.appendChild(header);
+
+                const table = document.createElement('table');
+                table.style.cssText = 'width: 100%; border-collapse: collapse;';
+                table.innerHTML = `
+                    <thead>
+                        <tr style="background: #2c3e50; color: white;">
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Nom</th>
+                            <th style="padding: 10px; text-align: center; border: 1px solid #ddd; width: 80px;">Pays</th>
+                            <th style="padding: 10px; text-align: center; border: 1px solid #ddd; width: 80px;">Titre</th>
+                            <th style="padding: 10px; text-align: center; border: 1px solid #ddd; width: 100px;">Elo</th>
+                            <th style="padding: 10px; text-align: center; border: 1px solid #ddd; width: 120px;">ID FIDE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                `;
+
+                const tbody = table.querySelector('tbody');
+                results.forEach((p, index) => {
+                    const tr = document.createElement('tr');
+                    tr.style.cssText = 'cursor: pointer; transition: background 0.2s;';
+                    tr.onmouseover = () => tr.style.background = '#e3f2fd';
+                    tr.onmouseout = () => tr.style.background = index % 2 === 0 ? '#fff' : '#f9f9f9';
+                    tr.style.background = index % 2 === 0 ? '#fff' : '#f9f9f9';
+
+                    tr.innerHTML = `
+                        <td style="padding: 12px; border: 1px solid #ddd; font-weight: 500;">${p.name}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${p.fed || '-'}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #d32f2f; font-weight: bold;">${p.title || '-'}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center; font-weight: 600;">${p.rating || '-'}</td>
+                        <td style="padding: 12px; border: 1px solid #ddd; text-align: center; font-family: monospace; font-size: 0.9em;">${p.fideId}</td>
+                    `;
+
+                    tr.onclick = () => {
+                        fillRegForm(p);
+                        document.getElementById('fideSearchModal').style.display = 'none';
+                    };
+
+                    tbody.appendChild(tr);
+                });
+
+                container.appendChild(table);
+            }
+
+            document.getElementById('fideSearchModal').style.display = 'flex';
+        }
+
+
+
+        function fillRegForm(p) {
+            // FIDE format: LASTNAME Firstname
+            // On essaie de séparer intelligemment
+            // Souvent tout en majuscules ou Nom, Prenom
+            let last = p.name, first = '';
+            if (p.name.includes(',')) {
+                const parts = p.name.split(',');
+                last = parts[0].trim();
+                first = parts[1].trim();
+            } else {
+                // Heuristique simple: dernier mot = prénom ? Non, FIDE c'est souvent "NOM Prenom"
+                // On va mettre tout dans Nom si pas de virgule, ou laisser l'utilisateur corriger
+                const parts = p.name.split(' ');
+                if (parts.length > 1) {
+                    last = parts.slice(0, -1).join(' ');
+                    first = parts[parts.length - 1];
+                }
+            }
+
+            document.getElementById('regLast').value = toTitleCase(last); // Helper à définir ou utiliser existant
+            document.getElementById('regFirst').value = toTitleCase(first);
+            document.getElementById('regElo').value = p.rating;
+            document.getElementById('regClub').value = p.fed;
+            document.getElementById('regFideId').value = p.fideId;
+
+            document.getElementById('fideSearchModal').style.display = 'none';
+        }
+
+        function toTitleCase(str) {
+            return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+        }
+
+        // --- Event Listeners ---
+        document.getElementById('formAddReg').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const reg = {
+                id: generateUUID(),
+                lastName: document.getElementById('regLast').value.trim(),
+                firstName: document.getElementById('regFirst').value.trim(),
+                eloSlow: document.getElementById('regElo').value,
+                club: document.getElementById('regClub').value.trim(),
+                fideId: document.getElementById('regFideId').value.trim(),
+                status: 'Non pointé',
+                payment: 'Non réglé',
+                createdAt: Date.now()
+            };
+
+            RegDB.add(reg);
+            loadRegistrations();
+            e.target.reset();
+            document.getElementById('regAddMsg').textContent = "Ajouté !";
+            setTimeout(() => document.getElementById('regAddMsg').textContent = "", 2000);
+        });
+
+        document.getElementById('regSearch').addEventListener('input', (e) => {
+            REG_FILTERS.q = e.target.value;
+            renderRegDashboard();
+        });
+        document.getElementById('regFilterStatus').addEventListener('change', (e) => {
+            REG_FILTERS.status = e.target.value;
+            renderRegDashboard();
+        });
+        document.getElementById('regFilterPayment').addEventListener('change', (e) => {
+            REG_FILTERS.payment = e.target.value;
+            renderRegDashboard();
+        });
+        document.getElementById('btnResetRegFilters').addEventListener('click', () => {
+            document.getElementById('regSearch').value = '';
+            document.getElementById('regFilterStatus').value = '';
+            document.getElementById('regFilterPayment').value = '';
+            REG_FILTERS = { q: '', status: '', payment: '' };
+            renderRegDashboard();
+        });
+
+        document.getElementById('btnPurgeReg').addEventListener('click', () => {
+            if (confirm("Tout effacer ?")) {
+                RegDB.purge();
+                loadRegistrations();
+            }
+        });
+
+        // Init
+        // (Rien à faire au chargement initial sauf si on veut précharger)
+
+        // =====================================================
+        // MODULE APPARIEMENTS (SWISS & ROUND ROBIN)
+        // =====================================================
+
+        // --- Gestion des Paramètres Avancés ---
+        let tournamentConfig = {
+            tieBreaks: { buchholz: true, sonneborn: true, direct: true, progressive: false },
+            points: { bye: 1.0, absent: 0 },
+            acceleration: false
+        };
+
+        function openTournamentSettings() {
+            // Charger les valeurs actuelles
+            document.getElementById('tbBuchholz').checked = tournamentConfig.tieBreaks.buchholz;
+            document.getElementById('tbSonneborn').checked = tournamentConfig.tieBreaks.sonneborn;
+            document.getElementById('tbDirect').checked = tournamentConfig.tieBreaks.direct;
+            document.getElementById('tbProgressive').checked = tournamentConfig.tieBreaks.progressive;
+
+            document.getElementById('ptsBye').value = tournamentConfig.points.bye;
+            document.getElementById('ptsAbsent').value = tournamentConfig.points.absent;
+
+            document.getElementById('optAcceleration').checked = tournamentConfig.acceleration;
+
+            document.getElementById('tournamentSettingsModal').style.display = 'flex';
+        }
+
+        function saveTournamentSettings() {
+            tournamentConfig = {
+                tieBreaks: {
+                    buchholz: document.getElementById('tbBuchholz').checked,
+                    sonneborn: document.getElementById('tbSonneborn').checked,
+                    direct: document.getElementById('tbDirect').checked,
+                    progressive: document.getElementById('tbProgressive').checked
+                },
+                points: {
+                    bye: parseFloat(document.getElementById('ptsBye').value),
+                    absent: parseFloat(document.getElementById('ptsAbsent').value)
+                },
+                acceleration: document.getElementById('optAcceleration').checked
+            };
+
+            // Sauvegarder dans localStorage ou Store si nécessaire
+            // Pour l'instant, c'est en mémoire vive
+            document.getElementById('tournamentSettingsModal').style.display = 'none';
+            alert("Paramètres enregistrés !");
+        }
+
+        class PairingService {
+            constructor() {
+                this.history = []; // Historique des parties {white: id, black: id, result: ...}
+            }
+
+            setHistory(history) {
+                this.history = history || [];
+            }
+
+            generate(players, roundNum, type = 'swiss') {
+                // Filtrer les joueurs actifs (non annulés)
+                const activePlayers = players.filter(p => p.status !== 'Annulé');
+
+                if (activePlayers.length < 2) throw new Error("Pas assez de joueurs actifs.");
+
+                if (type === 'swiss') return this._swissPairing(activePlayers, roundNum);
+                if (type === 'cup') return this._cupPairing(activePlayers, roundNum);
+                if (type === 'roundrobin') return this._roundRobinPairing(activePlayers, roundNum);
+                return this._randomPairing(activePlayers);
+            }
+
+            // --- SYSTÈME COUPE (KO) ---
+            _cupPairing(players, roundNum) {
+                // R1: Aléatoire
+                if (roundNum === 1) return this._randomPairing(players);
+
+                // R2+: Vainqueurs vs Vainqueurs
+                // On doit filtrer ceux qui ont gagné à la ronde précédente
+                // Problème: players contient TOUS les inscrits
+                // Il faut regarder l'historique pour savoir qui est qualifié
+
+                // Simplification: On prend les joueurs qui ont un score > 0 sur la dernière partie jouée ?
+                // Ou mieux: On regarde qui n'a pas perdu.
+
+                // Pour l'instant, faisons simple: Random parmi les joueurs restants (non annulés)
+                // L'utilisateur doit manuellement changer le statut des perdants en "Annulé" ou on filtre ici ?
+                // Idéalement: le système coupe gère l'élimination.
+
+                // On va supposer que l'utilisateur a mis à jour les statuts ou que l'historique permet de déduire.
+                // Faisons un appariement aléatoire des joueurs présents.
+                return this._randomPairing(players);
+            }
+
+            // --- SYSTÈME SUISSE (FIDE SIMPLIFIÉ MAIS ROBUSTE) ---
+            _swissPairing(players, roundNum) {
+                // 1. Calculer les scores et couleurs
+                const pData = players.map(p => {
+                    const stats = this._getPlayerStats(p.id);
+                    return { ...p, ...stats };
+                });
+
+                // 2. Trier (Score > Elo > Titre > Nom)
+                pData.sort((a, b) => {
+                    if (b.score !== a.score) return b.score - a.score;
+                    if ((b.eloSlow || 0) !== (a.eloSlow || 0)) return (b.eloSlow || 0) - (a.eloSlow || 0);
+                    return a.lastName.localeCompare(b.lastName);
+                });
+
+                // 3. Gestion du Bye (Impair)
+                let byePlayer = null;
+                if (pData.length % 2 !== 0) {
+                    // Le joueur le moins bien classé du groupe de score le plus bas qui n'a pas eu de bye
+                    for (let i = pData.length - 1; i >= 0; i--) {
+                        if (!pData[i].hasBye) {
+                            byePlayer = pData[i];
+                            pData.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+
+                // 4. Groupes de Score
+                const scoreGroups = {};
+                pData.forEach(p => {
+                    if (!scoreGroups[p.score]) scoreGroups[p.score] = [];
+                    scoreGroups[p.score].push(p);
+                });
+
+                // 5. Appariement par groupe (Top Half vs Bottom Half)
+                const pairings = [];
+                let floaters = []; // Joueurs non appariés du groupe précédent
+
+                const sortedScores = Object.keys(scoreGroups).map(Number).sort((a, b) => b - a);
+
+                for (const score of sortedScores) {
+                    let group = [...floaters, ...scoreGroups[score]];
+                    floaters = [];
+
+                    // Si groupe vide, continuer
+                    if (group.length === 0) continue;
+
+                    // Trier le groupe
+                    group.sort((a, b) => (b.eloSlow || 0) - (a.eloSlow || 0));
+
+                    // Tentative d'appariement
+                    while (group.length > 1) {
+                        const p1 = group.shift();
+                        let paired = false;
+
+                        // Chercher adversaire compatible
+                        // FIDE: Top half vs Bottom half
+                        // On cherche dans la 2ème moitié d'abord
+                        let searchOrder = [];
+                        const mid = Math.floor(group.length / 2);
+                        // Créer un ordre de recherche optimisé (milieu vers fin, puis début vers milieu)
+                        for (let i = mid; i < group.length; i++) searchOrder.push(i);
+                        for (let i = 0; i < mid; i++) searchOrder.push(i);
+
+                        for (const idx of searchOrder) {
+                            const p2 = group[idx];
+                            if (this._canPair(p1, p2)) {
+                                // Déterminer couleurs
+                                const colors = this._determineColors(p1, p2);
+                                pairings.push({ white: colors.white, black: colors.black });
+                                group.splice(idx, 1);
+                                paired = true;
+                                break;
+                            }
+                        }
+
+                        if (!paired) {
+                            // Impossible d'apparier p1 dans ce groupe -> Floater
+                            floaters.push(p1);
+                        }
+                    }
+
+                    // S'il reste un joueur
+                    if (group.length > 0) floaters.push(group[0]);
+                }
+
+                // Gestion des floaters restants (devrait être 0 si pair, ou forcer appariement dernier recours)
+                // Ici version simplifiée: appariement forcé des restants
+                while (floaters.length > 1) {
+                    const p1 = floaters.shift();
+                    const p2 = floaters.shift();
+                    const colors = this._determineColors(p1, p2);
+                    pairings.push({ white: colors.white, black: colors.black });
+                }
+
+                if (byePlayer) {
+                    pairings.push({ white: byePlayer, black: null, isBye: true });
+                }
+
+                return pairings;
+            }
+
+            // --- TOUTES RONDES (BERGER) ---
+            _roundRobinPairing(players, roundNum) {
+                let n = players.length;
+                const isOdd = n % 2 !== 0;
+                if (isOdd) n++; // Joueur fantôme pour bye
+
+                const pIds = players.map(p => p);
+                if (isOdd) pIds.push(null); // Bye
+
+                // Table de Berger
+                const pairings = [];
+                const half = n / 2;
+
+                // Rotation simple pour la ronde X
+                // Fixer le dernier joueur, tourner les autres
+                // Algorithme standard Berger
+
+                // Positions pour la ronde r (1-indexed)
+                // P[n] est fixe. Les autres tournent.
+
+                const roundIndex = roundNum - 1;
+                const movingPlayers = pIds.slice(0, n - 1);
+                const fixedPlayer = pIds[n - 1];
+
+                // Rotation: décalage de (roundIndex)
+                const rotated = [];
+                for (let i = 0; i < movingPlayers.length; i++) {
+                    rotated.push(movingPlayers[(i + roundIndex) % movingPlayers.length]);
+                }
+
+                // Appariements
+                // Dernier vs (r/2 ème élément de la rotation)? Non, algo plus simple:
+                // P[n] joue contre P[r] (modulo) ?
+                // Utilisons la méthode du "cercle" visuel
+
+                // Pour la ronde 1: 1-N, 2-(N-1), 3-(N-2)...
+                // Pour la ronde r: on décale les indices de (r-1)
+
+                // Implémentation directe Berger
+                // Blancs: (n+1)/2, Noirs: n+1...
+
+                // Méthode simple:
+                // Liste: [0, 1, 2, ... n-2] + [n-1 fixe]
+                // Ronde 1: 0 vs n-1, 1 vs n-2, 2 vs n-3...
+                // Ronde r: on fait tourner [0..n-2] de 1 cran vers la droite (ou gauche)
+
+                // Rotation vers la droite (sens horaire)
+                // [A B C D E] + F
+                // R1: A-F, B-E, C-D
+                // R2: E-F, A-D, B-C (E passe en 1er)
+
+                const cycle = [...movingPlayers];
+                // Décaler de (roundNum - 1) vers la droite
+                for (let k = 0; k < roundNum - 1; k++) {
+                    cycle.unshift(cycle.pop());
+                }
+
+                const fullList = [...cycle, fixedPlayer];
+
+                // Pairings:
+                // Le dernier de cycle joue contre fixedPlayer
+                // Les autres: 1er vs dernier-1, 2eme vs dernier-2...
+
+                // Cas spécial: dernier du cycle vs fixe
+                let p1 = cycle[cycle.length - 1];
+                let p2 = fixedPlayer;
+
+                // Alternance couleurs pour le fixe: Blanc si ronde impaire (sauf exceptions)
+                // Règle standard: Fixe a Blancs si ronde <= n/2 et paire, ou ronde > n/2 et impaire...
+                // Simplification: Fixe alterne. R1: Noir (selon Berger standard souvent 1-N)
+                // Si 1-N, 1 a les blancs.
+
+                if (p1 && p2) {
+                    if (roundNum % 2 !== 0) pairings.push({ white: p1, black: p2 });
+                    else pairings.push({ white: p2, black: p1 });
+                } else if (p1 && !p2) pairings.push({ white: p1, black: null, isBye: true });
+                else if (!p1 && p2) pairings.push({ white: p2, black: null, isBye: true });
+
+                // Les autres paires
+                for (let i = 0; i < (n - 2) / 2; i++) {
+                    const a = cycle[i];
+                    const b = cycle[cycle.length - 2 - i];
+                    if (a && b) {
+                        // Couleurs: 1er de la paire a les Blancs si (i+round) pair?
+                        // Berger: couleur dépend de la position
+                        // Simplifions: alternance basique basée sur l'index
+                        if ((i + roundNum) % 2 === 0) pairings.push({ white: a, black: b });
+                        else pairings.push({ white: b, black: a });
+                    } else if (a) pairings.push({ white: a, black: null, isBye: true });
+                    else if (b) pairings.push({ white: b, black: null, isBye: true });
+                }
+
+                return pairings;
+            }
+
+            _randomPairing(players) {
+                const shuffled = [...players].sort(() => Math.random() - 0.5);
+                const pairings = [];
+                while (shuffled.length > 1) {
+                    pairings.push({ white: shuffled.pop(), black: shuffled.pop() });
+                }
+                if (shuffled.length > 0) {
+                    pairings.push({ white: shuffled[0], black: null, isBye: true });
+                }
+                return pairings;
+            }
+
+            // --- HELPERS ---
+            _getPlayerStats(pid) {
+                let score = 0;
+                let colors = []; // 'w', 'b'
+                let opponents = [];
+                let hasBye = false;
+
+                this.history.forEach(h => {
+                    if (h.white === pid) {
+                        colors.push('w');
+                        opponents.push(h.black);
+                        if (h.result === '1-0') score += 1;
+                        else if (h.result === '1/2-1/2') score += 0.5;
+                    } else if (h.black === pid) {
+                        colors.push('b');
+                        opponents.push(h.white);
+                        if (h.result === '0-1') score += 1;
+                        else if (h.result === '1/2-1/2') score += 0.5;
+                    } else if (h.white === pid && h.isBye) {
+                        hasBye = true;
+                        score += 1;
+                    }
+                });
+                return { score, colors, opponents, hasBye };
+            }
+
+            _canPair(p1, p2) {
+                // Règle 1: Pas déjà joué
+                if (p1.opponents.includes(p2.id)) return false;
+
+                // Règle 2: Équilibre couleurs (Max 3 fois la même suite)
+                const c1 = this._getLastColors(p1.colors);
+                const c2 = this._getLastColors(p2.colors);
+
+                // Si les deux doivent absolument avoir la même couleur -> incompatible
+                if (c1.mustBe === 'w' && c2.mustBe === 'w') return false;
+                if (c1.mustBe === 'b' && c2.mustBe === 'b') return false;
+
+                return true;
+            }
+
+            _determineColors(p1, p2) {
+                const c1 = this._getLastColors(p1.colors);
+                const c2 = this._getLastColors(p2.colors);
+
+                // Priorité absolue
+                if (c1.mustBe === 'w') return { white: p1, black: p2 };
+                if (c1.mustBe === 'b') return { white: p2, black: p1 };
+                if (c2.mustBe === 'w') return { white: p2, black: p1 };
+                if (c2.mustBe === 'b') return { white: p1, black: p2 };
+
+                // Équilibrage (Différence W-B)
+                if (c1.bal > c2.bal) return { white: p2, black: p1 }; // p1 a plus de blancs
+                if (c2.bal > c1.bal) return { white: p1, black: p2 };
+
+                // Alternance simple (Dernière couleur)
+                if (c1.last === 'w' && c2.last !== 'w') return { white: p2, black: p1 };
+                if (c1.last === 'b' && c2.last !== 'b') return { white: p1, black: p2 };
+
+                // Si tout égal -> Elo le plus fort a les Blancs ? Non, alternance
+                // FIDE: Si historiques identiques, couleur alternée du plus haut classé
+                return { white: p1, black: p2 };
+            }
+
+            _getLastColors(colors) {
+                const n = colors.length;
+                if (n === 0) return { last: null, bal: 0, mustBe: null };
+
+                const last = colors[n - 1];
+                const bal = colors.filter(c => c === 'w').length - colors.filter(c => c === 'b').length;
+
+                let mustBe = null;
+                // Max 2 fois la même couleur de suite (donc 3ème doit changer)
+                if (n >= 2 && colors[n - 1] === colors[n - 2]) {
+                    mustBe = (colors[n - 1] === 'w') ? 'b' : 'w';
+                }
+
+                return { last, bal, mustBe };
+            }
+        }
+
+        // --- UI Integration ---
+        async function generatePairingsUI() {
+            const type = document.getElementById('pairingSystemSelect').value;
+            const roundNum = parseInt(document.getElementById('nextRoundNum').value) || 1;
+            const msg = document.getElementById('pairingMsg');
+
+            msg.textContent = "Génération en cours...";
+
+            try {
+                // 1. Récupérer joueurs
+                const players = RegDB.getAll();
+                if (players.length === 0) throw new Error("Aucun joueur inscrit !");
+
+                // 2. Récupérer historique (simulé depuis les rondes existantes)
+                // TODO: Construire l'historique réel depuis `roundsStore`
+                const history = buildHistoryFromStore();
+
+                // 3. Générer
+                const service = new PairingService();
+                service.setHistory(history);
+                const pairings = service.generate(players, roundNum, type);
+
+                // 4. Appliquer au plan (Créer tables)
+                applyPairingsToPlan(pairings);
+
+                msg.textContent = `✅ ${pairings.length} tables générées !`;
+                msg.style.color = "green";
+
+            } catch (e) {
+                console.error(e);
+                msg.textContent = "❌ " + e.message;
+                msg.style.color = "red";
+            }
+        }
+
+        function buildHistoryFromStore() {
+            const hist = [];
+            if (typeof roundsStore === 'undefined') return hist;
+
+            Object.values(roundsStore).forEach(round => {
+                round.physicalTables.forEach(t => {
+                    t.boards.forEach(b => {
+                        if (b.players && b.players.white && b.players.black) {
+                            // On a besoin des IDs. Si on a stocké les objets complets, ok.
+                            // Sinon on essaie de matcher par nom (moins fiable)
+                            // Ici on suppose que b.players contient les objets complets du store
+                            // Si ce n'est pas le cas (juste noms), il faudra mapper
+
+                            // Hack: on utilise le nom comme ID si pas d'ID
+                            const wId = b.players.white.id || b.players.white.name;
+                            const bId = b.players.black.id || b.players.black.name;
+
+                            let result = null;
+                            if (b.score) {
+                                if (b.score.white === '1') result = '1-0';
+                                else if (b.score.black === '1') result = '0-1';
+                                else if (b.score.white === '1/2') result = '1/2-1/2';
+                            }
+
+                            hist.push({ white: wId, black: bId, result });
+                        }
+                    });
+                });
+            });
+            return hist;
+        }
+
+        function applyPairingsToPlan(pairings) {
+            // Vider le plan actuel ?
+            if (!confirm("Cela va remplacer les tables actuelles. Continuer ?")) return;
+
+            // Reset tables
+            physicalTables = [];
+
+            // Créer tables
+            // On met 2 paires par table physique par défaut, ou 1
+            const boardsPerTable = parseInt(document.getElementById('boardsPerTable').value) || 2;
+            let currentTable = null;
+
+            pairings.forEach((p, i) => {
+                const boardNum = i + 1;
+
+                // Nouvelle table physique si nécessaire
+                if (i % boardsPerTable === 0) {
+                    currentTable = {
+                        id: Date.now() + i,
+                        x: 50 + (Math.floor(i / boardsPerTable) % 5) * 200, // Position simple grille
+                        y: 50 + Math.floor(i / (boardsPerTable * 5)) * 150,
+                        rotation: 0,
+                        boards: []
+                    };
+                    physicalTables.push(currentTable);
+                }
+
+                // Créer échiquier
+                const board = {
+                    boardNumber: boardNum,
+                    players: {
+                        white: {
+                            name: (p.white.lastName + ' ' + p.white.firstName).trim(),
+                            elo: p.white.eloSlow,
+                            comment: ""
+                        },
+                        black: p.black ? {
+                            name: (p.black.lastName + ' ' + p.black.firstName).trim(),
+                            elo: p.black.eloSlow,
+                            comment: ""
+                        } : null
+                    },
+                    score: { white: '', black: '' },
+                    flipped: false
+                };
+
+                currentTable.boards.push(board);
+            });
+
+            renderAllTables();
+            updateStats();
+            saveHistoryState();
+        }
+    </script>
 </body>
 
 </html>
